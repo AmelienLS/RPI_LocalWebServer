@@ -1,0 +1,3 @@
+Pour lancer le serveur, il extraire dans le dossier document les fichiers de la derniere release quelconque. 
+Ensuite, il faut ouvrir l'invite de commande et taper flask --app "/chemin/vers/app.py" run. 
+La page s'ouvrira dans le navigateur. Pour la fermer, il faut retourner dans l'invite et taper Ctrl+C

@@ -9,11 +9,11 @@ webbrowser.open('http://localhost:5000/')
 # Chemin relatif basé sur le fichier APP.py
 base_dir = os.path.dirname(os.path.abspath(__file__))
 
+# Ajout des fichiers styles et templates au chemin relatif
 app = Flask(
     __name__,
     template_folder=os.path.join(base_dir, "Templates"),
     static_folder=os.path.join(base_dir, "Styles")
-    # Ajout des fichiers styles et templates au chemin relatif
 )
 app.secret_key = 'Aximum_cms'
 
@@ -36,6 +36,8 @@ def login():
         cursor = conn.cursor()
         cursor.execute('SELECT prenom, admin FROM users WHERE identifiant = ?', (identifiant,))
         user = cursor.fetchone()
+        # SUPER IMPORTANT toujours fermer sa connection, 
+        # Sinon plus possible de récupérer des données.
         conn.close()
 
         if user:
@@ -61,6 +63,7 @@ def index():
     admin = session['admin']
     return render_template('index.html', prenom=prenom, admin=admin == 1)
 
+# clear la session 
 @app.route('/logout')
 def logout():
     session.clear()
@@ -70,8 +73,9 @@ def logout():
 def ajouter():
     if 'admin' not in session or not session['admin']:
         return redirect('/index') 
-    
+    # Aucune idéee de pourquoi post et pas get mais ca marche
     if request.method == 'POST':
+        # Récupération des données suivantes depuis le form HTML.
         data = request.form
         ref_ecran = data['ref_ecran']
         libelle = data['libelle']
@@ -104,7 +108,7 @@ def ajouter():
 def ajouterU():
     if 'admin' not in session or not session['admin']:
         return redirect('/index')  # Si l'utilisateur n'est pas admin, redirige vers /index
-
+    # Autre maniere de récupérer les données d'ubn form.
     if request.method == 'POST':
         identifiant = request.form['identifiant']
         prenom = request.form['prenom']
@@ -131,7 +135,8 @@ def ajouterU():
             # Message de succès
             flash('Utilisateur ajouté avec succès !', 'success')
         except sqlite3.IntegrityError as e:
-            # Si une erreur se produit malgré la vérification, la gestion de l'erreur se fait ici
+            # Si une erreur se produit malgré la vérification, la gestion de l'erreur se fait ici.
+            #Pour du debug en dev uniquement, je le laisse au cas ou.
             conn.close()
             error = "Erreur d'insertion dans la base de données : " + str(e)
             return render_template('ajouterU.html', error=error)
@@ -152,7 +157,7 @@ def ecran():
     ecrans = cursor.fetchall()
     conn.close()
     admin = session.get('admin', 0) == 1
-    #affichage de la page avec les ecrans et renvoie de l'info admin.
+    # Affichage de la page avec les ecrans et renvoie de l'info admin.
     return render_template('ecran.html', ecrans=ecrans, admin=admin)
 
 
@@ -185,7 +190,7 @@ def prendre():
                 n_value = ecran['n']  # Récupérer la valeur de 'n' à afficher
         else:
             message = "Erreur : sérigraphie non trouvée."
-            n_value = None  # Pas de valeur à afficher
+            n_value = None
         
         conn.close()
         return render_template('prendre.html', message=message, n_value=n_value)
@@ -356,6 +361,7 @@ def ranger():
     conn.close()
     return render_template('ranger.html', serigraphies=serigraphies, emplacement=emplacement)
 
-# Démarrage du serveur Flask
+# Démarrage du serveur Flask.
+# Mettre debug a True si jamais il le faut.
 if __name__ == '__main__':
     app.run(debug=False)
