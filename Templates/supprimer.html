@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supprimer une référence</title>
+    <link rel="stylesheet" href="Styles/supprimer.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Supprimer une référence</h1>
+        <a href="{{ url_for('index') }}" class="admin-link">Retour au menu</a>
+
+        <!-- Formulaire pour saisir la référence -->
+        <form method="POST" action="{{ url_for('supprimer') }}">
+            <label for="ref_ecran">Référence Écran :</label>
+            <input type="text" id="ref_ecran" name="ref_ecran" placeholder="Entrez la référence écran" required>
+            <button type="submit" name="action" value="check">Rechercher</button>
+        </form>
+
+        <!-- Section de confirmation -->
+        {% if ref_ecran %}
+        <div id="confirmation-container" style="margin-top: 1rem;">
+            {% if exists %}
+            <p style="color: red;">Êtes-vous sûr de vouloir supprimer la référence écran : <strong>{{ libelle }}</strong> ?</p>
+            <form method="POST" action="{{ url_for('supprimer') }}">
+                <input type="hidden" name="ref_ecran" value="{{ ref_ecran }}">
+                <div class="button-group">
+                    <button type="submit" name="action" value="delete" class="confirmer">Confirmer la suppression</button>
+                    <a href="{{ url_for('supprimer') }}" class="cancel-btn">Annuler</a>
+                </div>
+            </form>
+            {% else %}
+            <p style="color: red;">La référence écran "<strong>{{ ref_ecran }}</strong>" n'existe pas.</p>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>

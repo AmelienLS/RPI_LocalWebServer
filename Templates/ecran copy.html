@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tableau Sérigraphie</title>
+    <link rel="stylesheet" href="Styles/ecran.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Table Sérigraphie</h1>
+        <a href="{{ url_for('index') }}" class="admin-link">Retour au menu</a>
+        <table id="serigraphie-table">
+            <thead>
+                <tr>
+                    <th>Réf. Écran<br><input type="text" class="filter-input" data-column="0" placeholder="Filtrer"></th>
+                    <th>Libellé<br><input type="text" class="filter-input" data-column="1" placeholder="Filtrer"></th>
+                    <th>PCB<br><input type="text" class="filter-input" data-column="2" placeholder="Filtrer"></th>
+                    <th>FAB<br><input type="text" class="filter-input" data-column="3" placeholder="Filtrer"></th>
+                    <th>N° FAB<br><input type="text" class="filter-input" data-column="4" placeholder="Filtrer"></th>
+                    <th>Type<br><input type="text" class="filter-input" data-column="5" placeholder="Filtrer"></th>
+                    <th>N°<br><input type="text" class="filter-input" data-column="6" placeholder="Filtrer"></th>
+                    <th>Lavée<br><input type="text" class="filter-input" data-column="7" placeholder="Oui / Non"></th>
+                    <th>Sorti<br><input type="text" class="filter-input" data-column="8" placeholder="Oui / Non"></th>
+                    <th>Sortir</th> <!-- Nouvelle colonne -->
+                </tr>
+            </thead>
+            <tbody>
+                {% for ecran in ecrans %}
+                <tr>
+                    <td>{{ ecran.ref_ecran }}</td>
+                    <td>{{ ecran.libelle }}</td>
+                    <td>{{ ecran.pcb }}</td>
+                    <td>{{ ecran.fab }}</td>
+                    <td>{{ ecran.n_fab }}</td>
+                    <td>{{ ecran.type }}</td>
+                    <td>{{ ecran.n }}</td>
+                    <td>{{ 'Oui' if ecran.lave == 1 else 'Non' }}</td>
+                    <td>{{ 'Oui' if ecran.sorti == 1 else 'Non' }}</td>
+                    <td>
+                        <!-- Formulaire pour prendre la sérigraphie -->
+                        <form action="{{ url_for('prendre') }}" method="POST">
+                            <input type="hidden" name="ref_ecran" value="{{ ecran.ref_ecran }}">
+                            <button type="submit" class="button sortir-btn">Prendre</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        // Script pour les filtres
+        document.addEventListener('DOMContentLoaded', function () {
+            const table = document.getElementById('serigraphie-table');
+            const filters = document.querySelectorAll('.filter-input');
+
+            filters.forEach(filter => {
+                filter.addEventListener('input', function () {
+                    const columnIndex = this.getAttribute('data-column');
+                    const filterValue = this.value.toLowerCase();
+                    const rows = table.querySelectorAll('tbody tr');
+
+                    rows.forEach(row => {
+                        const cell = row.cells[columnIndex];
+                        if (cell) {
+                            const cellText = cell.textContent.toLowerCase();
+                            if (cellText.includes(filterValue)) {
+                                row.style.display = '';
+                            } else {
+                                row.style.display = 'none';
+                            }
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+</body>
+</html>

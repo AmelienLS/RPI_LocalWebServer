@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/Styles/ajouter.css">
+    <title>Ajouter Sérigraphie</title>
+</head>
+<body>
+    <a href="/index" class="retour">Retour au menu</a>
+    <div class="form-container">
+        <h1>Ajouter une Sérigraphie</h1>
+        {% if error %}
+        <p class="error">{{ error }}</p>
+        {% endif %}
+        {% if success %}
+        <p class="success">{{ success }}</p>
+        {% endif %}
+        <form method="POST">
+            <label for="ref_ecran">Réf Écran (9 caractères):</label>
+            <input type="text" id="ref_ecran" name="ref_ecran" required>
+
+            <label for="libelle">Libellé:</label>
+            <input type="text" id="libelle" name="libelle" required>
+
+            <label for="pcb">PCB (9 caractères):</label>
+            <input type="text" id="pcb" name="pcb">
+
+            <label for="fab">Fabricant (2 caractères):</label>
+            <input type="text" id="fab" name="fab" required>
+
+            <label for="n_fab">N° Fab (F + 6 caractères):</label>
+            <input type="text" id="n_fab" name="n_fab">
+
+            <label for="type">Type:</label>
+            <input type="text" id="type" name="type" required>
+
+            <label for="n">N° (3 caractères):</label>
+            <input type="text" id="n" name="n" required>
+
+            <button type="submit">Ajouter</button>
+        </form>
+    </div>
+</body>
+</html>

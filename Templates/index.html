@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/Styles/index.css">
+    <title>Accueil</title>
+</head>
+<body>
+    <div class="form-container">
+        <h1>Bienvenue, {{ prenom }}</h1>
+        
+        {% if admin %}
+            <div class="admin-actions">
+                <p>Vous êtes admin.</p>
+                <a href="/ajouter" class="button admin-link">Ajouter une sérigraphie</a>
+                <a href="/modifier" class="button admin-link">Modifier une sérigraphie</a>
+                <a href="/supprimer" class="button admin-link">Supprimer une sérigraphie</a>
+                <a href="/ajouterU" class="button admin-link">Ajouter un utilisateur</a>
+            </div>
+        {% endif %}
+    
+        <div class="user-actions">
+            <a href="/ecran" class="button user-link">Voir les sérigraphies</a>
+            <a href="/prendre" class="button user-link">Prendre une sérigraphie</a>
+            <a href="/ranger" class="button user-link">Ranger une sérigraphie</a>
+            <a href="/logout" class="button logout-button">Se déconnecter</a>
+        </div>
+    </div>    
+</body>
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <script type="text/javascript">
+        alert("{{ messages[0][1] }}");  // Affiche le premier message flash
+    </script>
+  {% endif %}
+{% endwith %}
+</html>

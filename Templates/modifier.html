@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modifier une Sérigraphie</title>
+    <link rel="stylesheet" href="Styles/modifier.css">
+</head>
+<body>
+    <div class="form-container">
+        <h1>Modifier une Sérigraphie</h1>
+
+        <!-- Formulaire de saisie de la référence écran -->
+        <form action="/modifier" method="post">
+            {% if not ref_ecran %}
+            <label for="ref_ecran">Référence Écran :</label>
+            <input type="text" id="ref_ecran" name="ref_ecran" required>
+            <button type="submit">Chercher</button>
+            {% else %}
+            <label for="ref_ecran">Référence Écran :</label>
+            <input type="text" id="ref_ecran" name="ref_ecran" value="{{ ref_ecran }}" required readonly>
+
+            <label for="libelle">Libellé :</label>
+            <input type="text" id="libelle" name="libelle" value="{{ libelle or '' }}" required>
+
+            <label for="pcb">PCB :</label>
+            <input type="text" id="pcb" name="pcb" value="{{ pcb or '' }}">
+
+            <label for="fab">Fabrication :</label>
+            <input type="text" id="fab" name="fab" value="{{ fab or '' }}" required>
+
+            <label for="n_fab">Numéro de Fabrication :</label>
+            <input type="text" id="n_fab" name="n_fab" value="{{ n_fab or '' }}">
+
+            <label for="type">Type :</label>
+            <input type="text" id="type" name="type" value="{{ type_ or '' }}" required>
+
+            <label for="n">N° :</label>
+            <input type="text" id="n" name="n" value="{{ n or '' }}" required>
+
+            <label for="sorti">Sorti :</label>
+            <select id="sorti" name="sorti">
+                <option value="0" {% if sorti == '0' %} selected {% endif %}>Non</option>
+                <option value="1" {% if sorti == '1' %} selected {% endif %}>Oui</option>
+            </select>
+
+            <label for="lave">Lavé :</label>
+            <select id="lave" name="lave">
+                <option value="0" {% if lave == '0' %} selected {% endif %}>Non</option>
+                <option value="1" {% if lave == '1' %} selected {% endif %}>Oui</option>
+            </select>
+
+            <button type="submit">Mettre à jour</button>
+            {% endif %}
+        </form>
+
+        <!-- Affichage du message de réussite ou d'erreur -->
+        {% if message %}
+            <div class="message">
+                <p>{{ message }}</p>
+            </div>
+        {% endif %}
+
+        <!-- Affichage d'un message d'erreur si la sérigraphie n'existe pas -->
+        {% if error %}
+            <script type="text/javascript">
+                alert("Sérigraphie non trouvée. Veuillez vérifier la référence et réessayer.");
+                window.location.href = '/modifier';
+            </script>
+        {% endif %}
+
+        <!-- Bouton de retour -->
+        <a href="/index" class="admin-link">Retour au menu</a>
+    </div>
+</body>
+</html>

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ajouter un Utilisateur</title>
+    <link rel="stylesheet" href="/Styles/ajouterU.css">
+</head>
+<body>
+    <!-- Bouton pour revenir à /index -->
+    <a href="/index" class="admin-link">Retour au menu</a>
+
+    <div class="form-container">
+        <h2>Ajouter un Utilisateur</h2>
+
+        {% if error %}
+        <div style="color: red; font-weight: bold;">
+            {{ error }}
+        </div>
+        {% endif %}
+
+        <form method="POST">
+            <label for="identifiant">Identifiant :</label>
+            <input type="text" id="identifiant" name="identifiant" required>
+
+            <label for="prenom">Prénom :</label>
+            <input type="text" id="prenom" name="prenom" required>
+
+            <label for="nom">Nom :</label>
+            <input type="text" id="nom" name="nom" required>
+
+            <label for="admin">Admin :</label>
+            <input type="checkbox" id="admin" name="admin">
+
+            <button type="submit">Ajouter</button>
+        </form>
+    </div>
+</body>
+</html>

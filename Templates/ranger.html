@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ranger Sérigraphies</title>
+    <link rel="stylesheet" href="Styles/ranger.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Ranger Sérigraphies</h1>
+        <a href="{{ url_for('index') }}" class="admin-link">Retour au menu</a>
+        
+        <form method="POST">
+            <label for="ref_ecran">Choisissez une sérigraphie à ranger :</label>
+            <select name="ref_ecran" id="ref_ecran" required>
+                {% for ecran in serigraphies %}
+                <option value="{{ ecran['ref_ecran'] }}">
+                    {{ ecran['libelle'] }} {{ecran['ref_ecran']}}
+                </option>
+                {% endfor %}
+            </select>
+
+            <label for="lavee">La sérigraphie a-t-elle été lavée ?</label>
+            <select name="lavee" id="lavee" required>
+                <option value="oui">Oui</option>
+                <option value="non">Non</option>
+            </select>
+
+            <button type="submit">Ranger</button>
+        </form>
+
+        <!-- Affiche l'emplacement si disponible -->
+        {% if emplacement %}
+        <p class="success-message">L'emplacement pour ranger est : {{ emplacement }}</p>
+        {% endif %}
+    </div>
+</body>
+</html>

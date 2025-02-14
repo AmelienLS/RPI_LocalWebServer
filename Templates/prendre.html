@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prendre Sérigraphie</title>
+    <link rel="stylesheet" href="Styles/prendre.css">
+</head>
+<body>
+    <div class="container">
+        <a href="/index" class="admin-link">Retour au menu</a>
+        
+        <h1>Prendre une Sérigraphie</h1>
+        
+        <form method="POST">
+            <div class="form-container">
+                <input type="text" name="ref_ecran" placeholder="Ref écran" required>
+                <button type="submit">Prendre</button>
+            </div>
+        </form>
+
+        {% if message %}
+            <p class="message">{{ message }}</p>
+        {% endif %}
+
+        {% if n_value %}
+            <p class="n-value">la sérigraphie est a l'emplacement : {{ n_value }}</p>
+        {% endif %}
+    </div>
+</body>
+</html>
