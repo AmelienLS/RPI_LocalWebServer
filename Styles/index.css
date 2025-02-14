@@ -1,12 +1,15 @@
 body {
-    font-family: Arial, sans-serif;
+    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
     margin: 0;
     padding: 0;
     background-color: #2A2D46;
     display: flex;
     justify-content: center;
-    align-items: center;
-    height: 100vh;
+    align-items: flex-start; /* Alignement au début pour éviter le chevauchement */
+    min-height: 100vh; /* Gérer les petits écrans */
+    padding: 1rem; /* Ajout d'espace autour du contenu */
+    box-sizing: border-box;
+    overflow-y: auto; /* Activer le défilement si le contenu dépasse */
 }
 
 .form-container {
@@ -15,18 +18,18 @@ body {
     border-radius: 8px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     text-align: center;
-    width: 400px; /* Ajusté la largeur pour éviter les débordements */
+    width: 100%; /* Prend toute la largeur disponible */
+    max-width: 400px; /* Limite la largeur sur les grands écrans */
     box-sizing: border-box;
+    margin-top: 1rem; /* Ajoute un espace supérieur */
 }
 
-/* Style du titre */
 h1 {
     color: #feed00;
     margin-bottom: 1rem;
 }
 
-/* Style des liens admin */
-.admin-link {
+.admin-link, .user-link {
     display: block;
     margin-top: 1rem;
     padding: 0.5rem 1rem;
@@ -38,34 +41,16 @@ h1 {
     font-weight: bold;
 }
 
-.admin-link:hover {
+.admin-link:hover, .user-link:hover {
     background-color: #e5d200;
 }
 
-/*stules des lien user*/
-.user-link {
-    display: block;
-    margin-top: 1rem;
-    padding: 0.5rem 1rem;
-    background-color: #feed00;
-    color: #191B2A;
-    text-decoration: none;
-    text-align: center;
-    border-radius: 4px;
-    font-weight: bold;
-}
-
-.user-link:hover {
-    background-color: #e5d200;
-}
-/* Style des paragraphes */
 p {
     color: white;
 }
 
-/* Style des boutons */
 .button {
-    width: calc(100% - 1rem); /* Ajusté pour éviter de toucher les bords */
+    width: calc(100% - 1rem);
     padding: 0.7rem;
     text-align: center;
     background-color: #feed00;
@@ -74,39 +59,35 @@ p {
     border-radius: 4px;
     cursor: pointer;
     font-size: 1rem;
-    margin-bottom: 0.5rem; /* Espacement entre les boutons */
+    margin-bottom: 0.5rem;
 }
 
-/* Style spécifique pour les actions admin */
 .admin-actions {
-    margin-bottom: 2rem; /* Espacement entre les blocs */
-    border: 1px solid #feed00; /* Ligne pour distinguer */
+    margin-bottom: 2rem;
+    border: 1px solid #feed00;
     padding: 1rem;
     border-radius: 8px;
     background-color: #2A2D46;
 }
 
-/* Texte spécifique pour les admin */
 .admin-actions p {
     color: rgb(40, 252, 12);
     font-weight: bold;
-    margin-bottom: 1rem; /* Espace sous le texte */
+    margin-bottom: 1rem;
 }
 
-/* Style pour les actions utilisateur */
 .user-actions {
-    width: 100%; /* S'étend sur toute la largeur */
+    width: 100%;
     box-sizing: border-box;
-    margin-top: 1rem; /* Ajout d'espace avant le bloc utilisateur */
+    margin-top: 1rem;
 }
 
-/* Style pour le bouton de déconnexion */
 .logout-button {
     text-align: center;
     text-decoration: none;
     display: block;
     margin-top: 1rem;
-    background-color: #FF4C4C; /* Rouge pour déconnexion */
+    background-color: #FF4C4C;
     color: #FFFFFF;
     padding: 0.7rem;
     border-radius: 4px;
@@ -116,12 +97,11 @@ p {
 }
 
 .logout-button:hover {
-    background-color: #E04343; /* Couleur au survol */
+    background-color: #E04343;
 }
 
-/* Style des messages flash pour afficher la confirmation */
 .flash-message {
-    color: #28a745; /* Vert pour un message de succès */
+    color: #28a745;
     font-weight: bold;
     margin-top: 1rem;
 }

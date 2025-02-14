@@ -22,7 +22,10 @@
                     <th>N°<br><input type="text" class="filter-input" data-column="6" placeholder="Filtrer"></th>
                     <th>Lavée<br><input type="text" class="filter-input" data-column="7" placeholder="Oui / Non"></th>
                     <th>Sorti<br><input type="text" class="filter-input" data-column="8" placeholder="Oui / Non"></th>
-                    <th>Sortir</th> <!-- Nouvelle colonne -->
+                    <th>Sortir</th>
+                    {% if admin %}
+                        <th>Modifier</th>
+                    {% endif %}
                 </tr>
             </thead>
             <tbody>
@@ -38,12 +41,19 @@
                     <td>{{ 'Oui' if ecran.lave == 1 else 'Non' }}</td>
                     <td>{{ 'Oui' if ecran.sorti == 1 else 'Non' }}</td>
                     <td>
-                        <!-- Formulaire pour prendre la sérigraphie -->
                         <form action="{{ url_for('prendre') }}" method="POST">
                             <input type="hidden" name="ref_ecran" value="{{ ecran.ref_ecran }}">
                             <button type="submit" class="button sortir-btn">Prendre</button>
                         </form>
                     </td>
+                    {% if admin %}
+                    <td>
+                        <form action="{{ url_for('modifier') }}" method="POST">
+                            <input type="hidden" name="ref_ecran" value="{{ ecran.ref_ecran }}">
+                            <button type="submit" class="button modifier-btn">Modifier</button>
+                        </form>
+                    </td>
+                    {% endif %}
                 </tr>
                 {% endfor %}
             </tbody>

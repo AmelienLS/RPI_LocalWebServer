@@ -1,5 +1,5 @@
 body {
-    font-family: Arial, sans-serif;
+    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
     margin: 0;
     padding: 0;
     background-color: #2A2D46;
@@ -42,7 +42,7 @@ button {
 }
 
 button:hover {
-    background-color: #cc5200;
+    background-color: #e5d200;
 }
 
 .error {

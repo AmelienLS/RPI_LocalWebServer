@@ -10,33 +10,37 @@
     <div class="form-container">
         <h1>Modifier une Sérigraphie</h1>
 
-        <!-- Formulaire de saisie de la référence écran -->
+        <!-- Formulaire de modification -->
         <form action="/modifier" method="post">
             {% if not ref_ecran %}
+            <!-- Saisie de la référence écran pour rechercher -->
             <label for="ref_ecran">Référence Écran :</label>
             <input type="text" id="ref_ecran" name="ref_ecran" required>
             <button type="submit">Chercher</button>
             {% else %}
-            <label for="ref_ecran">Référence Écran :</label>
-            <input type="text" id="ref_ecran" name="ref_ecran" value="{{ ref_ecran }}" required readonly>
+            <!-- Modification de la sérigraphie -->
+            <input type="hidden" name="old_ref_ecran" value="{{ ref_ecran }}">
+            
+            <label for="new_ref_ecran">Nouvelle Référence Écran :</label>
+            <input type="text" id="new_ref_ecran" name="new_ref_ecran" value="{{ ref_ecran }}" required maxlength="9" minlength="9">
 
             <label for="libelle">Libellé :</label>
             <input type="text" id="libelle" name="libelle" value="{{ libelle or '' }}" required>
 
             <label for="pcb">PCB :</label>
-            <input type="text" id="pcb" name="pcb" value="{{ pcb or '' }}">
+            <input type="text" id="pcb" name="pcb" value="{{ pcb or '' }}" maxlength="9" minlength="9">
 
-            <label for="fab">Fabrication :</label>
-            <input type="text" id="fab" name="fab" value="{{ fab or '' }}" required>
+            <label for="fab">Fabriquant :</label>
+            <input type="text" id="fab" name="fab" value="{{ fab or '' }}" required maxlength="2" minlength="2">
 
             <label for="n_fab">Numéro de Fabrication :</label>
-            <input type="text" id="n_fab" name="n_fab" value="{{ n_fab or '' }}">
+            <input type="text" id="n_fab" name="n_fab" value="{{ n_fab or '' }}" maxlength="7" minlength="7">
 
             <label for="type">Type :</label>
             <input type="text" id="type" name="type" value="{{ type_ or '' }}" required>
 
             <label for="n">N° :</label>
-            <input type="text" id="n" name="n" value="{{ n or '' }}" required>
+            <input type="text" id="n" name="n" value="{{ n or '' }}" required maxlength="3" minlength="3">
 
             <label for="sorti">Sorti :</label>
             <select id="sorti" name="sorti">
@@ -54,16 +58,16 @@
             {% endif %}
         </form>
 
-        <!-- Affichage du message de réussite ou d'erreur -->
+        <!-- Affichage du message de réussite -->
         {% if message %}
-            <div class="message">
+            <div class="success">
                 <p>{{ message }}</p>
             </div>
         {% endif %}
 
         <!-- Affichage d'un message d'erreur si la sérigraphie n'existe pas -->
         {% if error %}
-            <script type="text/javascript">
+            <script type="text/javascript" class="error">
                 alert("Sérigraphie non trouvée. Veuillez vérifier la référence et réessayer.");
                 window.location.href = '/modifier';
             </script>

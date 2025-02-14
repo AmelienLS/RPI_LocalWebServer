@@ -1,12 +1,13 @@
 /* Style global de la page */
 body {
-    font-family: Arial, sans-serif;
+    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
     background-color: #2A2D46; /* Couleur de fond de la page */
     display: flex;
     justify-content: center;
     align-items: flex-start;
     margin: 0;
     padding: 1rem;
+    box-sizing: border-box;
 }
 
 /* Container du tableau */
@@ -15,14 +16,18 @@ body {
     padding: 1.5rem;
     border-radius: 8px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-    width: 90%;
-    max-width: 1200px;
-    overflow-x: auto; /* Pour permettre le défilement horizontal si nécessaire */
-    position: relative; /* Permet de positionner des éléments par rapport à ce container */
+    width: 100%; /* Occupe toute la largeur */
+    max-width: 100%; /* Pas de limite de largeur */
+    overflow-x: auto; /* Défilement horizontal si nécessaire */
+    box-sizing: border-box;
 }
 
 /* Style du bouton de retour */
-.admin-link {
+.admin-link {    
+    position: fixed;
+    top: 1rem; /* Distance par rapport au haut de la page */
+    right: 1rem; /* Distance par rapport au côté droit */
+    z-index: 1000; /* Assurez-vous qu'il est au-dessus des autres éléments */
     display: block;
     padding: 0.5rem 1rem;
     background-color: #feed00;
@@ -31,9 +36,6 @@ body {
     text-align: center;
     border-radius: 4px;
     font-weight: bold;
-    position: absolute; /* Position relative au container */
-    top: 1rem; /* Espace depuis le haut du container */
-    right: 1rem; /* Espace depuis la droite du container */
 }
 
 /* Titre de la page */
@@ -45,7 +47,7 @@ h1 {
 
 /* Table */
 table {
-    width: 100%;
+    width: 100%; /* Occupe tout l'espace du conteneur */
     border-collapse: collapse; /* Retire les espaces entre les bordures */
     margin-bottom: 1rem;
     text-align: left;
@@ -54,7 +56,7 @@ table {
 /* En-tête du tableau */
 thead th {
     background-color: #2A2D46;
-    color: white; /* Texte sombre */
+    color: white; /* Texte blanc */
     padding: 0.75rem;
     font-size: 1rem;
     text-align: center;

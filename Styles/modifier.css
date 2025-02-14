@@ -1,6 +1,6 @@
 /* Style global de la page */
 body {
-    font-family: Arial, sans-serif;
+    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
     background-color: #2A2D46; /* Couleur de fond de la page */
     display: flex;
     justify-content: center;
@@ -90,14 +90,20 @@ button:hover {
     text-align: center;
 }
 
-.message.success {
-    background-color: #4CAF50; /* Vert pour les messages de succès */
-    color: white;
+.success {
+    padding: 1rem;
+    margin-top: 1rem;
+    border-radius: 4px;
+    text-align: center;
+    color: green;
 }
 
-.message.error {
-    background-color: #FF4C4C; /* Rouge pour les messages d'erreur */
-    color: white;
+.error {
+    padding: 1rem;
+    margin-top: 1rem;
+    border-radius: 4px;
+    text-align: center;
+    color: red;
 }
 
 /* Responsivité pour les petits écrans */

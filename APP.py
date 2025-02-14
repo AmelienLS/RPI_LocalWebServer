@@ -68,6 +68,9 @@ def logout():
 
 @app.route('/ajouter', methods=['GET', 'POST'])
 def ajouter():
+    if 'admin' not in session or not session['admin']:
+        return redirect('/index') 
+    
     if request.method == 'POST':
         data = request.form
         ref_ecran = data['ref_ecran']
@@ -143,15 +146,15 @@ def ecran():
     if 'prenom' not in session:
         return redirect('/')
     
-    # Connexion à la base de données
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute('SELECT ref_ecran, libelle, pcb, fab, n_fab, type, n, sorti, lave FROM serigraphie')
     ecrans = cursor.fetchall()
     conn.close()
+    admin = session.get('admin', 0) == 1
+    #affichage de la page avec les ecrans et renvoie de l'info admin.
+    return render_template('ecran.html', ecrans=ecrans, admin=admin)
 
-    # Affichage de la page avec les écrans
-    return render_template('ecran.html', ecrans=ecrans)
 
 @app.route('/prendre', methods=['GET', 'POST'])
 def prendre():
@@ -178,7 +181,7 @@ def prendre():
                 cursor.execute('UPDATE serigraphie SET sorti = 1 WHERE ref_ecran = ?', (ref_ecran,))
                 conn.commit()
                 libelle = ecran['libelle']  # Récupérer le libellé de la sérigraphie
-                message = f"Sérigraphie {libelle} marquée comme prise."
+                message = f"Sérigraphie {libelle} prise avec succès."
                 n_value = ecran['n']  # Récupérer la valeur de 'n' à afficher
         else:
             message = "Erreur : sérigraphie non trouvée."
@@ -191,8 +194,8 @@ def prendre():
 
 @app.route('/modifier', methods=['GET', 'POST'])
 def modifier():
-    if 'prenom' not in session:
-        return redirect('/')
+    if 'admin' not in session or not session['admin']:
+        return redirect('/index') 
 
     message = None
     error = False
@@ -207,59 +210,65 @@ def modifier():
     lave = None
 
     if request.method == 'POST':
-        ref_ecran = request.form['ref_ecran']
+        # Récupérer les champs du formulaire
+        old_ref_ecran = request.form.get('old_ref_ecran')  # Référence actuelle (avant modification)
+        new_ref_ecran = request.form.get('new_ref_ecran')  # Nouvelle référence (si modification)
+        libelle = request.form.get('libelle')
+        pcb = request.form.get('pcb')
+        fab = request.form.get('fab')
+        n_fab = request.form.get('n_fab')
+        type_ = request.form.get('type')
+        n = request.form.get('n')
+        sorti = request.form.get('sorti')
+        lave = request.form.get('lave')
 
         # Connexion à la base de données
         conn = get_db_connection()
         cursor = conn.cursor()
 
-        # Chercher la sérigraphie par la référence
-        cursor.execute('SELECT * FROM serigraphie WHERE ref_ecran = ?', (ref_ecran,))
-        ecran = cursor.fetchone()
-
-        if ecran:
-            # Si la sérigraphie existe, afficher ses valeurs actuelles
-            if 'libelle' in request.form:  # Si les informations sont soumises pour mise à jour
-                libelle = request.form['libelle']
-                pcb = request.form['pcb']
-                fab = request.form['fab']
-                n_fab = request.form['n_fab']
-                type_ = request.form['type']
-                n = request.form['n']
-                sorti = request.form['sorti']
-                lave = request.form['lave']
-
-                # Mise à jour dans la base de données
+        if old_ref_ecran:  # Mise à jour des données
+            # Vérifier si la nouvelle référence existe déjà dans la base
+            if new_ref_ecran and old_ref_ecran != new_ref_ecran:
+                cursor.execute('SELECT 1 FROM serigraphie WHERE ref_ecran = ?', (new_ref_ecran,))
+                if cursor.fetchone():
+                    message = f"La référence {new_ref_ecran} existe déjà. Veuillez choisir une autre référence."
+                    error = True
+                else:
+                    # Mise à jour avec la nouvelle référence
+                    cursor.execute('''UPDATE serigraphie 
+                                      SET ref_ecran = ?, libelle = ?, pcb = ?, fab = ?, n_fab = ?, type = ?, n = ?, sorti = ?, lave = ? 
+                                      WHERE ref_ecran = ?''',
+                                   (new_ref_ecran, libelle, pcb, fab, n_fab, type_, n, sorti, lave, old_ref_ecran))
+                    conn.commit()
+                    message = f"Sérigraphie {old_ref_ecran} mise à jour avec succès. Nouvelle référence : {new_ref_ecran}."
+            else:
+                # Mise à jour sans changement de référence
                 cursor.execute('''UPDATE serigraphie 
                                   SET libelle = ?, pcb = ?, fab = ?, n_fab = ?, type = ?, n = ?, sorti = ?, lave = ? 
-                                  WHERE ref_ecran = ?''', 
-                               (libelle, pcb, fab, n_fab, type_, n, sorti, lave, ref_ecran))
+                                  WHERE ref_ecran = ?''',
+                               (libelle, pcb, fab, n_fab, type_, n, sorti, lave, old_ref_ecran))
                 conn.commit()
+                message = f"Sérigraphie {old_ref_ecran} mise à jour avec succès."
 
-                message = f"Sérigraphie {ref_ecran} mise à jour avec succès."
-                return render_template("modifier.html")
-        else:
-            message = f"Sérigraphie avec la référence {ref_ecran} non trouvée."
-            error = True  # On indique qu'il y a une erreur
+        else:  # Recherche par référence (première étape)
+            ref_ecran = request.form.get('ref_ecran')
+            cursor.execute('SELECT * FROM serigraphie WHERE ref_ecran = ?', (ref_ecran,))
+            ecran = cursor.fetchone()
 
-        conn.close()
-
-    # Si la référence ecran existe, récupérez ses données
-    if ref_ecran:
-        conn = get_db_connection()
-        cursor = conn.cursor()
-        cursor.execute('SELECT * FROM serigraphie WHERE ref_ecran = ?', (ref_ecran,))
-        ecran = cursor.fetchone()
-
-        if ecran:
-            libelle = ecran['libelle']
-            pcb = ecran['pcb']
-            fab = ecran['fab']
-            n_fab = ecran['n_fab']
-            type_ = ecran['type']
-            n = ecran['n']
-            sorti = ecran['sorti']
-            lave = ecran['lave']
+            if ecran:
+                # Charger les données de la sérigraphie pour modification
+                ref_ecran = ecran['ref_ecran']
+                libelle = ecran['libelle']
+                pcb = ecran['pcb']
+                fab = ecran['fab']
+                n_fab = ecran['n_fab']
+                type_ = ecran['type']
+                n = ecran['n']
+                sorti = ecran['sorti']
+                lave = ecran['lave']
+            else:
+                message = f"Sérigraphie avec la référence {ref_ecran} non trouvée."
+                error = True
 
         conn.close()
 
@@ -268,8 +277,8 @@ def modifier():
     
 @app.route('/supprimer', methods=['GET', 'POST'])
 def supprimer():
-    if 'prenom' not in session:
-        return redirect('/')
+    if 'admin' not in session or not session['admin']:
+        return redirect('/index') 
     
     if request.method == 'POST':
         ref_ecran = request.form.get('ref_ecran', '').strip()
