@@ -361,6 +361,11 @@ def ranger():
     conn.close()
     return render_template('ranger.html', serigraphies=serigraphies, emplacement=emplacement)
 
+@app.route('/close_db')
+def close_db():
+     flash("La connexion à la base de données a été fermée.", "info")
+     return redirect('/index')   
+
 # Démarrage du serveur Flask.
 # Mettre debug a True si jamais il le faut.
 if __name__ == '__main__':
