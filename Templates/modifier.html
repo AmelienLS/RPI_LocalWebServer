@@ -42,13 +42,13 @@
             <label for="n">N° :</label>
             <input type="text" id="n" name="n" value="{{ n or '' }}" required maxlength="3" minlength="3">
 
-            <label for="sorti">Sorti :</label>
+            <label for="sorti">Sortie :</label>
             <select id="sorti" name="sorti">
                 <option value="0" {% if sorti == '0' %} selected {% endif %}>Non</option>
                 <option value="1" {% if sorti == '1' %} selected {% endif %}>Oui</option>
             </select>
 
-            <label for="lave">Lavé :</label>
+            <label for="lave">Lavée :</label>
             <select id="lave" name="lave">
                 <option value="0" {% if lave == '0' %} selected {% endif %}>Non</option>
                 <option value="1" {% if lave == '1' %} selected {% endif %}>Oui</option>

@@ -85,7 +85,7 @@ def ajouter():
         type_serigraphie = data['type']
         n = data['n']
 
-        # Validation des contraintes
+        # Validation des contraintes. A modifier si les contraintes changent.
         if len(fab) != 2 or len(n) != 3 or (len(n_fab) != 0 and (len(n_fab) != 7 or not n_fab.startswith("F"))):
             error_message = "Erreur : Les données ne respectent pas les contraintes."
             return render_template('ajouter.html', error=error_message)
