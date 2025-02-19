@@ -15,7 +15,6 @@ app = Flask(
     template_folder=os.path.join(base_dir, "Templates"),
     static_folder=os.path.join(base_dir, "Styles")
 )
-app.secret_key = 'Aximum_cms'
 
 # Fonction pour obtenir une connexion SQLite.
 # armoire.db doit rester dans le meme repertoire que app.py
