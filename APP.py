@@ -331,12 +331,13 @@ def ranger():
         return redirect('/')
     
     emplacement = None
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
     if request.method == 'POST':
         ref_ecran = request.form.get('ref_ecran')
         lavee = request.form.get('lavee') == 'oui'
 
-        conn = get_db_connection()
-        cursor = conn.cursor()
         # Vérifie si la sérigraphie existe et a été sortie
         cursor.execute("SELECT libelle, N FROM serigraphie WHERE ref_ecran = ? AND sorti = 1", (ref_ecran,))
         result = cursor.fetchone()
@@ -351,10 +352,7 @@ def ranger():
             emplacement = result['N']  # Récupérer l'emplacement
         else:
             flash("La sérigraphie sélectionnée n'existe pas ou n'est pas marquée comme sortie.", "error")
-        conn.close()
 
-    conn = get_db_connection()
-    cursor = conn.cursor()
     cursor.execute("SELECT ref_ecran, libelle, N FROM serigraphie WHERE sorti = 1")
     serigraphies = cursor.fetchall()
     conn.close()
@@ -369,3 +367,4 @@ def close_db():
 # Mettre debug a True si jamais il le faut.
 if __name__ == '__main__':
     app.run(debug=False)
+
