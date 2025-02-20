@@ -254,7 +254,6 @@ def modifier():
 def supprimer():
     if 'admin' not in session or not session['admin']:
         return redirect('/index') 
-    
     if request.method == 'POST':
         ref_ecran = request.form.get('ref_ecran', '').strip()
         action = request.form.get('action')

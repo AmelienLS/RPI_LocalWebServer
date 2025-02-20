@@ -18,7 +18,7 @@ body {
 }
 
 h1 {
-    color: #feed00; /* Couleur jaune Aximum */
+    color: #feed00; /* Couleur jaune */
     margin-bottom: 1rem;
 }
 
@@ -42,7 +42,7 @@ input {
 button {
     width: 100%;
     padding: 0.7rem;
-    background-color: #feed00; /* Jaune Aximum */
+    background-color: #feed00; /* Jaune */
     color: #191B2A;
     border: none;
     border-radius: 4px;
@@ -67,7 +67,7 @@ button {
 .cancel-btn{
     width: 100%;
     padding: 0.7rem;
-    background-color: #feed00; /* Jaune Aximum */
+    background-color: #feed00; /* Jaune */
     color: #191B2A;
     border: none;
     border-radius: 4px;
