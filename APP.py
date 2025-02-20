@@ -2,6 +2,7 @@ from flask import *
 import os
 import sqlite3
 import webbrowser
+import secrets
 
 #ouverture automatique du navigateur
 webbrowser.open('http://localhost:5000/')
@@ -15,9 +16,8 @@ app = Flask(
     template_folder=os.path.join(base_dir, "Templates"),
     static_folder=os.path.join(base_dir, "Styles")
 )
-
-#clé "secrete". Elle est obligatoire pour l'utilisation de l'argument session, mais n'est le code de rien de sensible.
-app.secret_key = 'aximum_cms'
+# Générer une clé secrète unique à chaque démarrage
+app.secret_key = secrets.token_hex(16)
 
 # Fonction pour obtenir une connexion SQLite.
 # armoire.db doit rester dans le meme repertoire que app.py
