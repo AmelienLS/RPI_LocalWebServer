@@ -314,6 +314,5 @@ def close_db():
                             success="La connexion à la base de données a été fermée.")
 
 # Démarrage du serveur Flask.
-# Mettre debug a True si jamais il le faut.
 if __name__ == '__main__':
     app.run(debug=False)
