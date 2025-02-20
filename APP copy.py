@@ -124,11 +124,12 @@ def ajouterU():
                 cursor.execute('INSERT INTO users (identifiant, prenom, nom, admin) VALUES (?, ?, ?, ?)',
                                (identifiant, prenom, nom, admin))
                 conn.commit()
+                flash('Utilisateur ajouté avec succès !', 'success')
             except sqlite3.IntegrityError as e:
                 error = "Erreur d'insertion dans la base de données : " + str(e)
                 return render_template('ajouterU.html', error=error)
 
-        return render_template('ajouterU.html', success="Utilisateur ajouté avec succès !")
+        return redirect('/ajouterU')
 
     return render_template('ajouterU.html')
 
@@ -267,14 +268,26 @@ def supprimer():
                 row = cursor.fetchone()
 
                 if row:
-                    return render_template('supprimer.html', ref_ecran=ref_ecran, exists=True, libelle=row[0])
+                    return render_template(
+                        'supprimer.html',
+                        ref_ecran=ref_ecran,
+                        exists=True,
+                        libelle=row[0]
+                    )
                 else:
-                    return render_template('supprimer.html', ref_ecran=ref_ecran, exists=False)
+                    return render_template(
+                        'supprimer.html',
+                        ref_ecran=ref_ecran,
+                        exists=False
+                    )
 
             elif action == "delete":
                 cursor.execute("DELETE FROM serigraphie WHERE ref_ecran = ?", (ref_ecran,))
                 conn.commit()
-                return render_template('supprimer.html', success=f"La référence écran '{ref_ecran}' a été supprimée avec succès.")
+
+                flash(f"La référence écran '{ref_ecran}' a été supprimée avec succès.", 'success')
+                return redirect('/supprimer')
+
     return render_template('supprimer.html')
 
 @app.route('/ranger', methods=['GET', 'POST'])
@@ -282,7 +295,6 @@ def ranger():
     if 'prenom' not in session:
         return redirect('/')
     
-    error = None
     emplacement = None
 
     with get_db_connection() as conn:
@@ -295,23 +307,25 @@ def ranger():
             cursor.execute("SELECT libelle, N FROM serigraphie WHERE ref_ecran = ? AND sorti = 1", (ref_ecran,))
             result = cursor.fetchone()
             if result:
-                cursor.execute("UPDATE serigraphie SET sorti = 0, lave = ? WHERE ref_ecran = ?",
-                               (1 if lavee else 0, ref_ecran))
+                cursor.execute("""
+                    UPDATE serigraphie 
+                    SET sorti = 0, lave = ? 
+                    WHERE ref_ecran = ?
+                """, (1 if lavee else 0, ref_ecran))
                 conn.commit()
                 emplacement = result['N']
             else:
-                error = "La sérigraphie sélectionnée n'existe pas ou n'est pas marquée comme sortie."
+                flash("La sérigraphie sélectionnée n'existe pas ou n'est pas marquée comme sortie.", "error")
 
         cursor.execute("SELECT ref_ecran, libelle, N FROM serigraphie WHERE sorti = 1")
         serigraphies = cursor.fetchall()
 
-    return render_template('ranger.html', serigraphies=serigraphies, emplacement=emplacement, error=error)
+    return render_template('ranger.html', serigraphies=serigraphies, emplacement=emplacement)
 
 @app.route('/close_db')
 def close_db():
-     # Remplacer flash par un message de confirmation dans index
-     return render_template('index.html', prenom=session.get('prenom'), admin=session.get('admin')==1,
-                            success="La connexion à la base de données a été fermée.")
+     flash("La connexion à la base de données a été fermée.", "info")
+     return redirect('/index')   
 
 # Démarrage du serveur Flask.
 # Mettre debug a True si jamais il le faut.

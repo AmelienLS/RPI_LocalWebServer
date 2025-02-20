@@ -26,13 +26,9 @@
             <a href="/ranger" class="button user-link">Ranger une sérigraphie</a>
             <a href="/logout" class="button logout-button">Se déconnecter</a>
         </div>
+        {% if success %}
+            <div class="confirmation-message" style="color: green;">{{ success }}</div>
+        {% endif %}
     </div>    
 </body>
-{% with messages = get_flashed_messages(with_categories=true) %}
-  {% if messages %}
-    <script type="text/javascript">
-        alert("{{ messages[0][1] }}");  // Affiche le premier message flash
-    </script>
-  {% endif %}
-{% endwith %}
 </html>
