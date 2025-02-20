@@ -317,5 +317,3 @@ def close_db():
 # Mettre debug a True si jamais il le faut.
 if __name__ == '__main__':
     app.run(debug=False)
-
-# Pour le debug, utiliser cette commande : python app.py
