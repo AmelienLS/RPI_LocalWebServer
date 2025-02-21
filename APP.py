@@ -356,6 +356,17 @@ def close_db():
     """
     return render_template('index.html', prenom=session.get('prenom'), admin=session.get('admin')==1,
                            success="La connexion à la base de données a été fermée.")
+    
+# Cette route permet de servir les fichiers JavaScript présents dans le dossier "Functions".
+# Lorsqu'une requête est faite à /Functions/nom_du_fichier, le fichier correspondant est envoyé.
+@app.route('/Functions/<path:filename>')
+def send_functions(filename):
+    # Récupère le chemin absolu du répertoire actuel (où se trouve APP.py)
+    base_dir = os.path.abspath(os.path.dirname(__file__))
+    # Construit le chemin vers le dossier "Functions" en se basant sur le répertoire racine du projet
+    functions_dir = os.path.join(base_dir, 'Functions')
+    # Envoie le fichier demandé depuis le dossier "Functions"
+    return send_from_directory(functions_dir, filename)
 
 # Lancement du serveur Flask (mode production avec debug désactivé)
 if __name__ == '__main__':
