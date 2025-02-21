@@ -1,3 +1,92 @@
-Pour lancer le serveur, il extraire dans le dossier document les fichiers de la derniere release quelconque. 
-Ensuite, il faut ouvrir l'invite de commande et taper flask --app "/chemin/vers/app.py" run. 
-La page s'ouvrira dans le navigateur. Pour la fermer, il faut retourner dans l'invite et taper Ctrl+C
+# Documentation du Projet Sérigraphie
+
+## Présentation du Projet
+
+Ce projet est une application web développée avec Flask qui permet de gérer des sérigraphies. L’application se connecte à une base de données SQLite ([armoire.db](armoire.db)), gère les utilisateurs et permet d'ajouter, modifier, supprimer et gérer le statut des sérigraphies (prise, rangement, etc.).
+
+## Structure du Projet
+
+Le projet est organisé comme suit :
+
+- **Racine du projet**  
+  - `APP.py` : Point d'entrée principal de l’application. Il configure Flask, définit les routes et gère la connexion à la base de données via la fonction [`get_db_connection`](APP.py#L11).
+  - `armoire.db` : Fichier SQLite contenant les données des sérigraphies et des utilisateurs.
+  - `readme` : Ce fichier, qui contient désormais toutes les explications pour comprendre le projet.
+  
+- **Dossier Templates/**  
+  Contient tous les fichiers HTML utilisés pour l’affichage des pages. Chaque page utilise un fichier CSS dédié (situé dans le dossier Styles) et certains liens spécifiques dans les balises `<link>` permettent d’inclure une icône pour l’onglet du navigateur ([Logo.png](Images/Logo.png)).
+  - Exemple : [ecran.html](Templates/ecran.html) affiche le tableau des sérigraphies.
+  
+- **Dossier Styles/**  
+  Contient les fichiers CSS pour le style de chaque page.  
+  - Exemple : [ecran.css](Styles/ecran.css) assure la mise en forme du tableau présenté dans [ecran.html](Templates/ecran.html).
+  
+- **Dossier Functions/**  
+  Contient des fichiers JavaScript pour gérer des interactions côté client (filtrage de tableau, etc.).
+  - Exemple : [Ecran.js](Functions/Ecran.js) définit la logique de filtrage pour le tableau dans [ecran.html](Templates/ecran.html).
+
+- **Dossier Images/**  
+  Contient les fichiers image utilisés dans le projet, par exemple pour l’icône de l’onglet (`Logo.png` ou `database.ico`).
+
+## Explications détaillées du Code
+
+### Configuration et Lancement
+- **Fichier [APP.py](APP.py)**  
+  Ce fichier initialise l’application Flask :
+  - **Clé secrète** : Générée dynamiquement pour sécuriser les sessions (via `secrets.token_hex(16)`).
+  - **Connexion à la base de données** : La fonction `get_db_connection()` crée et retourne une connexion à la base SQLite avec une `row_factory` pour permettre l’accès par noms de colonnes.
+  - **Ouverture automatique** : La page principale s’ouvre automatiquement par `webbrowser.open('http://localhost:5000/')`.
+
+### Routes Principales
+- **Route `/` (login)**  
+  Gère l’authentification en vérifiant l’identifiant dans la table `users` de la base de données.
+  
+- **Route `/index`**  
+  Affiche la page d’accueil une fois l’utilisateur authentifié.  
+  Selon son statut (admin ou non), différentes actions (ajout, modification, suppression, etc.) sont proposées.
+
+- **Route `/ajouter`**  
+  Permet d’ajouter une nouvelle sérigraphie en collectant divers paramètres (référence, libellé, PCB, fabricant, etc.) et en effectuant des validations sur le format des données.
+
+- **Route `/modifier`**  
+  Permet de rechercher une sérigraphie par sa référence et de mettre à jour ses informations.  
+  Vérifie également que la nouvelle référence n’existe pas déjà en cas de modification.
+
+- **Route `/supprimer`**  
+  Permet de vérifier l’existence d’une sérigraphie et ensuite de la supprimer de la base.
+
+- **Route `/prendre` et `/ranger`**  
+  Ces routes gèrent le changement de statut d’une sérigraphie (prise ou rangée).  
+  Le statut `sorti` et une indication relative au lavage (via `lave`) sont mis à jour dans la base.
+
+### Gestion du Frontend
+- **Templates HTML**  
+  Chaque fichier dans le dossier [Templates](Templates/) correspond à une vue de l’application, par exemple :
+  - [login.html](Templates/login.html) pour l’authentification,
+  - [modifier.html](Templates/modifier.html) pour modifier une sérigraphie, etc.
+  
+- **Feuilles de Style**  
+  Chaque fichier CSS du dossier [Styles](Styles/) correspond à une page ou un ensemble de pages et définit la présentation des éléments HTML.
+
+- **Scripts JavaScript**  
+  Les fichiers dans le dossier [Functions](Functions/) contiennent des scripts permettant, par exemple, de filtrer dynamiquement les tableaux d’affichage ([Ecran.js](Functions/Ecran.js)).
+
+## Conseils pour la Maintenance
+
+- **Validation et Gestion des Erreurs**  
+  L’application inclut des validations pour s’assurer que les données utilisateurs respectent des contraintes précises (longueur des chaînes, format particulier, etc.).
+  
+- **Sécurité**  
+  La clé secrète de l’application, générée au démarrage, sécurise la gestion des sessions.
+  
+- **Modularité**  
+  La séparation entre le backend (Flask et SQLite) et le frontend (HTML, CSS, JavaScript) facilite la compréhension et la maintenance du code.
+
+## Comment Lancer le Projet
+
+1. Assurez-vous que Python et Flask sont installés.
+2. Placez-vous dans le dossier du projet.
+3. Lancez la commande :
+   flask --app "APP.py" run
+4. Le navigateur s’ouvrira automatiquement pour afficher l’application.
+5. Pour terminer le serveur, utilisez Ctrl+C dans l’invite de commande.
