@@ -62,77 +62,7 @@
         </table>
     </div>
 
-    <script>
-        // Scripts de filtration
-        document.addEventListener('DOMContentLoaded', function () {
-            const table = document.getElementById('serigraphie-table');
-            const filters = document.querySelectorAll('.filter-input');
-
-            function applyFilters() {
-                const rows = table.querySelectorAll('tbody tr');
-                rows.forEach(row => {
-                    let show = true;
-                    filters.forEach(filter => {
-                        const columnIndex = filter.getAttribute('data-column');
-                        const filterValue = filter.value.toLowerCase().trim();
-                        if(filterValue !== '') {
-                            const cell = row.cells[columnIndex];
-                            if(cell && !cell.textContent.toLowerCase().includes(filterValue)) {
-                                show = false;
-                            }
-                        }
-                    });
-                    row.style.display = show ? '' : 'none';
-                });
-            }
-
-            filters.forEach(filter => {
-                filter.addEventListener('input', applyFilters);
-            });
-        });
-    </script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const container = document.querySelector('.container');
-            let startX = 0, startY = 0;
-            let initialTranslateX = 0, initialTranslateY = 0;
-
-            // Assurer un transform initial
-            container.style.transform = "translate(0px, 0px)";
-
-            container.addEventListener('touchstart', function(event) {
-                if (event.touches.length === 2) {
-                    event.preventDefault();
-                    // Calcul du centre des deux doigts
-                    const touch1 = event.touches[0];
-                    const touch2 = event.touches[1];
-                    startX = (touch1.pageX + touch2.pageX) / 2;
-                    startY = (touch1.pageY + touch2.pageY) / 2;
-
-                    // Récupération de la translation actuelle
-                    const style = window.getComputedStyle(container);
-                    const matrix = new DOMMatrixReadOnly(style.transform);
-                    initialTranslateX = matrix.m41;
-                    initialTranslateY = matrix.m42;
-                }
-            }, {passive: false});
-
-            container.addEventListener('touchmove', function(event) {
-                if (event.touches.length === 2) {
-                    event.preventDefault();
-                    const touch1 = event.touches[0];
-                    const touch2 = event.touches[1];
-                    const currentX = (touch1.pageX + touch2.pageX) / 2;
-                    const currentY = (touch1.pageY + touch2.pageY) / 2;
-
-                    // Calcul du déplacement
-                    const deltaX = currentX - startX;
-                    const deltaY = currentY - startY;
-
-                    container.style.transform = `translate(${initialTranslateX + deltaX}px, ${initialTranslateY + deltaY}px)`;
-                }
-            }, {passive: false});
-        });
-    </script>
+    <script src="/Functions/Ecran.js"></script>
+    <script src="/Functions/ecranDrag.js"></script>
 </body>
 </html>
