@@ -1,33 +1,26 @@
 from flask import *
-import os
-import sqlite3
-import webbrowser
-import secrets
+import os, sqlite3, webbrowser, secrets
 
-# Ouverture automatique du navigateur sur l'URL locale
+# Ouvrir automatiquement le navigateur à l'URL locale
 webbrowser.open('http://localhost:5000/')
 
 # Détermination du répertoire de base du projet
 base_dir = os.path.dirname(os.path.abspath(__file__))
 
-# Configuration des dossiers de templates et de fichiers statiques (Styles)
+# Configuration de l’application Flask
 app = Flask(
     __name__,
     template_folder=os.path.join(base_dir, "Templates"),
     static_folder=os.path.join(base_dir, "Styles")
 )
-# Génération d'une clé secrète unique pour la session utilisateur
 app.secret_key = secrets.token_hex(16)
 
-# Chemin vers la base de données (armoire.db doit se trouver dans le même répertoire que app.py)
+# Chemin vers la base de données
 project_root = os.path.dirname(os.path.realpath(__file__))
 database = os.path.join(project_root, 'armoire.db')
 
 def get_db_connection():
-    """
-    Renvoie une connexion à la base de données SQLite.
-    La row_factory est configurée pour retourner des Row (similaires à des dictionnaires).
-    """
+    """Renvoie une connexion à la base de données SQLite."""
     conn = sqlite3.connect(database)
     conn.row_factory = sqlite3.Row
     return conn
@@ -71,8 +64,8 @@ def index():
         return redirect('/')
     
     prenom = session['prenom']
-    admin = session['admin']
-    return render_template('index.html', prenom=prenom, admin=admin == 1)
+    admin = session['admin'] == 1
+    return render_template('index.html', prenom=prenom, admin=admin)
 
 @app.route('/logout')
 def logout():
@@ -368,6 +361,8 @@ def send_functions(filename):
     # Envoie le fichier demandé depuis le dossier "Functions"
     return send_from_directory(functions_dir, filename)
 
-# Lancement du serveur Flask (mode production avec debug désactivé)
+# Lancement du serveur Flask (production avec debug désactivé)
 if __name__ == '__main__':
     app.run(debug=False)
+
+
