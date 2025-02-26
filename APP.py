@@ -364,5 +364,3 @@ def send_functions(filename):
 # Lancement du serveur Flask (production avec debug désactivé)
 if __name__ == '__main__':
     app.run(debug=False)
-
-
