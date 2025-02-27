@@ -96,18 +96,33 @@ def ajouter():
         # Vérification des contraintes sur certains champs
         if len(fab) != 2 or len(n) != 3 or (len(n_fab) != 0 and (len(n_fab) != 7 or not n_fab.startswith("F"))):
             error_message = "Erreur : Les données ne respectent pas les contraintes."
-            return render_template('ajouter.html', error=error_message)
+            return render_template('ajouter.html', error=error_message,
+                                   ref_ecran=ref_ecran, libelle=libelle, pcb=pcb, fab=fab, n_fab=n_fab, type=type_serigraphie, n=n)
 
-        # Insertion de la nouvelle sérigraphie dans la base de données
-        with get_db_connection() as conn:
-            cursor = conn.cursor()
-            cursor.execute('''
-                INSERT INTO serigraphie (ref_ecran, libelle, pcb, fab, n_fab, type, n)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
-            ''', (ref_ecran, libelle, pcb, fab, n_fab, type_serigraphie, n))
-            conn.commit()
-
-        return render_template('ajouter.html', success="Données ajoutées avec succès.")
+        try:
+            # Insertion de la nouvelle sérigraphie dans la base de données
+            with get_db_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute('''
+                    INSERT INTO serigraphie (ref_ecran, libelle, pcb, fab, n_fab, type, n)
+                    VALUES (?, ?, ?, ?, ?, ?, ?)
+                ''', (ref_ecran, libelle, pcb, fab, n_fab, type_serigraphie, n))
+                conn.commit()
+            return render_template('ajouter.html', success="Données ajoutées avec succès.")
+        except sqlite3.IntegrityError as e:
+            error_str = str(e)
+            if "UNIQUE constraint failed:" in error_str:
+                constraint = error_str.split("UNIQUE constraint failed: ")[1]
+                # Remplacer le nom de la colonne par le nom de la ligne du formulaire
+                if "ref_ecran" in constraint:
+                    field_name = "Réf Écran"
+                    ref_ecran = ""
+                else:
+                    field_name = "Emplacement"
+                    n = ""
+                error_message = f'Erreur: {field_name} déjà utilisée.'
+            return render_template('ajouter.html', error=error_message,
+                                   ref_ecran=ref_ecran, libelle=libelle, pcb=pcb, fab=fab, n_fab=n_fab, type=type_serigraphie, n=n)
 
     return render_template('ajouter.html')
 
@@ -132,15 +147,26 @@ def ajouterU():
 
             if existing_user:
                 error = "L'identifiant existe déjà. Veuillez en choisir un autre."
-                return render_template('ajouterU.html', error=error)
+                return render_template('ajouterU.html', error=error,
+                                       identifiant=identifiant, prenom=prenom, nom=nom)
 
             try:
                 cursor.execute('INSERT INTO users (identifiant, prenom, nom, admin) VALUES (?, ?, ?, ?)',
                                (identifiant, prenom, nom, admin))
                 conn.commit()
             except sqlite3.IntegrityError as e:
-                error = "Erreur d'insertion dans la base de données : " + str(e)
-                return render_template('ajouterU.html', error=error)
+                error_str = str(e)
+                if "UNIQUE constraint failed:" in error_str:
+                    constraint = error_str.split("UNIQUE constraint failed: ")[1]
+                    # Remplacer le nom de la colonne par le nom du champ du formulaire
+                    if "identifiant" in constraint:
+                        field_name = "Identifiant"
+                        identifiant = ""
+                    else:
+                        field_name = constraint
+                    error = f'Erreur: {field_name} déjà utilisé.'
+                return render_template('ajouterU.html', error=error,
+                                       identifiant=identifiant, prenom=prenom, nom=nom)
 
         return render_template('ajouterU.html', success="Utilisateur ajouté avec succès !")
 

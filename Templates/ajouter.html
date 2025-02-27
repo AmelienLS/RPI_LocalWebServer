@@ -21,25 +21,25 @@
         {% endif %}
         <form method="POST">
             <label for="ref_ecran">Réf Écran (9 caractères):</label>
-            <input type="text" id="ref_ecran" name="ref_ecran" required>
+            <input type="text" id="ref_ecran" name="ref_ecran" value="{{ ref_ecran or '' }}" required>
 
             <label for="libelle">Libellé:</label>
-            <input type="text" id="libelle" name="libelle" required>
+            <input type="text" id="libelle" name="libelle" value="{{ libelle or '' }}" required>
 
             <label for="pcb">PCB (9 caractères):</label>
-            <input type="text" id="pcb" name="pcb">
+            <input type="text" id="pcb" name="pcb" value="{{ pcb or '' }}">
 
             <label for="fab">Fabricant (2 caractères):</label>
-            <input type="text" id="fab" name="fab" required>
+            <input type="text" id="fab" name="fab" value="{{ fab or '' }}" required>
 
             <label for="n_fab">N° Fab (F + 6 caractères):</label>
-            <input type="text" id="n_fab" name="n_fab">
+            <input type="text" id="n_fab" name="n_fab" value="{{ n_fab or '' }}">
 
             <label for="type">Type:</label>
-            <input type="text" id="type" name="type" required>
+            <input type="text" id="type" name="type" value="{{ type or '' }}" required>
 
             <label for="n">N° (3 caractères):</label>
-            <input type="text" id="n" name="n" required>
+            <input type="text" id="n" name="n" value="{{ n or '' }}" required>
 
             <button type="submit">Ajouter</button>
         </form>
