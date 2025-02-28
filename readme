@@ -74,13 +74,16 @@ Le projet est organisé comme suit :
 ## Conseils pour la Maintenance
 
 - **Validation et Gestion des Erreurs**  
-  L’application inclut des validations pour s’assurer que les données utilisateurs respectent des contraintes précises (longueur des chaînes, format particulier, etc.).
+  L’application inclut des validations pour s’assurer que les données utilisateurs respectent des contraintes précises (longueur des chaînes, format particulier, etc.). Vérifier que les conditions correspondent bien aux besoins.
   
 - **Sécurité**  
-  La clé secrète de l’application, générée au démarrage, sécurise la gestion des sessions.
+  La clé secrète de l’application, générée au démarrage, sécurise la gestion des sessions. Vérifier que la clé de sécurité est bien paramétrée sans quoi l'application ne peut se lancer.
   
 - **Modularité**  
-  La séparation entre le backend (Flask et SQLite) et le frontend (HTML, CSS, JavaScript) facilite la compréhension et la maintenance du code.
+  La séparation entre le backend (Flask et SQLite) et le frontend (HTML, CSS, JavaScript) facilite la compréhension et la maintenance du code. Attention a bien vérifier que les chemins relatifs sont bien correct pour permettre une bonne discussion entre le back et le front.
+
+- **Base de donnée**
+  la base de donnée SQLite permet de stocker toute les données. Il faut bien faire attention que les contraintes de la base de données correspondent aux contraintes donnée par le backend. Pour lire la DB, il est possible soit d'utiliser une application tierce (DB browser for SQLite par exemple) ou bien une extension Visual Studio Code (SQLite3 Editor par exemple)
 
 ## Comment Lancer le Projet
 
