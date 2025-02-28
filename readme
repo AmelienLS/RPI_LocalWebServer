@@ -96,3 +96,16 @@ Le projet est organisé comme suit :
    flask --app "app.py" run
 4. Le navigateur s’ouvrira automatiquement pour afficher l’application.
 5. Pour terminer le serveur, utilisez Ctrl+C dans l’invite de commande.
+
+## Utilisation de Docker et du Dockerfile
+
+Docker est une plateforme de conteneurisation qui permet d'isoler une application avec toutes ses dépendances. Le Dockerfile fournit une recette pour créer une image Docker qui contient l'environnement de l'application.
+
+Dans ce projet, le Dockerfile :
+- Utilise une image de base légère de Python (3.8-slim).
+- Définit le répertoire de travail et copie le fichier de dépendances pour installer les packages.
+- Copie le reste du code source de l'application.
+- Expose le port 5000 pour lancer l'application Flask.
+- Spécifie la commande pour démarrer l'application automatiquement.
+
+Cette approche facilite le déploiement dans divers environnements en garantissant que l'application s'exécute de manière cohérente.
