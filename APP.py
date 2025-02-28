@@ -2,40 +2,47 @@ from flask import *
 import os, sqlite3, webbrowser, secrets
 
 # Ouvrir automatiquement le navigateur à l'URL locale
+# On lance le navigateur web pour afficher l'application Flask dès le démarrage
 webbrowser.open('http://localhost:5000/')
 
 # Détermination du répertoire de base du projet
+# On récupère le chemin absolu du fichier courant pour définir le répertoire de base
 base_dir = os.path.dirname(os.path.abspath(__file__))
 
-# Configuration de l’application Flask
+# Initialisation de l'application Flask en précisant les dossiers pour les templates et les fichiers statiques (styles)
 app = Flask(
     __name__,
     template_folder=os.path.join(base_dir, "Templates"),
     static_folder=os.path.join(base_dir, "Styles")
 )
+# Générer une clé secrète aléatoire pour sécuriser la session utilisateur
 app.secret_key = secrets.token_hex(16)
 
-# Chemin vers la base de données
+# Définition du chemin vers la base de données SQLite
 project_root = os.path.dirname(os.path.realpath(__file__))
 database = os.path.join(project_root, 'armoire.db')
 
 def get_db_connection():
-    """Renvoie une connexion à la base de données SQLite."""
+    """Renvoie une connexion à la base de données SQLite.
+       - Crée une connexion à la base SQLite.
+       - Configure la connexion pour retourner des objets Row (accès par nom de colonne).
+    """
     conn = sqlite3.connect(database)
     conn.row_factory = sqlite3.Row
     return conn
 
+# Route de connexion
 @app.route('/', methods=['GET', 'POST'])
 def login():
     """
-    Route de connexion.
-    - POST : récupère l'identifiant et vérifie dans la base de données.
-    - GET : affiche la page de connexion.
+    Traite la connexion de l'utilisateur.
+    - Méthode POST : récupère l'identifiant, vérifie son existence dans la BD et démarre la session.
+    - Méthode GET  : affiche le formulaire de connexion.
     """
     if request.method == 'POST':
         identifiant = request.form['identifiant']
         
-        # Connexion à la base de données pour récupérer l'utilisateur
+        # Connexion à la base pour récupérer les informations de l'utilisateur
         with get_db_connection() as conn:
             cursor = conn.cursor()
             cursor.execute('SELECT prenom, admin FROM users WHERE identifiant = ?', (identifiant,))
@@ -43,22 +50,24 @@ def login():
 
         if user:
             prenom, admin = user
-            # Stockage des informations utilisateur en session
+            # Stocke le prénom et le statut admin dans la session pour une utilisation ultérieure
             session['prenom'] = prenom
             session['admin'] = admin
             return redirect('/index')
         else:
-            # Utilisateur non trouvé
+            # Si l'utilisateur n'est pas trouvé, on renvoie une erreur sur le formulaire de connexion
             return render_template('login.html', error="Identifiant incorrect.")
 
-    # Affichage de la page de connexion par défaut (méthode GET)
+    # Afficher le formulaire de connexion en cas de requête GET
     return render_template('login.html')
 
+# Route de la page d'accueil
 @app.route('/index')
 def index():
     """
-    Route de la page d'accueil.
-    Vérifie la connexion de l'utilisateur et transmet son prénom et statut d'admin à la vue.
+    Affiche la page d'accueil.
+    - Vérifie que l'utilisateur est connecté (présence du prénom dans la session).
+    - Passe à la vue le prénom et le statut admin pour l'affichage conditionnel.
     """
     if 'prenom' not in session:
         return redirect('/')
@@ -67,19 +76,24 @@ def index():
     admin = session['admin'] == 1
     return render_template('index.html', prenom=prenom, admin=admin)
 
+# Route de déconnexion
 @app.route('/logout')
 def logout():
     """
-    Déconnecte l'utilisateur en vidant la session.
+    Déconnecte l'utilisateur.
+    - Vide la session et redirige vers la page de connexion.
     """
     session.clear()
     return redirect('/')
 
+# Route pour ajouter une sérigraphie
 @app.route('/ajouter', methods=['GET', 'POST'])
 def ajouter():
     """
-    Route pour ajouter une nouvelle sérigraphie.
-    Vérifie les contraintes sur les champs et insère les données dans la base.
+    Permet l'ajout d'une nouvelle sérigraphie.
+    - Vérifie que l'utilisateur est un administrateur.
+    - Valide les contraintes sur les champs et insère la donnée dans la BD.
+    - Gère les erreurs d'unicité au niveau de la base de données.
     """
     if 'admin' not in session or not session['admin']:
         return redirect('/index') 
@@ -93,14 +107,14 @@ def ajouter():
         type_serigraphie = data['type']
         n = data['n']
 
-        # Vérification des contraintes sur certains champs
+        # Vérification des contraintes sur certains champs (ex. longueur et format)
         if len(fab) != 2 or len(n) != 3 or (len(n_fab) != 0 and (len(n_fab) != 7 or not n_fab.startswith("F"))):
             error_message = "Erreur : Les données ne respectent pas les contraintes."
             return render_template('ajouter.html', error=error_message,
                                    ref_ecran=ref_ecran, libelle=libelle, pcb=pcb, fab=fab, n_fab=n_fab, type=type_serigraphie, n=n)
 
         try:
-            # Insertion de la nouvelle sérigraphie dans la base de données
+            # Insertion dans la base de données
             with get_db_connection() as conn:
                 cursor = conn.cursor()
                 cursor.execute('''
@@ -113,7 +127,7 @@ def ajouter():
             error_str = str(e)
             if "UNIQUE constraint failed:" in error_str:
                 constraint = error_str.split("UNIQUE constraint failed: ")[1]
-                # Remplacer le nom de la colonne par le nom de la ligne du formulaire
+                # Adaptation du message d'erreur en fonction du champ concerné
                 if "ref_ecran" in constraint:
                     field_name = "Réf Écran"
                     ref_ecran = ""
@@ -126,11 +140,13 @@ def ajouter():
 
     return render_template('ajouter.html')
 
+# Route pour ajouter un utilisateur
 @app.route('/ajouterU', methods=['GET', 'POST'])
 def ajouterU():
     """
-    Route pour ajouter un nouvel utilisateur.
-    Vérifie si l'identifiant est disponible et insère l'utilisateur dans la base.
+    Permet à un administrateur d'ajouter un nouvel utilisateur.
+    - Vérifie l'unicité de l'identifiant.
+    - Insère dans la base en gérant les potentielles erreurs d'intégrité.
     """
     if 'admin' not in session or not session['admin']:
         return redirect('/index')  
@@ -158,7 +174,6 @@ def ajouterU():
                 error_str = str(e)
                 if "UNIQUE constraint failed:" in error_str:
                     constraint = error_str.split("UNIQUE constraint failed: ")[1]
-                    # Remplacer le nom de la colonne par le nom du champ du formulaire
                     if "identifiant" in constraint:
                         field_name = "Identifiant"
                         identifiant = ""
@@ -172,11 +187,12 @@ def ajouterU():
 
     return render_template('ajouterU.html')
 
+# Route affichant le tableau des sérigraphies
 @app.route('/ecran')
 def ecran():
     """
-    Route qui affiche le tableau des sérigraphies.
-    Récupère toutes les sérigraphies depuis la base et transmet le statut admin.
+    Affiche la liste complète des sérigraphies.
+    Récupère les données depuis la base et transmet le statut admin pour un affichage conditionnel.
     """
     if 'prenom' not in session:
         return redirect('/')
@@ -189,11 +205,13 @@ def ecran():
     admin = session.get('admin', 0) == 1
     return render_template('ecran.html', ecrans=ecrans, admin=admin)
 
+# Route pour prendre une sérigraphie (marquer comme sortie)
 @app.route('/prendre', methods=['GET', 'POST'])
 def prendre():
     """
-    Route pour prendre une sérigraphie.
-    Met à jour l'état de la sérigraphie si elle n'est pas déjà sortie.
+    Permet de prendre (emprunter) une sérigraphie.
+    - Vérifie que la sérigraphie n'est pas déjà marquée comme sortie.
+    - Met à jour l'état de la sérigraphie et renvoie un message de confirmation.
     """
     if 'prenom' not in session:
         return redirect('/')
@@ -224,11 +242,14 @@ def prendre():
 
     return render_template('prendre.html', message=None, n_value=None)
 
+# Route pour modifier une sérigraphie
 @app.route('/modifier', methods=['GET', 'POST'])
 def modifier():
     """
-    Route pour modifier une sérigraphie.
-    Deux modes : recherche d'une référence existante OU mise à jour (avec ou sans changement de référence).
+    Permet la modification d'une sérigraphie existante.
+    - Mode recherche : l'utilisateur entre une référence pour précharger les données.
+    - Mode modification : les données peuvent être mises à jour, avec ou sans changement de référence.
+    - Vérifie l'unicité de la nouvelle référence en cas de modification.
     """
     if 'admin' not in session or not session['admin']:
         return redirect('/index') 
@@ -302,12 +323,13 @@ def modifier():
     return render_template('modifier.html', message=message, ref_ecran=ref_ecran, libelle=libelle, pcb=pcb,
                            fab=fab, n_fab=n_fab, type_=type_, n=n, sorti=sorti, lave=lave, error=error)
     
+# Route pour supprimer une sérigraphie
 @app.route('/supprimer', methods=['GET', 'POST'])
 def supprimer():
     """
-    Route pour supprimer une sérigraphie.
-    En mode vérification (action "check"), la page affiche une demande de confirmation.
-    En mode suppression (action "delete"), la référence est supprimée de la base.
+    Permet la suppression d'une sérigraphie.
+    - Mode "check" : demande de confirmation en affichant les détails de la sérigraphie.
+    - Mode "delete" : suppression effective de la sérigraphie dans la BD.
     """
     if 'admin' not in session or not session['admin']:
         return redirect('/index') 
@@ -333,15 +355,16 @@ def supprimer():
                 return render_template('supprimer.html', success=f"La référence écran '{ref_ecran}' a été supprimée avec succès.")
     return render_template('supprimer.html')
 
+# Route pour ranger une sérigraphie
 @app.route('/ranger', methods=['GET', 'POST'])
 def ranger():
     """
-    Route pour ranger une sérigraphie.
-    Met à jour l'attribut 'sorti' et enregistre l'état de lavage.
+    Permet de ranger une sérigraphie.
+    - Met à jour l'attribut 'sorti' et enregistre l'état de lavage.
     """
     if 'prenom' not in session:
         return redirect('/')
-    
+
     error = None
     emplacement = None
 
@@ -367,11 +390,12 @@ def ranger():
 
     return render_template('ranger.html', serigraphies=serigraphies, emplacement=emplacement, error=error)
 
+# Route de fermeture de la connexion à la base
 @app.route('/close_db')
 def close_db():
     """
-    Route de fermeture de la connexion à la base.
-    Affiche un message de confirmation sur la page d'accueil.
+    Ferme la connexion à la base de données.
+    - Affiche un message de confirmation sur la page d'accueil.
     """
     return render_template('index.html', prenom=session.get('prenom'), admin=session.get('admin')==1,
                            success="La connexion à la base de données a été fermée.")
