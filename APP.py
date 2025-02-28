@@ -86,11 +86,11 @@ def logout():
     session.clear()
     return redirect('/')
 
-# Route pour ajouter une sérigraphie
+# Route pour ajouter un écran
 @app.route('/ajouter', methods=['GET', 'POST'])
 def ajouter():
     """
-    Permet l'ajout d'une nouvelle sérigraphie.
+    Permet l'ajout d'une nouvelle écran.
     - Vérifie que l'utilisateur est un administrateur.
     - Valide les contraintes sur les champs et insère la donnée dans la BD.
     - Gère les erreurs d'unicité au niveau de la base de données.
@@ -187,11 +187,11 @@ def ajouterU():
 
     return render_template('ajouterU.html')
 
-# Route affichant le tableau des sérigraphies
+# Route affichant le tableau des écrans
 @app.route('/ecran')
 def ecran():
     """
-    Affiche la liste complète des sérigraphies.
+    Affiche la liste complète des écrans.
     Récupère les données depuis la base et transmet le statut admin pour un affichage conditionnel.
     """
     if 'prenom' not in session:
@@ -205,13 +205,13 @@ def ecran():
     admin = session.get('admin', 0) == 1
     return render_template('ecran.html', ecrans=ecrans, admin=admin)
 
-# Route pour prendre une sérigraphie (marquer comme sortie)
+# Route pour prendre un écran (marquer comme sortie)
 @app.route('/prendre', methods=['GET', 'POST'])
 def prendre():
     """
-    Permet de prendre (emprunter) une sérigraphie.
-    - Vérifie que la sérigraphie n'est pas déjà marquée comme sortie.
-    - Met à jour l'état de la sérigraphie et renvoie un message de confirmation.
+    Permet de prendre (emprunter) un écran.
+    - Vérifie que l'écran n'est pas déjà marquée comme sortie.
+    - Met à jour l'état de l'écran et renvoie un message de confirmation.
     """
     if 'prenom' not in session:
         return redirect('/')
@@ -226,27 +226,27 @@ def prendre():
 
             if ecran:
                 if ecran['sorti'] == 1:
-                    message = "Erreur : cette sérigraphie a déjà été prise."
+                    message = "Erreur : cet écran a déjà été prise."
                     n_value = None
                 else:
                     cursor.execute('UPDATE serigraphie SET sorti = 1 WHERE ref_ecran = ?', (ref_ecran,))
                     conn.commit()
                     libelle = ecran['libelle']
-                    message = f"Sérigraphie {libelle} prise avec succès."
+                    message = f"écran {libelle} prise avec succès."
                     n_value = ecran['n']
             else:
-                message = "Erreur : sérigraphie non trouvée."
+                message = "Erreur : écran non trouvée."
                 n_value = None
 
         return render_template('prendre.html', message=message, n_value=n_value)
 
     return render_template('prendre.html', message=None, n_value=None)
 
-# Route pour modifier une sérigraphie
+# Route pour modifier un écran
 @app.route('/modifier', methods=['GET', 'POST'])
 def modifier():
     """
-    Permet la modification d'une sérigraphie existante.
+    Permet la modification d'un écran existante.
     - Mode recherche : l'utilisateur entre une référence pour précharger les données.
     - Mode modification : les données peuvent être mises à jour, avec ou sans changement de référence.
     - Vérifie l'unicité de la nouvelle référence en cas de modification.
@@ -293,14 +293,14 @@ def modifier():
                                           WHERE ref_ecran = ?''',
                                        (new_ref_ecran, libelle, pcb, fab, n_fab, type_, n, sorti, lave, old_ref_ecran))
                         conn.commit()
-                        message = f"Sérigraphie {old_ref_ecran} mise à jour avec succès. Nouvelle référence : {new_ref_ecran}."
+                        message = f"écran {old_ref_ecran} mise à jour avec succès. Nouvelle référence : {new_ref_ecran}."
                 else:
                     cursor.execute('''UPDATE serigraphie 
                                       SET libelle = ?, pcb = ?, fab = ?, n_fab = ?, type = ?, n = ?, sorti = ?, lave = ? 
                                       WHERE ref_ecran = ?''',
                                    (libelle, pcb, fab, n_fab, type_, n, sorti, lave, old_ref_ecran))
                     conn.commit()
-                    message = f"Sérigraphie {old_ref_ecran} mise à jour avec succès."
+                    message = f"écran {old_ref_ecran} mise à jour avec succès."
             else:
                 ref_ecran = request.form.get('ref_ecran')
                 cursor.execute('SELECT * FROM serigraphie WHERE ref_ecran = ?', (ref_ecran,))
@@ -317,19 +317,19 @@ def modifier():
                     sorti = ecran['sorti']
                     lave = ecran['lave']
                 else:
-                    message = f"Sérigraphie avec la référence {ref_ecran} non trouvée."
+                    message = f"écran avec la référence {ref_ecran} non trouvée."
                     error = True
 
     return render_template('modifier.html', message=message, ref_ecran=ref_ecran, libelle=libelle, pcb=pcb,
                            fab=fab, n_fab=n_fab, type_=type_, n=n, sorti=sorti, lave=lave, error=error)
     
-# Route pour supprimer une sérigraphie
+# Route pour supprimer un écran
 @app.route('/supprimer', methods=['GET', 'POST'])
 def supprimer():
     """
-    Permet la suppression d'une sérigraphie.
-    - Mode "check" : demande de confirmation en affichant les détails de la sérigraphie.
-    - Mode "delete" : suppression effective de la sérigraphie dans la BD.
+    Permet la suppression d'un écran.
+    - Mode "check" : demande de confirmation en affichant les détails de la écran.
+    - Mode "delete" : suppression effective de la écran dans la BD.
     """
     if 'admin' not in session or not session['admin']:
         return redirect('/index') 
@@ -355,11 +355,11 @@ def supprimer():
                 return render_template('supprimer.html', success=f"La référence écran '{ref_ecran}' a été supprimée avec succès.")
     return render_template('supprimer.html')
 
-# Route pour ranger une sérigraphie
+# Route pour ranger un écran
 @app.route('/ranger', methods=['GET', 'POST'])
 def ranger():
     """
-    Permet de ranger une sérigraphie.
+    Permet de ranger un écran.
     - Met à jour l'attribut 'sorti' et enregistre l'état de lavage.
     """
     if 'prenom' not in session:
@@ -383,7 +383,7 @@ def ranger():
                 conn.commit()
                 emplacement = result['N']
             else:
-                error = "La sérigraphie sélectionnée n'existe pas ou n'est pas marquée comme sortie."
+                error = "La écran sélectionnée n'existe pas ou n'est pas marquée comme sortie."
 
         cursor.execute("SELECT ref_ecran, libelle, N FROM serigraphie WHERE sorti = 1")
         serigraphies = cursor.fetchall()

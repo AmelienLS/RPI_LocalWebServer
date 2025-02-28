@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Modifier une Sérigraphie</title>
+    <title>Modifier un écran</title>
     <link rel="stylesheet" href="Styles/modifier.css">
     <link rel="icon" href="\Images\Logo.png" type="image/png">
 </head>
 <body>
-    <!--Page de modification d'une sérigraphie avec recherche préalable par référence -->
+    <!--Page de modification d'un écran avec recherche préalable par référence -->
     <div class="form-container">
-        <h1>Modifier une Sérigraphie</h1>
+        <h1>Modifier un écran</h1>
 
         <!-- Formulaire de modification -->
         <form action="/modifier" method="post">
@@ -20,7 +20,7 @@
             <input type="text" id="ref_ecran" name="ref_ecran" required>
             <button type="submit">Chercher</button>
             {% else %}
-            <!-- Modification de la sérigraphie -->
+            <!-- Modification de l'écran -->
             <input type="hidden" name="old_ref_ecran" value="{{ ref_ecran }}">
             
             <label for="new_ref_ecran">Nouvelle Référence Écran :</label>
@@ -67,10 +67,10 @@
             </div>
         {% endif %}
 
-        <!-- Affichage d'un message d'erreur si la sérigraphie n'existe pas -->
+        <!-- Affichage d'un message d'erreur si l'écran n'existe pas -->
         {% if error %}
             <script type="text/javascript" class="error">
-                alert("Sérigraphie non trouvée. Veuillez vérifier la référence et réessayer.");
+                alert("écran non trouvé. Veuillez vérifier la référence et réessayer.");
                 window.location.href = '/modifier';
             </script>
         {% endif %}

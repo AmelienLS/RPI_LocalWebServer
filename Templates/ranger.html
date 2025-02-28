@@ -3,18 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ranger Sérigraphies</title>
+    <title>Ranger écrans</title>
     <link rel="stylesheet" href="Styles/ranger.css">
     <link rel="icon" href="\Images\Logo.png" type="image/png">
 </head>
 <body>
-    <!--Page utilisée pour ranger une sérigraphie et gérer le statut de lavage -->
+    <!--Page utilisée pour ranger un écran et gérer le statut de lavage -->
     <div class="container">
-        <h1>Ranger Sérigraphies</h1>
+        <h1>Ranger écrans</h1>
         <a href="{{ url_for('index') }}" class="admin-link">Retour au menu</a>
         
         <form method="POST">
-            <label for="ref_ecran">Choisissez une sérigraphie à ranger :</label>
+            <label for="ref_ecran">Choisissez un écran à ranger :</label>
             <select name="ref_ecran" id="ref_ecran" required>
                 {% for ecran in serigraphies %}
                 <option value="{{ ecran['ref_ecran'] }}">
@@ -23,7 +23,7 @@
                 {% endfor %}
             </select>
 
-            <label for="lavee">La sérigraphie a-t-elle été lavée ?</label>
+            <label for="lavee">L'écran a-t-il été lavé ?</label>
             <select name="lavee" id="lavee" required>
                 <option value="oui">Oui</option>
                 <option value="non">Non</option>
