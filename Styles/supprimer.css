@@ -30,13 +30,20 @@ label {
     text-align: left;
 }
 
-input {
+input, select {
     width: 100%;
     padding: 0.5rem;
     margin-bottom: 1rem;
-    border: 1px solid #ccc;
+    background-color: #2A2D46;
+    color: #ffffff;
+    border: 1px solid #2A2D46;
     border-radius: 4px;
     font-size: 1rem;
+}
+
+input:focus, select:focus {
+    border-color: #feed00;
+    outline: none;
 }
 
 button {
