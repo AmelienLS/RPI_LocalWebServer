@@ -9,7 +9,7 @@ Ce projet est une application web développée avec Flask qui permet de gérer d
 Le projet est organisé comme suit :
 
 - **Racine du projet**  
-  - `APP.py` : Point d'entrée principal de l’application. Il configure Flask, définit les routes et gère la connexion à la base de données via la fonction [`get_db_connection`](APP.py#L11).
+  - `APP.py` : Point d'entrée principal de l’application. Il configure Flask, définit les routes et gère la connexion à la base de données via la fonction [`get_db_connection`](app.py#L11).
   - `armoire.db` : Fichier SQLite contenant les données des sérigraphies et des utilisateurs.
   - `readme` : Ce fichier, qui contient désormais toutes les explications pour comprendre le projet.
   
@@ -31,7 +31,7 @@ Le projet est organisé comme suit :
 ## Explications détaillées du Code
 
 ### Configuration et Lancement
-- **Fichier [APP.py](APP.py)**  
+- **Fichier [app.py](app.py)**  
   Ce fichier initialise l’application Flask :
   - **Clé secrète** : Générée dynamiquement pour sécuriser les sessions (via `secrets.token_hex(16)`).
   - **Connexion à la base de données** : La fonction `get_db_connection()` crée et retourne une connexion à la base SQLite avec une `row_factory` pour permettre l’accès par noms de colonnes.
@@ -86,7 +86,10 @@ Le projet est organisé comme suit :
 
 1. Assurez-vous que Python et Flask sont installés.
 2. Placez-vous dans le dossier du projet.
-3. Lancez la commande :
-   flask --app "APP.py" run
+3. Double cliquez sur appStartWindows ou appStartLinux selon votre environnement.
+   Les fichiers lancerApp permettant un lancement avec Docker. Ceci est utile en cas de
+   lancement sur un hardawre où il n'est pas possible d'installer python ou flask.
+   En cas de probleme, lancez la commande :
+   flask --app "app.py" run
 4. Le navigateur s’ouvrira automatiquement pour afficher l’application.
 5. Pour terminer le serveur, utilisez Ctrl+C dans l’invite de commande.
