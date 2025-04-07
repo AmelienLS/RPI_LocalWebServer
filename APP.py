@@ -16,7 +16,10 @@ app = Flask(
     static_folder=os.path.join(base_dir, "Styles")
 )
 # Générer une clé secrète aléatoire pour sécuriser la session utilisateur
-app.secret_key = secrets.token_hex(16)
+def generate_secret_key():
+    app.secret_key = secrets.token_hex(16)
+
+generate_secret_key()
 
 # Définition du chemin vers la base de données SQLite
 project_root = os.path.dirname(os.path.realpath(__file__))
