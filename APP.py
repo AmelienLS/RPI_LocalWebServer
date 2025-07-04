@@ -208,12 +208,12 @@ def ecran():
     admin = session.get('admin', 0) == 1
     return render_template('ecran.html', ecrans=ecrans, admin=admin)
 
-# Route pour prendre un écran (marquer comme sortie)
+# Route pour prendre un écran (marquer comme sorti)
 @app.route('/prendre', methods=['GET', 'POST'])
 def prendre():
     """
     Permet de prendre (emprunter) un écran.
-    - Vérifie que l'écran n'est pas déjà marquée comme sortie.
+    - Vérifie que l'écran n'est pas déjà marqué comme sortie.
     - Met à jour l'état de l'écran et renvoie un message de confirmation.
     """
     if 'prenom' not in session:
@@ -332,7 +332,7 @@ def supprimer():
     """
     Permet la suppression d'un écran.
     - Mode "check" : demande de confirmation en affichant les détails de la écran.
-    - Mode "delete" : suppression effective de la écran dans la BD.
+    - Mode "delete" : suppression effective de l'écran dans la BD.
     """
     if 'admin' not in session or not session['admin']:
         return redirect('/index') 
