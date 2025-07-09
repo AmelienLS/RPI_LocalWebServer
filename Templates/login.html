@@ -14,6 +14,7 @@
         <form method="POST">
             <input type="text" name="identifiant" placeholder="Identifiant" required>
             <button type="submit">Se connecter</button>
+            <button type="submit" class="shutdown-button" formaction="/shutdown">Éteindre</button>
         </form>
         {% if error %}
         <p class="error">{{ error }}</p>

@@ -7,6 +7,7 @@ body {
     justify-content: center;
     align-items: center;
     height: 100vh;
+    outline: none;
 }
 
 .login-container {
@@ -38,9 +39,11 @@ input:focus, select:focus {
     border-color: #feed00;
     outline: none;
 }
+
 button {
     width: 100%;
     padding: 10px;
+    margin-bottom: 10px; /* Ajout d'une marge pour espacer les boutons */
     background-color: #feed00;
     color: #191B2A;
     border: none;
@@ -50,6 +53,16 @@ button {
 
 button:hover {
     background-color: #e5d200;
+}
+
+/* Style spécifique pour le bouton d'arrêt */
+.shutdown-button {
+    background-color: #d9534f; /* Rouge */
+    color: white;
+}
+
+.shutdown-button:hover {
+    background-color: #c9302c; /* Rouge plus foncé */
 }
 
 .error {

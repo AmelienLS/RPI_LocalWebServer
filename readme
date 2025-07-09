@@ -67,7 +67,7 @@ La plupart des routes sont protégées par les décorateurs `@login_required` et
   Le statut `sorti` et une indication relative au lavage (via `lave`) sont mis à jour dans la base.
 
 - **Route `/shutdown`**  
-  Accessible uniquement par les administrateurs, cette route permet d'éteindre proprement le système (la Raspberry Pi). Elle exécute une commande système (`sudo shutdown -h now`).
+  Accessible uniquement par les administrateurs de la raspberry, cette route permet d'éteindre proprement le système (la Raspberry Pi). Elle exécute une commande système (`sudo shutdown -h now`). Un bouton rouge sur la page de connexion permet de déclencher cette action, mais elle ne fonctionnera que si une session administrateur est déjà active dans le navigateur.
 
 ### Gestion du Frontend
 - **Templates HTML**  

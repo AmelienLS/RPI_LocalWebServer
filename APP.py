@@ -1,7 +1,5 @@
-import flask, sqlite3
-from secrets import token_hex
-from webbrowser import open
-from os import path
+from flask import *
+import sqlite3, secrets, os, webbrowser, subprocess
 # Ouvrir automatiquement le navigateur à l'URL locale
 # On lance le navigateur web pour afficher l'application Flask dès le démarrage
 webbrowser.open('http://localhost:5000/')
@@ -403,6 +401,14 @@ def close_db():
     """
     return render_template('index.html', prenom=session.get('prenom'), admin=session.get('admin')==1,
                            success="La connexion à la base de données a été fermée.")
+    
+@app.route("/shutdown", methods=["POST"])
+def shutdown():
+    try:
+        subprocess.run(["/usr/bin/sudo", "/sbin/shutdown", "now"])
+        return "Extinction en cours..."
+    except Exception as e:
+        return f"Erreur : {str(e)}"
     
 # Cette route permet de servir les fichiers JavaScript présents dans le dossier "Functions".
 # Lorsqu'une requête est faite à /Functions/nom_du_fichier, le fichier correspondant est envoyé.
