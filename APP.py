@@ -1,5 +1,5 @@
 from flask import *
-import os, sqlite3, webbrowser, secrets
+import os, sqlite3, webbrowser, secrets, subprocess
 
 # Ouvrir automatiquement le navigateur à l'URL locale
 # On lance le navigateur web pour afficher l'application Flask dès le démarrage
@@ -413,6 +413,14 @@ def send_functions(filename):
     functions_dir = os.path.join(base_dir, 'Functions')
     # Envoie le fichier demandé depuis le dossier "Functions"
     return send_from_directory(functions_dir, filename)
+
+@app.route("/shutdown", methods=["POST"])
+def shutdown():
+    try:
+        subprocess.run(["/usr/bin/sudo", "/sbin/shutdown", "now"])
+        return "Extinction en cours..."
+    except Exception as e:
+        return f"Erreur : {str(e)}"
 
 # Lancement du serveur Flask (production avec debug désactivé)
 if __name__ == '__main__':

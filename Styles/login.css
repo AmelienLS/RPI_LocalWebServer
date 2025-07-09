@@ -52,6 +52,15 @@ button:hover {
     background-color: #e5d200;
 }
 
+.shutdown-button {
+    background-color: #dc3545;
+    color: white;
+}
+
+.shutdown-button:hover {
+    background-color: #c82333;
+}
+
 .error {
     color: red;
     margin-top: 1rem;
