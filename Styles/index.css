@@ -10,6 +10,9 @@ body {
     padding: 1rem; /* Ajout d'espace autour du contenu */
     box-sizing: border-box;
     overflow-y: auto; /* Activer le défilement si le contenu dépasse */
+    -webkit-user-select: none; /* Safari */
+    -ms-user-select: none; /* IE 10+ et Edge */
+    user-select: none; /* Standard */
 }
 
 .form-container {

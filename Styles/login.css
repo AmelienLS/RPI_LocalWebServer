@@ -8,6 +8,10 @@ body {
     align-items: center;
     height: 100vh;
     outline: none;
+    /* Empêche la sélection de texte pour une meilleure expérience tactile */
+    -webkit-user-select: none; /* Safari */
+    -ms-user-select: none; /* IE 10+ et Edge */
+    user-select: none; /* Standard */
 }
 
 .login-container {
