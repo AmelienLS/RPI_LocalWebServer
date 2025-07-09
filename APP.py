@@ -152,7 +152,7 @@ def ajouterU():
     - Insère dans la base en gérant les potentielles erreurs d'intégrité.
     """
     if 'admin' not in session or not session['admin']:
-        return redirect('/index')  
+        return redirect('/index')   
     if request.method == 'POST':
         identifiant = request.form['identifiant']
         prenom = request.form['prenom']
