@@ -1,6 +1,7 @@
-from flask import *
-import os, sqlite3, webbrowser, secrets
-
+import flask, sqlite3
+from secrets import token_hex
+from webbrowser import open
+from os import path
 # Ouvrir automatiquement le navigateur à l'URL locale
 # On lance le navigateur web pour afficher l'application Flask dès le démarrage
 webbrowser.open('http://localhost:5000/')

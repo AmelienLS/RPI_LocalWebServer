@@ -35,9 +35,16 @@ Le projet est organisé comme suit :
   Ce fichier initialise l’application Flask :
   - **Clé secrète** : Générée dynamiquement pour sécuriser les sessions (via `secrets.token_hex(16)`).
   - **Connexion à la base de données** : La fonction `get_db_connection()` crée et retourne une connexion à la base SQLite avec une `row_factory` pour permettre l’accès par noms de colonnes.
+  - **Structure optimisée** : Le code a été refactorisé pour inclure des décorateurs pour la sécurité et des fonctions utilitaires pour réduire la duplication de code.
   - **Ouverture automatique** : La page principale s’ouvre automatiquement par `webbrowser.open('http://localhost:5000/')`.
 
+### Décorateurs et Fonctions Utilitaires
+Pour améliorer la lisibilité et la maintenance, le code utilise :
+- **Décorateurs `@login_required` et `@admin_required`** : Ces décorateurs sont appliqués aux routes pour s'assurer que seul un utilisateur connecté (ou un administrateur) peut y accéder. Cela centralise la logique de sécurité et évite la répétition de code.
+- **Fonction `get_ecran_by_ref()`** : Une fonction utilitaire qui factorise la logique de recherche d'un écran dans la base de données, la rendant réutilisable à travers plusieurs routes.
+
 ### Routes Principales
+La plupart des routes sont protégées par les décorateurs `@login_required` et/ou `@admin_required` pour sécuriser l'accès.
 - **Route `/` (login)**  
   Gère l’authentification en vérifiant l’identifiant dans la table `users` de la base de données.
   
@@ -59,6 +66,9 @@ Le projet est organisé comme suit :
   Ces routes gèrent le changement de statut d’une sérigraphie (prise ou rangée).  
   Le statut `sorti` et une indication relative au lavage (via `lave`) sont mis à jour dans la base.
 
+- **Route `/shutdown`**  
+  Accessible uniquement par les administrateurs, cette route permet d'éteindre proprement le système (la Raspberry Pi). Elle exécute une commande système (`sudo shutdown -h now`).
+
 ### Gestion du Frontend
 - **Templates HTML**  
   Chaque fichier dans le dossier [Templates](Templates/) correspond à une vue de l’application, par exemple :
@@ -77,35 +87,43 @@ Le projet est organisé comme suit :
   L’application inclut des validations pour s’assurer que les données utilisateurs respectent des contraintes précises (longueur des chaînes, format particulier, etc.). Vérifier que les conditions correspondent bien aux besoins.
   
 - **Sécurité**  
-  La clé secrète de l’application, générée au démarrage, sécurise la gestion des sessions. Vérifier que la clé de sécurité est bien paramétrée sans quoi l'application ne peut se lancer.
+  La clé secrète de l’application, générée au démarrage, sécurise la gestion des sessions. De plus, les décorateurs `@login_required` et `@admin_required` protègent les routes sensibles contre les accès non autorisés.
   
 - **Modularité**  
-  La séparation entre le backend (Flask et SQLite) et le frontend (HTML, CSS, JavaScript) facilite la compréhension et la maintenance du code. Attention a bien vérifier que les chemins relatifs sont bien correct pour permettre une bonne discussion entre le back et le front.
+  La séparation entre le backend (Flask et SQLite) et le frontend (HTML, CSS, JavaScript) facilite la compréhension et la maintenance du code. L'utilisation de décorateurs et de fonctions utilitaires renforce cette modularité en isolant les logiques spécifiques (sécurité, accès aux données). Attention a bien vérifier que les chemins relatifs sont bien correct pour permettre une bonne discussion entre le back et le front.
 
 - **Base de donnée**
   la base de donnée SQLite permet de stocker toute les données. Il faut bien faire attention que les contraintes de la base de données correspondent aux contraintes donnée par le backend. Pour lire la DB, il est possible soit d'utiliser une application tierce (DB browser for SQLite par exemple) ou bien une extension Visual Studio Code (SQLite3 Editor par exemple)
 
-## Comment Lancer le Projet
+## Configuration sur Raspberry Pi (Ubuntu)
 
+Pour assurer un fonctionnement autonome sur une Raspberry Pi équipée d'Ubuntu, plusieurs scripts de configuration ont été créés pour automatiser le déploiement et le lancement de l'application.
+
+### 1. Démarrage automatique de l'application (Service Systemd)
+
+Le script [`setup_armoire.sh`](Setups%20Linux/setup_armoire.sh) configure l'application Flask pour qu'elle s'exécute en tant que service `systemd` au démarrage du système. Voici ses actions principales :
+- **Installation des dépendances** : Installe `python3`, `venv` et `pip`.
+- **Environnement virtuel** : Crée un environnement virtuel dans le dossier du projet pour isoler les dépendances Python.
+- **Installation de Flask & Gunicorn** : Installe les bibliothèques nécessaires dans l'environnement virtuel. Gunicorn est utilisé comme serveur WSGI, plus robuste que le serveur de développement de Flask.
+- **Création du service `armoire.service`** : Un fichier de service est créé dans `/etc/systemd/system/`. Ce service lance l'application via Gunicorn sur le port 5000.
+- **Activation du service** : Le service est activé pour se lancer automatiquement à chaque démarrage (`systemctl enable armoire`).
+
+### 2. Lancement automatique de Firefox en mode Kiosque
+
+Pour que l'interface soit directement accessible, Firefox est configuré pour se lancer en plein écran (mode kiosque) et afficher l'application. Deux méthodes sont proposées via des scripts :
+
+- **Méthode 1 (Autostart Desktop)** : Le script [`setup_firefox_autostart.sh`](Setups%20Linux/setup_firefox_autostart.sh) crée un fichier `.desktop` dans le dossier `~/.config/autostart`. Ce fichier exécute un script qui attend 10 secondes (pour laisser le temps au service de démarrer) puis lance Firefox en mode kiosque sur `http://localhost:5000`.
+
+- **Méthode 2 (Service Systemd Utilisateur)** : Le script [`install_firefox_autostart_systemd.sh`](Setups%20Linux/install_firefox_autostart_systemd.sh) crée un service `systemd` au niveau de l'utilisateur. Ce service se lance après le démarrage de la session graphique et exécute la même commande pour lancer Firefox. Cette méthode est souvent plus fiable.
+
+Grâce à cette configuration, la Raspberry Pi devient un terminal dédié à l'application : au démarrage, le serveur web se lance en arrière-plan et le navigateur s'ouvre automatiquement en plein écran sur l'interface de l'application.
+
+## Comment Lancer le Projet
+Le projet se lance automatiquement grace a la configuration de la raspberry. Dans le cas contraire, effectuer la manipultion suivante:
 1. Assurez-vous que Python et Flask sont installés.
 2. Placez-vous dans le dossier du projet.
 3. Double cliquez sur appStartWindows ou appStartLinux selon votre environnement.
-   Les fichiers lancerApp permettant un lancement avec Docker. Ceci est utile en cas de
-   lancement sur un hardawre où il n'est pas possible d'installer python ou flask.
    En cas de probleme, lancez la commande :
    flask --app "app.py" run
 4. Le navigateur s’ouvrira automatiquement pour afficher l’application.
 5. Pour terminer le serveur, utilisez Ctrl+C dans l’invite de commande.
-
-## Utilisation de Docker et du Dockerfile
-
-Docker est une plateforme de conteneurisation qui permet d'isoler une application avec toutes ses dépendances. Le Dockerfile fournit une recette pour créer une image Docker qui contient l'environnement de l'application.
-
-Dans ce projet, le Dockerfile :
-- Utilise une image de base légère de Python (3.8-slim).
-- Définit le répertoire de travail et copie le fichier de dépendances pour installer les packages.
-- Copie le reste du code source de l'application.
-- Expose le port 5000 pour lancer l'application Flask.
-- Spécifie la commande pour démarrer l'application automatiquement.
-
-Cette approche facilite le déploiement dans divers environnements en garantissant que l'application s'exécute de manière cohérente.
