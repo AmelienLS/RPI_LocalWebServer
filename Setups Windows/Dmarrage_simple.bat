@@ -1,3 +1,4 @@
+REM filepath: vscode-vfs://github/AmelienLS/RPI_LocalWebServer/Setups%20Windows/Dmarrage_simple.bat
 @echo off
 setlocal
 
@@ -33,8 +34,9 @@ echo.
 :: 1. Cloner ou mettre a jour le depot
 echo [~] Mise a jour du code source depuis GitHub...
 if exist "%PROJECT_DIR%\.git" (
-    cd /d "%PROJECT_DIR%"
+    pushd "%PROJECT_DIR%"
     git pull
+    popd
 ) else (
     git clone "%REPO_URL%" "%PROJECT_DIR%"
 )
