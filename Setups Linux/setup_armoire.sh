@@ -4,6 +4,7 @@ echo "🔧 Déploiement automatique de l'app Flask locale"
 
 # Variables
 PROJECT_DIR="/home/amelien/RPI_LocalWebServer-Release"
+REPO_URL="https://github.com/AmelienLS/RPI_LocalWebServer.git"
 SERVICE_NAME="armoire"
 PYTHON_BIN="/usr/bin/python3"
 USER_NAME="amelien"
@@ -11,10 +12,22 @@ VENV_DIR="$PROJECT_DIR/venv"
 APP_ENTRY="APP.py"
 WSGI_FILE="$PROJECT_DIR/wsgi.py"
 
-# 1. Installer les paquets nécessaires
+# 0. Installer les paquets nécessaires
 echo "📦 Installation des dépendances système..."
 sudo apt update
 sudo apt install -y python3 python3-venv python3-pip
+
+# 1. Cloner ou mettre à jour le dépôt
+echo "📂 Clonage ou mise à jour du dépôt Git..."
+if [ -d "$PROJECT_DIR" ]; then
+    echo "Le répertoire de destination existe. Mise à jour depuis Git..."
+    cd "$PROJECT_DIR"
+    git pull
+    cd - > /dev/null
+else
+    echo "Clonage du dépôt..."
+    git clone "$REPO_URL" "$PROJECT_DIR"
+fi
 
 # 2. Créer un environnement virtuel
 echo "🐍 Création de l'environnement virtuel..."
