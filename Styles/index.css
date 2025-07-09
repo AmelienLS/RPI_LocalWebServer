@@ -1,68 +1,17 @@
+/* --- Styles spécifiques à la page d'accueil --- */
+
 body {
-    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
-    margin: 0;
-    padding: 0;
-    background-color: #2A2D46;
-    display: flex;
-    justify-content: center;
-    align-items: flex-start; /* Alignement au début pour éviter le chevauchement */
-    min-height: 100vh; /* Gérer les petits écrans */
-    padding: 1rem; /* Ajout d'espace autour du contenu */
-    box-sizing: border-box;
-    overflow-y: auto; /* Activer le défilement si le contenu dépasse */
-    -webkit-user-select: none; /* Safari */
-    -ms-user-select: none; /* IE 10+ et Edge */
-    user-select: none; /* Standard */
+    overflow-y: auto;
 }
 
 .form-container {
-    background: #191B2A;
-    padding: 2rem;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    text-align: center;
-    width: 100%; /* Prend toute la largeur disponible */
-    max-width: 400px; /* Limite la largeur sur les grands écrans */
-    box-sizing: border-box;
-    margin-top: 1rem; /* Ajoute un espace supérieur */
-}
-
-h1 {
-    color: #feed00;
-    margin-bottom: 1rem;
+    max-width: 400px;
+    margin-top: 1rem;
 }
 
 .admin-link, .user-link {
-    display: block;
+    position: static; /* Annule le positionnement absolu */
     margin-top: 1rem;
-    padding: 0.5rem 1rem;
-    background-color: #feed00;
-    color: #191B2A;
-    text-decoration: none;
-    text-align: center;
-    border-radius: 4px;
-    font-weight: bold;
-}
-
-.admin-link:hover, .user-link:hover {
-    background-color: #e5d200;
-}
-
-p {
-    color: white;
-}
-
-.button {
-    width: calc(100% - 1rem);
-    padding: 0.7rem;
-    text-align: center;
-    background-color: #feed00;
-    color: #191B2A;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 1rem;
-    margin-bottom: 0.5rem;
 }
 
 .admin-actions {
@@ -81,8 +30,6 @@ p {
 
 .user-actions {
     width: 100%;
-    box-sizing: border-box;
-    margin-top: 1rem;
 }
 
 .logout-button {
@@ -101,10 +48,4 @@ p {
 
 .logout-button:hover {
     background-color: #E04343;
-}
-
-.flash-message {
-    color: #28a745;
-    font-weight: bold;
-    margin-top: 1rem;
 }

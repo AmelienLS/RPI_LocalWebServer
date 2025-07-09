@@ -1,17 +1,8 @@
+/* --- Styles spécifiques à la page de connexion --- */
+
 body {
-    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
-    margin: 0;
-    padding: 0;
-    background-color: #2A2D46;
-    display: flex;
-    justify-content: center;
     align-items: center;
-    height: 100vh;
-    outline: none;
-    /* Empêche la sélection de texte pour une meilleure expérience tactile */
-    -webkit-user-select: none; /* Safari */
-    -ms-user-select: none; /* IE 10+ et Edge */
-    user-select: none; /* Standard */
+    padding: 0; /* La page de login n'a pas besoin de padding */
 }
 
 .login-container {
@@ -23,43 +14,11 @@ body {
     width: 300px;
 }
 
-h1 {
-    color: #feed00; 
-    margin-bottom: 1rem;
-}
-
-input, select {
-    width: 100%;
-    padding: 0.5rem;
-    margin-bottom: 1rem;
-    background-color: #2A2D46;
-    color: #ffffff;
-    border: 1px solid #2A2D46;
-    border-radius: 4px;
-    font-size: 1rem;
-}
-
-input:focus, select:focus {
-    border-color: #feed00;
-    outline: none;
-}
-
 button {
-    width: 100%;
     padding: 10px;
-    margin-bottom: 10px; /* Ajout d'une marge pour espacer les boutons */
-    background-color: #feed00;
-    color: #191B2A;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
+    margin-bottom: 10px;
 }
 
-button:hover {
-    background-color: #e5d200;
-}
-
-/* Style spécifique pour le bouton d'arrêt */
 .shutdown-button {
     background-color: #d9534f; /* Rouge */
     color: white;
@@ -72,4 +31,5 @@ button:hover {
 .error {
     color: red;
     margin-top: 1rem;
+    background-color: transparent; /* Annule le fond des messages d'erreur communs */
 }

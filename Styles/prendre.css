@@ -1,3 +1,5 @@
+/* --- Styles spécifiques à la page "prendre" --- */
+
 body {
     font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
     margin: 0;
@@ -12,7 +14,6 @@ body {
     user-select: none; /* Standard */
 }
 
-/* Container principal de la page */
 .container {
     background: #191B2A;
     padding: 2rem;
@@ -21,33 +22,6 @@ body {
     width: 400px;
 }
 
-/* Bouton de retour, placé en haut à droite */
-.admin-link {
-    display: block;
-    margin-top: 1rem;
-    padding: 0.5rem 1rem;
-    background-color: #feed00;
-    color: #191B2A;
-    text-decoration: none;
-    text-align: center;
-    border-radius: 4px;
-    font-weight: bold;
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-}
-
-.admin-link:hover {
-    background-color: #e5d200;
-}
-
-/* Titre de la page */
-h1 {
-    color: #feed00;
-    margin-bottom: 1rem;
-}
-
-/* Style du formulaire */
 .form-container {
     background: #191B2A;
     padding: 2rem;
@@ -57,48 +31,16 @@ h1 {
     width: 300px;
 }
 
-/* Style des champs de texte et du bouton */
-input, select {
-    width: 100%;
-    padding: 0.5rem;
-    margin-bottom: 1rem;
-    background-color: #2A2D46;
-    color: #ffffff;
-    border: 1px solid #2A2D46;
-    border-radius: 4px;
-    font-size: 1rem;
-}
-
-input:focus, select:focus {
-    border-color: #feed00;
-    outline: none;
-}
-
-button {
-    width: 100%;
-    padding: 0.7rem;
-    background-color: #feed00;
-    color: #191B2A;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 1rem;
-}
-
-button:hover {
-    background-color: #e5d200;
-}
-
-/* Message de retour */
 .message {
     color: #feed00;
+    background-color: transparent;
     font-size: 1rem;
     text-align: center;
     margin-top: 1rem;
 }
-/* Affichage du numéro de la sérigraphie */
+
 .n-value {
-    color: green;
+    color: #4CAF50; /* Vert */
     font-size: 1rem;
     margin-top: 1rem;
     text-align: center;
