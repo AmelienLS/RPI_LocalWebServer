@@ -36,6 +36,19 @@ body {
     background-color: #2A2D46;
 }
 
+.user-link  {
+    display: block;
+    padding: 0.5rem 1rem;
+    background-color: #feed00;
+    color: #191B2A;
+    text-decoration: none;
+    text-align: center;
+    border-radius: 4px;
+    font-weight: bold;
+    position: absolute;
+    top: 1rem;
+}
+
 .logout-button {
     text-align: center;
     text-decoration: none;
