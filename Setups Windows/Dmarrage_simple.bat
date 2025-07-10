@@ -78,13 +78,13 @@ echo.
 :: 4) Lancement du serveur
 echo [^>^>^>] Démarrage du serveur WSGI local en arrière-plan...
 echo     URL : http://127.0.0.1:5000
-echo [i] Le serveur va s'executer dans une nouvelle fenetre.
-echo [i] Cette fenetre va se fermer.
+echo [i] Le serveur va s'exécuter silencieusement.
+echo [i] Cette fenêtre va se fermer. Utilisez Stop.bat pour arrêter le serveur.
 echo.
 
 call "%VENV_DIR%\Scripts\activate.bat"
 pushd "%PROJECT_DIR%"
-  start "Serveur Local RPI" python -m waitress --host=127.0.0.1 --port=5000 APP:app
+  start /B "Serveur Local RPI" python -m waitress --host=127.0.0.1 --port=5000 APP:app
 popd
 call "%VENV_DIR%\Scripts\deactivate.bat"
 
