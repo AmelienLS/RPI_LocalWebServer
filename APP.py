@@ -1,5 +1,5 @@
 from flask import *
-import sqlite3, secrets, os, webbrowser, subprocess, platform, threading
+import sqlite3, secrets, os, webbrowser, subprocess, platform
 # Ouvrir automatiquement le navigateur à l'URL locale
 # On lance le navigateur web pour afficher l'application Flask dès le démarrage
 webbrowser.open('http://localhost:5000/')
@@ -405,29 +405,18 @@ def close_db():
 @app.route("/shutdown", methods=["POST"])
 def shutdown():
     """
-    Éteint le système (Linux/RPi) ou ferme le serveur + le navigateur (Windows).
+    Éteint le système (Raspberry/Linux) ou ferme le serveur WSGI (Windows).
     """
     system_os = platform.system()
+
     try:
         if system_os == "Windows":
-            # 1) programme la fermeture du processus Python après un tout petit délai
-            threading.Timer(0.5, lambda: os._exit(0)).start()
+            # Ferme le serveur WSGI Waitress sur Windows
+            os._exit(0)  # arrêt immédiat du processus Python
+            return "<h1>Serveur Windows arrêté.</h1>"
 
-            # 2) renvoie une mini-page qui fermera la fenêtre Edge après 500 ms
-            return """
-            <!DOCTYPE html>
-            <html lang="fr">
-            <head><meta charset="UTF-8"><title>Arrêt</title></head>
-            <body style="display:flex;justify-content:center;align-items:center;height:100vh;">
-              <h1>Arrêt du serveur en cours…</h1>
-              <script>
-                setTimeout(() => window.close(), 500);
-              </script>
-            </body>
-            </html>
-            """
-
-        elif system_os in ["Linux", "Darwin"]:
+        elif system_os in ["Linux", "Darwin"]:  # Darwin inclus pour MacOS, au cas où
+            # Commande d'arrêt sur Linux
             subprocess.run(["sudo", "shutdown", "-h", "now"])
             return "<h1>Arrêt du système en cours...</h1>"
 

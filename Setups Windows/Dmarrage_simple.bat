@@ -63,7 +63,7 @@ if not exist "%VENV_DIR%\Scripts\activate.bat" (
     pause & exit /b 1
   )
   call "%VENV_DIR%\Scripts\activate.bat"
-    %USERPROFILE%\RPI_LocalWebServer-Release\vend\Scripts\python.exe -m pip install --upgrade pip
+    %USERPROFILE%\RPI_LocalWebServer-Release\vend\Scripts\python.exe -m pip install 
     pip install flask waitress
     if errorlevel 1 (
       echo [!] Échec de l'installation des dépendances !
@@ -83,7 +83,6 @@ echo.
 
 call "%VENV_DIR%\Scripts\activate.bat"
 pushd "%PROJECT_DIR%"
-    start "" msedge --app="http://127.0.0.1:5000/"
     python -m waitress --host=127.0.0.1 --port=5000 APP:app
     if errorlevel 1 (
         echo [!] Le serveur s'est arrêté avec une erreur !
