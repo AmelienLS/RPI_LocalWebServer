@@ -1,30 +1,25 @@
 @echo off
 setlocal
 
-echo [i] Arret et suppression du service de l'application (tache planifiee).
-echo [!] Ce script doit etre execute en tant qu'administrateur.
+echo [i] Tentative d'arret du serveur web local (port 5000)...
 echo.
 
-:: Variable
-set "SERVICE_NAME=armoire_server"
-
-:: Verifier si la tache existe
-schtasks /query /tn "%SERVICE_NAME%" >nul 2>nul
-if %errorlevel% neq 0 (
-    echo [i] La tache planifiee "%SERVICE_NAME%" n'existe pas. Aucune action requise.
-    pause
-    exit /b 0
+set "PID="
+for /f "tokens=5" %%a in ('netstat -aon ^| findstr ":5000" ^| findstr "LISTENING"') do (
+    set "PID=%%a"
 )
 
-:: Arreter la tache si elle est en cours d'execution
-echo [i] Tentative d'arret de la tache "%SERVICE_NAME%"...
-schtasks /end /tn "%SERVICE_NAME%"
-
-:: Supprimer la tache planifiee
-echo [i] Suppression de la tache planifiee "%SERVICE_NAME%"...
-schtasks /delete /tn "%SERVICE_NAME%" /f
+if defined PID (
+    if "%PID%" neq "0" (
+        echo [i] Serveur trouve avec le PID: %PID%. Arret en cours...
+        taskkill /F /PID %PID%
+        echo [OK] Le processus du serveur a ete termine.
+    ) else (
+        echo [i] Le port 5000 est utilise par le systeme (PID 0), impossible de l'arreter.
+    )
+) else (
+    echo [i] Aucun serveur ne semble tourner sur le port 5000.
+)
 
 echo.
-echo [OK] La tache planifiee a ete supprimee avec succes.
-echo [i] Le serveur ne demarrera plus automatiquement.
 pause

@@ -80,6 +80,7 @@ echo [^>^>^>] Démarrage du serveur WSGI local...
 echo     URL : http://127.0.0.1:5000
 echo [!] CTRL+C pour stopper.
 echo.
+pause & exit /b 1
 
 call "%VENV_DIR%\Scripts\activate.bat"
 pushd "%PROJECT_DIR%"
