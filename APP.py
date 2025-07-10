@@ -1,5 +1,5 @@
 from flask import *
-import sqlite3, secrets, os, webbrowser, subprocess, plateform
+import sqlite3, secrets, os, webbrowser, subprocess, platform
 # Ouvrir automatiquement le navigateur à l'URL locale
 # On lance le navigateur web pour afficher l'application Flask dès le démarrage
 webbrowser.open('http://localhost:5000/')
