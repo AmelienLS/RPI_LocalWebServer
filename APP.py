@@ -403,41 +403,53 @@ def close_db():
                            success="La connexion à la base de données a été fermée.")
     
 @app.route("/shutdown", methods=["POST"])
+import subprocess
+import platform
+import os
+from flask import render_template, request
+
+@app.route("/shutdown", methods=["GET", "POST"])
 def shutdown():
-    """
-    Éteint le système (Raspberry/Linux) ou ferme le serveur WSGI (Windows).
-    """
     system_os = platform.system()
 
-    try:
-        if system_os == "Windows":
-            # Ferme le serveur Waitress proprement
-            shutdown_script = """
-                <script>
-                    window.onload = function(){
-                        window.open('', '_self').close();
-                    }
-                </script>
-                <h1>Serveur Windows arrêté.</h1>
-            """
-            # Arrête le serveur Flask après avoir renvoyé la réponse HTTP
-            shutdown_response = Response(shutdown_script)
-            shutdown_response.headers['Content-Type'] = 'text/html'
+    if request.method == "POST":
+        try:
+            if system_os == "Windows":
+                # Arrêt immédiat du serveur Flask
+                shutdown_response = "<script>window.open('', '_self').close();</script>"
+                os._exit(0)
+                return shutdown_response
 
-            # Lance l'arrêt serveur juste après avoir envoyé la réponse
-            os._exit(0)
-            return shutdown_response
+            elif system_os in ["Linux", "Darwin"]:
+                subprocess.run(["sudo", "shutdown", "-h", "now"])
+                return "<h1>Arrêt du système en cours...</h1>"
 
-        elif system_os in ["Linux", "Darwin"]:  # Darwin inclus pour MacOS, au cas où
-            # Commande d'arrêt sur Linux
-            subprocess.run(["sudo", "shutdown", "-h", "now"])
-            return "<h1>Arrêt du système en cours...</h1>"
+            else:
+                return f"<h1>OS '{system_os}' non supporté.</h1>"
 
-        else:
-            return f"<h1>OS '{system_os}' non supporté pour l'arrêt.</h1>"
+        except Exception as e:
+            return f"<h1>Erreur :</h1><p>{e}</p>"
 
-    except Exception as e:
-        return f"<h1>Erreur :</h1><p>{e}</p>"
+    # Affiche la page avec bouton pour confirmer l'arrêt
+    return """
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Shutdown</title>
+    </head>
+    <body style="background-color:#2A2D46; color:#FFFFFF; display:flex; justify-content:center; align-items:center; height:100vh; font-family:sans-serif;">
+        <div style="text-align:center;">
+            <h1>Confirmer l'arrêt du serveur ?</h1>
+            <form method="POST">
+                <button style="padding:15px; background-color:#feed00; color:#191B2A; border:none; cursor:pointer; border-radius:5px; font-size:16px;">
+                    Oui, fermer
+                </button>
+            </form>
+        </div>
+    </body>
+    </html>
+    """
+
     
 # Cette route permet de servir les fichiers JavaScript présents dans le dossier "Functions".
 # Lorsqu'une requête est faite à /Functions/nom_du_fichier, le fichier correspondant est envoyé.
