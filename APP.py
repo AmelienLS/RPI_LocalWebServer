@@ -1,5 +1,5 @@
 from flask import *
-import sqlite3, secrets, os, webbrowser, subprocess
+import sqlite3, secrets, os, webbrowser, subprocess, plateform
 # Ouvrir automatiquement le navigateur à l'URL locale
 # On lance le navigateur web pour afficher l'application Flask dès le démarrage
 webbrowser.open('http://localhost:5000/')
@@ -405,18 +405,26 @@ def close_db():
 @app.route("/shutdown", methods=["POST"])
 def shutdown():
     """
-    Éteint le système d'exploitation.
-    Cette route est accessible sans authentification pour permettre l'arrêt
-    directement depuis la page de connexion.
+    Éteint le système (Raspberry/Linux) ou ferme le serveur WSGI (Windows).
     """
+    system_os = platform.system()
+
     try:
-        # Exécute la commande d'arrêt.
-        # Sur Linux, cela nécessite que l'utilisateur exécutant Flask ait les droits sudo sans mot de passe.
-        subprocess.run(["sudo", "shutdown", "-h", "now"])
-        return "<h1>Arrêt du système en cours...</h1>"
+        if system_os == "Windows":
+            # Ferme le serveur WSGI Waitress sur Windows
+            os._exit(0)  # arrêt immédiat du processus Python
+            return "<h1>Serveur Windows arrêté.</h1>"
+
+        elif system_os in ["Linux", "Darwin"]:  # Darwin inclus pour MacOS, au cas où
+            # Commande d'arrêt sur Linux
+            subprocess.run(["sudo", "shutdown", "-h", "now"])
+            return "<h1>Arrêt du système en cours...</h1>"
+
+        else:
+            return f"<h1>OS '{system_os}' non supporté pour l'arrêt.</h1>"
+
     except Exception as e:
-        # En cas d'erreur (ex: droits insuffisants), un message est retourné.
-        return f"<h1>Erreur lors de la tentative d'arrêt :</h1><p>{e}</p>"
+        return f"<h1>Erreur :</h1><p>{e}</p>"
     
 # Cette route permet de servir les fichiers JavaScript présents dans le dossier "Functions".
 # Lorsqu'une requête est faite à /Functions/nom_du_fichier, le fichier correspondant est envoyé.
