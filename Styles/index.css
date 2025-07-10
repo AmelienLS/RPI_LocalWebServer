@@ -28,8 +28,12 @@ body {
     margin-bottom: 1rem;
 }
 
-.user-actions {
-    width: 100%;
+.user-actions {    
+    margin-bottom: 2rem;
+    border: 1px solid #feed00;
+    padding: 1rem;
+    border-radius: 8px;
+    background-color: #2A2D46;
 }
 
 .logout-button {
