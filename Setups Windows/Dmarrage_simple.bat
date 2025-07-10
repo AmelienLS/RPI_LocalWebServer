@@ -76,19 +76,16 @@ echo [OK] Environnement virtuel prêt.
 echo.
 
 :: 4) Lancement du serveur
-echo [^>^>^>] Démarrage du serveur WSGI local...
+echo [^>^>^>] Démarrage du serveur WSGI local en arrière-plan...
 echo     URL : http://127.0.0.1:5000
-echo [!] CTRL+C pour stopper.
+echo [i] Le serveur va s'executer dans une nouvelle fenetre.
+echo [i] Cette fenetre va se fermer.
 echo.
-pause & exit /b 1
 
 call "%VENV_DIR%\Scripts\activate.bat"
 pushd "%PROJECT_DIR%"
-  python -m waitress --host=127.0.0.1 --port=5000 APP:app
-  if errorlevel 1 (
-    echo [!] Le serveur s'est arrêté avec une erreur !
-    pause
-  )
+  start "Serveur Local RPI" python -m waitress --host=127.0.0.1 --port=5000 APP:app
 popd
+call "%VENV_DIR%\Scripts\deactivate.bat"
 
 endlocal
