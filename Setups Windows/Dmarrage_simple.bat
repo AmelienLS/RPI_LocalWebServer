@@ -76,7 +76,7 @@ echo [OK] Environnement virtuel prêt.
 echo.
 
 :: 4) Lancement du serveur
-echo [>>>] Démarrage du serveur WSGI local...
+echo [^>^>^>] Démarrage du serveur WSGI local...
 echo     URL : http://127.0.0.1:5000
 echo [!] CTRL+C pour arrêter.
 echo.
