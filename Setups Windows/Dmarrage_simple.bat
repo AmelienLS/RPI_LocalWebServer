@@ -63,7 +63,7 @@ if not exist "%VENV_DIR%\Scripts\activate.bat" (
     pause & exit /b 1
   )
   call "%VENV_DIR%\Scripts\activate.bat"
-    pip install --upgrade pip
+    %USERPROFILE%\RPI_LocalWebServer-Release\vend\Scripts\python.exe -m pip install --upgrade pip
     pip install flask waitress
     if errorlevel 1 (
       echo [!] Échec de l'installation des dépendances !
