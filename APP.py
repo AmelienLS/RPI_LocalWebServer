@@ -403,12 +403,6 @@ def close_db():
                            success="La connexion à la base de données a été fermée.")
     
 @app.route("/shutdown", methods=["POST"])
-import subprocess
-import platform
-import os
-from flask import render_template, request
-
-@app.route("/shutdown", methods=["GET", "POST"])
 def shutdown():
     system_os = platform.system()
 
