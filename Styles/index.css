@@ -14,6 +14,12 @@ body {
     margin-top: 1rem;
 }
 
+/* Ajout pour restaurer le style bouton des user-links */
+.user-link {
+    position: static;
+    margin-top: 1rem;
+}
+
 .admin-actions {
     margin-bottom: 2rem;
     border: 1px solid #feed00;
