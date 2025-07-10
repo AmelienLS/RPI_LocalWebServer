@@ -411,9 +411,22 @@ def shutdown():
 
     try:
         if system_os == "Windows":
-            # Ferme le serveur WSGI Waitress sur Windows
-            os._exit(0)  # arrêt immédiat du processus Python
-            return "<h1>Serveur Windows arrêté.</h1>"
+            # Ferme le serveur Waitress proprement
+            shutdown_script = """
+                <script>
+                    window.onload = function(){
+                        window.open('', '_self').close();
+                    }
+                </script>
+                <h1>Serveur Windows arrêté.</h1>
+            """
+            # Arrête le serveur Flask après avoir renvoyé la réponse HTTP
+            shutdown_response = Response(shutdown_script)
+            shutdown_response.headers['Content-Type'] = 'text/html'
+
+            # Lance l'arrêt serveur juste après avoir envoyé la réponse
+            os._exit(0)
+            return shutdown_response
 
         elif system_os in ["Linux", "Darwin"]:  # Darwin inclus pour MacOS, au cas où
             # Commande d'arrêt sur Linux
