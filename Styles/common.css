@@ -80,7 +80,7 @@ button:hover {
 }
 
 /* --- Liens de navigation (Retour, etc.) --- */
-.admin-link, .retour, .retour-menu {
+.admin-link, .user-link, .retour, .retour-menu {
     display: block;
     padding: 0.5rem 1rem;
     background-color: #feed00;
@@ -93,7 +93,7 @@ button:hover {
     top: 1rem;
 }
 
-.admin-link, .retour {
+.admin-link, .user-link, .retour {
     right: 1rem;
 }
 

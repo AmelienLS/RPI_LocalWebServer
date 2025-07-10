@@ -9,7 +9,7 @@ body {
     margin-top: 1rem;
 }
 
-.admin-link, .user-link {
+.admin-link {
     position: static; /* Annule le positionnement absolu */
     margin-top: 1rem;
 }
@@ -34,19 +34,6 @@ body {
     padding: 1rem;
     border-radius: 8px;
     background-color: #2A2D46;
-}
-
-.user-link  {
-    display: block;
-    padding: 0.5rem 1rem;
-    background-color: #feed00;
-    color: #191B2A;
-    text-decoration: none;
-    text-align: center;
-    border-radius: 4px;
-    font-weight: bold;
-    position: absolute;
-    top: 1rem;
 }
 
 .logout-button {
