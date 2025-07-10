@@ -76,14 +76,19 @@ echo [OK] Environnement virtuel prêt.
 echo.
 
 :: 4) Lancement du serveur
-echo [>>>] Démarrage du serveur WSGI local en arrière-plan...
+echo [>>>] Démarrage du serveur WSGI local...
 echo     URL : http://127.0.0.1:5000
-echo [i] Cette fenêtre va se fermer. Utilisez Stop.bat pour arrêter le serveur.
+echo [!] CTRL+C pour arrêter.
+echo.
+
 call "%VENV_DIR%\Scripts\activate.bat"
 pushd "%PROJECT_DIR%"
-start "" /B "%VENV_DIR%\Scripts\waitress-serve.exe" --host=127.0.0.1 --port=5000 APP:app
+    python -m waitress --host=127.0.0.1 --port=5000 APP:app
+    if errorlevel 1 (
+        echo [!] Le serveur s'est arrêté avec une erreur !
+        pause
+    )
 popd
 call "%VENV_DIR%\Scripts\deactivate.bat"
-exit /b
 
 endlocal
