@@ -2,7 +2,7 @@ from flask import *
 import sqlite3, secrets, os, webbrowser, subprocess, platform
 # Ouvrir automatiquement le navigateur à l'URL locale
 # On lance le navigateur web pour afficher l'application Flask dès le démarrage
-webbrowser.open('http://localhost:5000/')
+# webbrowser.open('http://localhost:5000/') # Cette ligne provoque une erreur lorsque l'app est lancée en tant que service
 
 # Détermination du répertoire de base du projet
 # On récupère le chemin absolu du fichier courant pour définir le répertoire de base
