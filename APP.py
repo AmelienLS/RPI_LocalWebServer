@@ -1,8 +1,48 @@
 from flask import *
 import sqlite3, secrets, os, webbrowser, subprocess, platform
+
+# Configuration d'écran pour Windows
+SCREEN_CONFIG = {
+    "screen_number": 1,  # 0 = écran principal, 1 = écran secondaire, etc.
+    "use_screen_selection": True  # Activer/désactiver la sélection d'écran
+}
+
+def open_browser_on_screen(url):
+    """
+    Ouvre le navigateur avec contrôle de l'écran d'affichage (Windows uniquement).
+    """
+    system_os = platform.system()
+    
+    if system_os == "Windows" and SCREEN_CONFIG["use_screen_selection"]:
+        try:
+            # Calcul de la position selon le numéro d'écran
+            screen_width = 1920  # Largeur standard d'écran
+            position_x = SCREEN_CONFIG["screen_number"] * screen_width
+            
+            # Arguments pour Chrome en mode kiosque sur l'écran choisi
+            chrome_args = [
+                "chrome.exe",
+                f"--window-position={position_x},0",
+                "--kiosk",  # Mode plein écran
+                "--disable-infobars",
+                "--disable-extensions",
+                url
+            ]
+            
+            subprocess.Popen(chrome_args)
+            print(f"Navigateur ouvert sur l'écran {SCREEN_CONFIG['screen_number']}")
+            
+        except Exception as e:
+            print(f"Erreur lors de l'ouverture du navigateur : {e}")
+            # Fallback vers la méthode standard
+            webbrowser.open(url)
+    else:
+        # Méthode standard pour autres OS ou si désactivé
+        webbrowser.open(url)
+
 # Ouvrir automatiquement le navigateur à l'URL locale
 # On lance le navigateur web pour afficher l'application Flask dès le démarrage
-# webbrowser.open('http://localhost:5000/') # Cette ligne provoque une erreur lorsque l'app est lancée en tant que service
+open_browser_on_screen('http://localhost:5000/')
 
 # Détermination du répertoire de base du projet
 # On récupère le chemin absolu du fichier courant pour définir le répertoire de base
