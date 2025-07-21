@@ -25,7 +25,9 @@ echo "📝 Création du service systemd utilisateur..."
 cat <<EOF > "$SYSTEMD_USER_DIR/$SERVICE_NAME"
 [Unit]
 Description=Lancer Firefox en mode kiosque sur app locale
-After=graphical-session.target
+# S'assure que l'application 'armoire' est démarrée avant de lancer Firefox
+After=graphical-session.target network-online.target armoire.service
+Requires=armoire.service
 
 [Service]
 ExecStart=$SCRIPT_PATH

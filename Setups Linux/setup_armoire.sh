@@ -60,7 +60,8 @@ echo "⚙️ Création du service systemd : $SERVICE_NAME"
 sudo bash -c "cat > $SERVICE_FILE" <<EOF
 [Unit]
 Description=Gunicorn server for Flask app - $SERVICE_NAME
-After=network.target
+After=network-online.target
+Wants=network-online.target
 
 [Service]
 User=$USER_NAME
