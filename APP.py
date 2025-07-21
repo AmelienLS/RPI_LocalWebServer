@@ -3,7 +3,7 @@ import sqlite3, secrets, os, webbrowser, subprocess, platform
 
 # Configuration d'écran pour Windows
 SCREEN_CONFIG = {
-    "screen_number": 1,  # 0 = écran principal, 1 = écran secondaire, etc.
+    "screen_number": 0,  # 0 = écran principal, 1 = écran secondaire, etc.
     "use_screen_selection": True  # Activer/désactiver la sélection d'écran
 }
 
