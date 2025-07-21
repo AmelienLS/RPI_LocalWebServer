@@ -417,7 +417,7 @@ def shutdown():
 
         elif system_os in ["Linux", "Darwin"]:  # Darwin inclus pour MacOS, au cas où
             # Commande d'arrêt sur Linux
-            subprocess.run(["sudo", "shutdown", "-h", "now"])
+            subprocess.run(["/usr/bin/sudo", "shutdown", "-h", "now"])
             return "<h1>Arrêt du système en cours...</h1>"
 
         else:
