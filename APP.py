@@ -12,7 +12,8 @@ base_dir = os.path.dirname(os.path.abspath(__file__))
 app = Flask(
     __name__,
     template_folder=os.path.join(base_dir, "Templates"),
-    static_folder=os.path.join(base_dir, "Styles")
+    static_folder=os.path.join(base_dir, "Styles"),
+    static_url_path='/Styles'
 )
 # Générer une clé secrète aléatoire pour sécuriser la session utilisateur
 def generate_secret_key():
