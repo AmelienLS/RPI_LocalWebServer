@@ -30,7 +30,7 @@ fi
 echo "Suppression en cours..."
 
 # Variables
-PROJECT_DIR="/home/amelien/RPI_LocalWebServer-Release"
+PROJECT_DIR="/home/amelien/RPI_LocalWebServer"
 SERVICE_NAME="armoire"
 USER_NAME="amelien"
 BROWSER_AUTOSTART_SCRIPT="/home/$USER_NAME/launch_firefox.sh"

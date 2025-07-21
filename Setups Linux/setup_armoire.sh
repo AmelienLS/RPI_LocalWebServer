@@ -3,7 +3,7 @@
 echo "🔧 Déploiement automatique de l'app Flask locale"
 
 # Variables
-PROJECT_DIR="/home/amelien/RPI_LocalWebServer-Release"
+PROJECT_DIR="/home/amelien/RPI_LocalWebServer"
 REPO_URL="https://github.com/AmelienLS/RPI_LocalWebServer.git"
 SERVICE_NAME="armoire"
 PYTHON_BIN="/usr/bin/python3"
