@@ -32,7 +32,7 @@ def open_browser_on_screen(url):
             edge_args = [
                 edge_path,
                 f"--window-position={position_x},0",
-                f"--kiosk={url}",  # mode kiosque
+                f"--start-fullscreen",  # mode kiosque
                 "--disable-infobars",
                 "--disable-extensions",
                 url
