@@ -28,23 +28,11 @@ if errorlevel 1 (
 echo [OK] Prérequis OK.
 echo.
 
-:: Demande de la branche à utiliser
-set /p BRANCH="[?] Quelle branche souhaitez-vous utiliser ? [main] : "
-if "%BRANCH%"=="" set BRANCH=main
-echo [i] Branche sélectionnée : %BRANCH%
-echo.
-
 :: 2) Cloner ou mettre à jour le dépôt
 echo [~] Mise à jour du code source...
 if exist "%PROJECT_DIR%" (
   if exist "%PROJECT_DIR%\.git" (
     pushd "%PROJECT_DIR%"
-      git fetch
-      git checkout %BRANCH%
-      if errorlevel 1 (
-        echo [!] Impossible de basculer sur la branche %BRANCH% !
-        popd & pause & exit /b 1
-      )
       git pull
       if errorlevel 1 (
         echo [!] git pull a échoué !
@@ -56,12 +44,12 @@ if exist "%PROJECT_DIR%" (
     pause & exit /b 1
   )
 ) else (
-  git clone -b %BRANCH% "%REPO_URL%" "%PROJECT_DIR%"
+  git clone "%REPO_URL%" "%PROJECT_DIR%"
   if errorlevel 1 (
     echo [!] git clone a échoué !
     pause & exit /b 1
   )
-}
+)
 echo [OK] Code source prêt.
 echo.
 
