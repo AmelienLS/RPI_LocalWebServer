@@ -9,7 +9,7 @@ SCREEN_CONFIG = {
 
 SCREEN_CONFIG = {
     "use_screen_selection": True,
-    "screen_number": 2  # change selon tes besoins
+    "screen_number": 1  # change selon tes besoins
 }
 
 def open_browser_on_screen(url):
@@ -32,17 +32,16 @@ def open_browser_on_screen(url):
             edge_args = [
                 edge_path,
                 f"--window-position={position_x},0",
-                "--kiosk",  # mode plein écran sans bordures
+                f"--kiosk={url}",  # mode kiosque
                 "--disable-infobars",
-                "--disable-extensions",
-                url
+                "--disable-extensions"
             ]
 
             subprocess.Popen(edge_args)
-            print(f"Edge ouvert sur l'écran {SCREEN_CONFIG['screen_number']}")
+            print(f"Edge ouvert en mode kiosque sur l'écran {SCREEN_CONFIG['screen_number']} 🚀")
 
         except Exception as e:
-            print(f"Erreur lors de l'ouverture de Edge : {e}")
+            print(f"Erreur lors de l'ouverture de Edge 😱 : {e}")
             webbrowser.open(url)
 
     else:
