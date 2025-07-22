@@ -30,11 +30,36 @@ if errorlevel 1 (
 echo [OK] Prerequis OK.
 echo.
 
+:: Affichage des branches disponibles
+echo [i] Récupération des branches disponibles...
+echo.
+echo Branches disponibles:
+git ls-remote --heads "%REPO_URL%" > "%TEMP%\git_branches.txt"
+for /F "tokens=*" %%a in ('type "%TEMP%\git_branches.txt" ^| findstr "refs/heads/"') do (
+  for /F "tokens=3 delims=/" %%b in ("%%a") do (
+    echo - %%b
+  )
+)
+del "%TEMP%\git_branches.txt" >nul 2>&1
+echo.
+
+:: Demande de la branche à utiliser
+set /p BRANCH="[?] Quelle branche souhaitez-vous packager ? [main] : "
+if "%BRANCH%"=="" set BRANCH=main
+echo [i] Branche sélectionnée : %BRANCH%
+echo.
+
 :: 2) Cloner ou mettre à jour le depot
 echo [~] Mise a jour du code source...
 if exist "%PROJECT_DIR%" (
   if exist "%PROJECT_DIR%\.git" (
     pushd "%PROJECT_DIR%"
+      git fetch
+      git checkout %BRANCH%
+      if errorlevel 1 (
+        echo [!] Impossible de basculer sur la branche %BRANCH% !
+        popd & pause & exit /b 1
+      )
       git pull
       if errorlevel 1 (
         echo [!] git pull a echoue !
@@ -46,7 +71,7 @@ if exist "%PROJECT_DIR%" (
     pause & exit /b 1
   )
 ) else (
-  git clone "%REPO_URL%" "%PROJECT_DIR%"
+  git clone -b %BRANCH% "%REPO_URL%" "%PROJECT_DIR%"
   if errorlevel 1 (
     echo [!] git clone a echoue !
     pause & exit /b 1
