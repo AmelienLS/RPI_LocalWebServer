@@ -38,8 +38,8 @@ if errorlevel 1 (
 echo.
 
 :: 3) Installation des dépendances
-echo [~] Installation des dépendances...
-echo     Mise à jour de pip...
+echo [~] Installation des dependances...
+echo     Mise a jour de pip...
 python -m pip install --upgrade pip
 echo     Installation de PyInstaller...
 python -m pip install pyinstaller
@@ -48,18 +48,18 @@ if exist requirements.txt (
     echo     Installation depuis requirements.txt...
     python -m pip install -r requirements.txt
     if errorlevel 1 (
-        echo [!] ERREUR: Échec de l'installation des dépendances !
+        echo [!] ERREUR: Echec de l'installation des dependances!
         pause & exit /b 1
     )
 ) else (
     echo     Installation de Flask...
     python -m pip install flask
     if errorlevel 1 (
-        echo [!] ERREUR: Échec de l'installation de Flask !
+        echo [!] ERREUR: Echec de l'installation de Flask!
         pause & exit /b 1
     )
 )
-echo [OK] Dépendances installées.
+echo [OK] Dependances installees.
 echo.
 
 :: 4) Configuration pour la construction
@@ -71,11 +71,11 @@ set "WORK_DIR=build"
 echo [~] Nettoyage des anciens builds...
 if exist "%DIST_DIR%" rmdir /s /q "%DIST_DIR%"
 if exist "%WORK_DIR%" rmdir /s /q "%WORK_DIR%"
-echo [OK] Nettoyage terminé.
+echo [OK] Nettoyage termine.
 echo.
 
-:: 6) Construction de l'exécutable
-echo [>>>] Construction de l'exécutable avec PyInstaller...
+:: 6) Construction de l'executable
+echo [^>^>^>] Construction de l'executable avec PyInstaller...
 echo.
 
 pyinstaller --noconfirm --clean --onedir ^
