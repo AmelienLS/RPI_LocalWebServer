@@ -127,3 +127,23 @@ Le projet se lance automatiquement grace a la configuration de la raspberry. Dan
    flask --app "app.py" run
 4. Le navigateur s’ouvrira automatiquement pour afficher l’application.
 5. Pour terminer le serveur, utilisez Ctrl+C dans l’invite de commande.
+
+## Création d'un exécutable Windows
+Pour faciliter le déploiement sur un nouvel ordinateur, un script `build_exe.bat`
+est fourni dans le dossier `Setups Windows`. Il utilise **PyInstaller** pour
+générer un programme autonome contenant l'application et toutes ses ressources.
+
+### Étapes pour générer l'exécutable
+1. Installer Python sur la machine cible et s'assurer que la commande `python`
+   est accessible.
+2. Installer PyInstaller :
+   ```cmd
+   pip install pyinstaller
+   ```
+3. Depuis une invite de commandes, exécuter le script :
+   ```cmd
+   Setups Windows\build_exe.bat
+   ```
+4. L'exécutable sera créé dans le dossier `dist\APP\APP.exe`. Copiez ce
+   dossier sur la machine souhaitée puis lancez `APP.exe` pour démarrer le
+   serveur.
