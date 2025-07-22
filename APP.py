@@ -34,7 +34,8 @@ def open_browser_on_screen(url):
                 f"--window-position={position_x},0",
                 f"--kiosk={url}",  # mode kiosque
                 "--disable-infobars",
-                "--disable-extensions"
+                "--disable-extensions",
+                url
             ]
 
             subprocess.Popen(edge_args)
