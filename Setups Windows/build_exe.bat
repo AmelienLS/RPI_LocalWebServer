@@ -1,14 +1,15 @@
 @echo off
 chcp 65001 >nul
-setlocal
+setlocal EnableDelayedExpansion
 
 cls
+title Création d'exécutable - RPI_LocalWebServer
 echo [i] Préparation de l'exécutable Windows...
 echo.
 
 :: 1) Vérification de Python
 echo [~] Vérification de Python...
-python --version >nul 2>&1
+python --version
 if errorlevel 1 (
     echo [!] ERREUR: Python non trouvé !
     echo     https://www.python.org/downloads/
@@ -19,17 +20,17 @@ echo.
 
 :: 2) Vérification et installation de pip
 echo [~] Vérification de pip...
-python -m pip --version >nul 2>&1
+python -m pip --version
 if errorlevel 1 (
     echo [~] Installation de pip...
     curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
     python get-pip.py
     if errorlevel 1 (
         echo [!] ERREUR: Impossible d'installer pip !
-        del get-pip.py 2>nul
+        if exist get-pip.py del get-pip.py
         pause & exit /b 1
     )
-    del get-pip.py
+    if exist get-pip.py del get-pip.py
     echo [OK] pip installé.
 ) else (
     echo [OK] pip est déjà installé.
@@ -38,8 +39,10 @@ echo.
 
 :: 3) Installation des dépendances
 echo [~] Installation des dépendances...
-python -m pip install --upgrade pip >nul 2>&1
-python -m pip install pyinstaller >nul 2>&1
+echo     Mise à jour de pip...
+python -m pip install --upgrade pip
+echo     Installation de PyInstaller...
+python -m pip install pyinstaller
 
 if exist requirements.txt (
     echo     Installation depuis requirements.txt...
