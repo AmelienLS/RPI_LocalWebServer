@@ -1,5 +1,5 @@
 from flask import *
-import sqlite3, secrets, os, subprocess, platform, shutil
+import sqlite3, secrets, os, webbrowser, subprocess, platform
 
 # Configuration d'écran pour Windows
 SCREEN_CONFIG = {
@@ -7,40 +7,46 @@ SCREEN_CONFIG = {
     "use_screen_selection": True  # Activer/désactiver la sélection d'écran
 }
 
+SCREEN_CONFIG = {
+    "use_screen_selection": True,
+    "screen_number": 1  # change selon tes besoins
+}
+
 def open_browser_on_screen(url):
-    """
-    Ouvre le navigateur avec contrôle de l'écran d'affichage (Windows uniquement).
-    """
     system_os = platform.system()
-    chrome_path = shutil.which("google-chrome") or shutil.which("chrome") \
-              or r"C:\Program Files\Google\Chrome\Application\chrome.exe"
-    
+
     if system_os == "Windows" and SCREEN_CONFIG["use_screen_selection"]:
         try:
-            # Calcul de la position selon le numéro d'écran
-            screen_width = 1920  # Largeur standard d'écran
+            # Chemin standard pour Microsoft Edge (Windows 10/11)
+            edge_path = r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"
+            if not os.path.exists(edge_path):
+                edge_path = r"C:\Program Files\Microsoft\Edge\Application\msedge.exe"
+
+            if not os.path.exists(edge_path):
+                raise FileNotFoundError("Microsoft Edge non trouvé au chemin habituel.")
+
+            # Position écran
+            screen_width = 1920
             position_x = SCREEN_CONFIG["screen_number"] * screen_width
-            
-            # Arguments pour Chrome en mode kiosque sur l'écran choisi
-            chrome_args = [
-                "chrome.exe",
+
+            edge_args = [
+                edge_path,
                 f"--window-position={position_x},0",
-                "--kiosk",  # Mode plein écran
+                "--kiosk",  # mode plein écran sans bordures
                 "--disable-infobars",
                 "--disable-extensions",
                 url
             ]
-            
-            subprocess.Popen(chrome_args)
-            print(f"Navigateur ouvert sur l'écran {SCREEN_CONFIG['screen_number']}")
-            
+
+            subprocess.Popen(edge_args)
+            print(f"Edge ouvert sur l'écran {SCREEN_CONFIG['screen_number']}")
+
         except Exception as e:
-            print(f"Erreur lors de l'ouverture du navigateur : {e}")
-            # Fallback vers la méthode standard
-            subprocess.Popen([chrome_path, "--start-fullscreen", url])
+            print(f"Erreur lors de l'ouverture de Edge : {e}")
+            webbrowser.open(url)
+
     else:
-        # Méthode standard pour autres OS ou si désactivé
-        subprocess.Popen([chrome_path, "--start-fullscreen", url])
+        webbrowser.open(url)
 
 # Ouvrir automatiquement le navigateur à l'URL locale
 # On lance le navigateur web pour afficher l'application Flask dès le démarrage
