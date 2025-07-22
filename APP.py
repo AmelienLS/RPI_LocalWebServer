@@ -486,6 +486,15 @@ def send_functions(filename):
     # Envoie le fichier demandé depuis le dossier "Functions"
     return send_from_directory(functions_dir, filename)
 
+# Cette route permet de servir les fichiers images présents dans le dossier "Images".
+# Elle est nécessaire pour que les icônes utilisées dans les templates soient
+# correctement récupérées par le navigateur.
+@app.route('/Images/<path:filename>')
+def send_images(filename):
+    base_dir = os.path.abspath(os.path.dirname(__file__))
+    images_dir = os.path.join(base_dir, 'Images')
+    return send_from_directory(images_dir, filename)
+
 # Lancement du serveur Flask (production avec debug désactivé)
 if __name__ == '__main__':
     app.run(debug=False)
