@@ -1,5 +1,5 @@
 from flask import *
-import sqlite3, secrets, os, webbrowser, subprocess, platform
+import sqlite3, secrets, os, sys, webbrowser, subprocess, platform
 
 # Configuration d'écran pour Windows
 SCREEN_CONFIG = {
@@ -53,8 +53,9 @@ def open_browser_on_screen(url):
 open_browser_on_screen('http://localhost:5000/')
 
 # Détermination du répertoire de base du projet
-# On récupère le chemin absolu du fichier courant pour définir le répertoire de base
-base_dir = os.path.dirname(os.path.abspath(__file__))
+# Lorsqu'il est empaqueté avec PyInstaller, `sys._MEIPASS` contient le dossier temporaire
+# où se trouvent les ressources. Sinon, on utilise le chemin du fichier courant.
+base_dir = getattr(sys, "_MEIPASS", os.path.dirname(os.path.abspath(__file__)))
 
 # Initialisation de l'application Flask en précisant les dossiers pour les templates et les fichiers statiques (styles)
 app = Flask(
@@ -70,8 +71,7 @@ def generate_secret_key():
 generate_secret_key()
 
 # Définition du chemin vers la base de données SQLite
-project_root = os.path.dirname(os.path.realpath(__file__))
-database = os.path.join(project_root, 'armoire.db')
+database = os.path.join(base_dir, 'armoire.db')
 
 def get_db_connection():
     """Renvoie une connexion à la base de données SQLite.

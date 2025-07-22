@@ -126,4 +126,31 @@ Le projet se lance automatiquement grace a la configuration de la raspberry. Dan
    En cas de probleme, lancez la commande :
    flask --app "app.py" run
 4. Le navigateur s’ouvrira automatiquement pour afficher l’application.
-5. Pour terminer le serveur, utilisez Ctrl+C dans l’invite de commande.
+5. Pour terminer le serveur, utilisez Ctrl+C dans l'invite de commande.
+
+## Emballage de l'application
+
+### Utilisation de PyInstaller
+1. Installez PyInstaller :
+   ```bash
+   pip install pyinstaller
+   ```
+2. Depuis la racine du projet, lancez :
+   ```bash
+   pyinstaller --onefile APP.py \
+     --add-data "Templates:Templates" \
+     --add-data "Styles:Styles" \
+     --add-data "Images:Images" \
+     --add-data "armoire.db:."
+   ```
+   Sur Windows, utilisez un point-virgule `;` à la place des deux-points pour les options `--add-data`.
+3. L'exécutable sera créé dans le dossier `dist/`.
+
+### Utilisation d'un `setup.py`
+1. Créez un fichier `setup.py` décrivant les dépendances et les fichiers à inclure.
+2. Exécutez :
+   ```bash
+   python setup.py install
+   ```
+   L'application peut alors être lancée comme n'importe quel paquet installé.
+
