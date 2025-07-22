@@ -9,7 +9,7 @@ SCREEN_CONFIG = {
 
 SCREEN_CONFIG = {
     "use_screen_selection": True,
-    "screen_number": 1  # change selon tes besoins
+    "screen_number": 2  # change selon tes besoins
 }
 
 def open_browser_on_screen(url):
