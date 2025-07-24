@@ -128,7 +128,8 @@ echo.
 echo [^>^>^>] Démarrage du serveur WSGI local...
 echo     URL : http://127.0.0.1:5000
 echo [!] CTRL+C pour arrêter.
-echo [!] Fichiers stockés à %USERPROFILE%\RPI_LocalWebServer-Release
+for /F "delims=" %%A in ('echo prompt $E ^| cmd') do set "ESC=%%A"
+echo %ESC%]8;;file:///%USERPROFILE%/RPI_LocalWebServer-Release%ESC%\Open Project Folder%ESC%]8;;%ESC%\
 echo.
 
 call "%VENV_DIR%\Scripts\activate.bat"
