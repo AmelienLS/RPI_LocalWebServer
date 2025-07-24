@@ -15,15 +15,39 @@ echo.
 echo [~] Vérification de Python et Git...
 where python >nul 2>&1
 if errorlevel 1 (
-  echo [!] ERREUR: Python non trouvé !
-  echo     https://www.python.org/downloads/
-  pause & exit /b 1
+  echo [!] Python non trouvé ! Installation automatique...
+  where winget >nul 2>&1
+  if errorlevel 1 (
+    echo [!] ERREUR: winget non disponible !
+    echo     Installez manuellement Python : https://www.python.org/downloads/
+    pause & exit /b 1
+  )
+  winget install --id Python.Python.3.12 --silent --accept-package-agreements --accept-source-agreements
+  if errorlevel 1 (
+    echo [!] Échec de l'installation de Python !
+    pause & exit /b 1
+  )
+  echo [OK] Python installé.
 )
 where git >nul 2>&1
 if errorlevel 1 (
-  echo [!] ERREUR: Git non trouvé ! 🔧
-  echo     https://git-scm.com/download/win
-  pause & exit /b 1
+  echo [!] Git non trouvé ! Installation automatique...
+  where winget >nul 2>&1
+  if errorlevel 1 (
+    echo [!] ERREUR: winget non disponible !
+    echo     Installez manuellement Git : https://git-scm.com/download/win
+    pause & exit /b 1
+  )
+  winget install --id Git.Git --silent --accept-package-agreements --accept-source-agreements
+  if errorlevel 1 (
+    echo [!] Échec de l'installation de Git !
+    pause & exit /b 1
+  )
+  echo [OK] Git installé.
+  echo [i] Redémarrage du script requis pour actualiser le PATH...
+  pause
+  "%~f0"
+  exit /b 0
 )
 echo [OK] Prérequis OK.
 echo.
@@ -52,13 +76,13 @@ echo [~] Mise à jour du code source...
 if exist "%PROJECT_DIR%" (
   if exist "%PROJECT_DIR%\.git" (
     pushd "%PROJECT_DIR%"
-      git fetch
-      git checkout %BRANCH%
+      git fetch >nul 2>&1
+      git checkout %BRANCH% >nul 2>&1
       if errorlevel 1 (
         echo [!] Impossible de basculer sur la branche %BRANCH% !
         popd & pause & exit /b 1
       )
-      git pull
+      git pull >nul 2>&1
       if errorlevel 1 (
         echo [!] git pull a échoué !
         popd & pause & exit /b 1
@@ -69,7 +93,7 @@ if exist "%PROJECT_DIR%" (
     pause & exit /b 1
   )
 ) else (
-  git clone -b %BRANCH% "%REPO_URL%" "%PROJECT_DIR%"
+  git clone -b %BRANCH% "%REPO_URL%" "%PROJECT_DIR%" >nul 2>&1
   if errorlevel 1 (
     echo [!] git clone a échoué !
     pause & exit /b 1
