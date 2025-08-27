@@ -1,8 +1,12 @@
-# Documentation du Projet Sérigraphie
+# RPI LocalWebServer
 
-## Présentation du Projet
+Application web développée avec Flask pour gérer des sérigraphies sur une Raspberry Pi. Elle permet de suivre l'état des écrans, d'administrer les utilisateurs et de déployer facilement le service sur un environnement embarqué.
 
-Ce projet est une application web développée avec Flask qui permet de gérer des sérigraphies. L’application se connecte à une base de données SQLite ([armoire.db](armoire.db)), gère les utilisateurs et permet d'ajouter, modifier, supprimer et gérer le statut des sérigraphies (prise, rangement, etc.).
+## Fonctionnalités
+
+- Ajout, modification, suppression et suivi des sérigraphies.
+- Authentification des utilisateurs et gestion des administrateurs.
+- Déploiement automatique sur Raspberry Pi (service systemd et lancement de Firefox en mode kiosque).
 
 ## Structure du Projet
 
@@ -11,7 +15,7 @@ Le projet est organisé comme suit :
 - **Racine du projet**  
   - `APP.py` : Point d'entrée principal de l’application. Il configure Flask, définit les routes et gère la connexion à la base de données via la fonction [`get_db_connection`](app.py#L11).
   - `armoire.db` : Fichier SQLite contenant les données des sérigraphies et des utilisateurs.
-  - `readme` : Ce fichier, qui contient désormais toutes les explications pour comprendre le projet.
+  - `README.md` : Documentation principale du projet.
   
 - **Dossier Templates/**  
   Contient tous les fichiers HTML utilisés pour l’affichage des pages. Chaque page utilise un fichier CSS dédié (situé dans le dossier Styles) et certains liens spécifiques dans les balises `<link>` permettent d’inclure une icône pour l’onglet du navigateur ([Logo.png](Images/Logo.png)).
@@ -147,3 +151,15 @@ générer un programme autonome contenant l'application et toutes ses ressources
 4. L'exécutable sera créé dans le dossier `dist\APP\APP.exe`. Copiez ce
    dossier sur la machine souhaitée puis lancez `APP.exe` pour démarrer le
    serveur.
+
+## Contribuer
+
+Les contributions sont les bienvenues ! Merci de consulter le fichier [CONTRIBUTING.md](CONTRIBUTING.md) pour connaître les bonnes pratiques et le processus de soumission.
+
+## Licence
+
+Ce projet est distribué sous la licence MIT. Voir le fichier [LICENSE](LICENSE) pour plus d'informations.
+
+## Historique des versions
+
+Les changements notables de chaque version sont documentés dans le fichier [CHANGELOG.md](CHANGELOG.md).
