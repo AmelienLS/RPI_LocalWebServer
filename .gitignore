@@ -6,3 +6,11 @@ venv/
 .Python
 .env
 .pytest_cache/
+# Local databases and sensitive data dumps
+*.db
+*.sqlite
+*.sqlite3
+*.db-journal
+
+# Local environment secrets
+.env.*

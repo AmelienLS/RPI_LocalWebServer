@@ -14,7 +14,9 @@ Le projet est organisé comme suit :
 
 - **Racine du projet**  
   - `APP.py` : Point d'entrée principal de l’application. Il configure Flask, définit les routes et gère la connexion à la base de données via la fonction [`get_db_connection`](app.py#L11).
-  - `armoire.db` : Fichier SQLite contenant les données des sérigraphies et des utilisateurs.
+  - `armoire.db` : Fichier SQLite contenant les données des sérigraphies et des utilisateurs. Il n'est plus versionné pour
+    éviter de conserver des données personnelles dans l'historique Git ; créez ou restaurez ce fichier depuis une sauvegarde
+    locale lors du déploiement.
   - `README.md` : Documentation principale du projet.
   
 - **Dossier Templates/**  
@@ -155,6 +157,17 @@ générer un programme autonome contenant l'application et toutes ses ressources
 ## Contribuer
 
 Les contributions sont les bienvenues ! Merci de consulter le fichier [CONTRIBUTING.md](CONTRIBUTING.md) pour connaître les bonnes pratiques et le processus de soumission.
+
+## Tests
+
+Une suite de tests peut être exécutée avec [pytest](https://docs.pytest.org/) :
+
+```bash
+pytest
+```
+
+Si aucune vérification automatisée n’est définie, la commande s’exécutera tout de même pour confirmer qu’aucun test existant
+n’échoue.
 
 ## Licence
 
