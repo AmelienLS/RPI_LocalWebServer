@@ -8,6 +8,7 @@ venv/
 .pytest_cache/
 # Local databases and sensitive data dumps
 *.db
+!armoire.db
 *.sqlite
 *.sqlite3
 *.db-journal
