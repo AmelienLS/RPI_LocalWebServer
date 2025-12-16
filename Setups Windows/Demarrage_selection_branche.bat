@@ -91,7 +91,7 @@ for /F "tokens=*" %%a in ('type "%TEMP%\git_branches.txt" ^| findstr "refs/heads
   for /F "tokens=3 delims=/" %%b in ("%%a") do (
     set /a BRANCH_COUNT+=1
     set "BRANCH_!BRANCH_COUNT!=%%b"
-    if /I "%%b"=="main" set "DEFAULT_BRANCH_INDEX=!BRANCH_COUNT+1!"
+    if /I "%%b"=="main" set "DEFAULT_BRANCH_INDEX=!BRANCH_COUNT!"
     echo   !BRANCH_COUNT!. %%b
   )
 )
@@ -110,7 +110,7 @@ goto BRANCH_CHOICE_DONE
 
 :BRANCH_CHOICE_NUMERIC
 set "BRANCH_SELECTION="
-set /p BRANCH_SELECTION="[?] Choisissez le numéro de la branche [%DEFAULT_BRANCH_INDEX%] : "
+set /p BRANCH_SELECTION="[?] Choisissez le numéro de la branche [%DEFAULT_BRANCH_INDEX+1%] : "
 if "%BRANCH_SELECTION%"=="" set "BRANCH_SELECTION=%DEFAULT_BRANCH_INDEX%"
 
 set /a BRANCH_INDEX=%BRANCH_SELECTION% 2>nul
