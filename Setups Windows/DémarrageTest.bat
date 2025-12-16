@@ -134,6 +134,7 @@ echo.
 
 call "%VENV_DIR%\Scripts\activate.bat"
 pushd "%PROJECT_DIR%"
+    start "" powershell -Command "Start-Sleep -Seconds 3; Start-Process 'http://127.0.0.1:5000'"
     python -m waitress --host=127.0.0.1 --port=5000 APP:app
     if errorlevel 1 (
         echo [!] Le serveur s'est arrêté avec une erreur !
