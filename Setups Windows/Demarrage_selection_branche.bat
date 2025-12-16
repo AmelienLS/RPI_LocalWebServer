@@ -82,33 +82,39 @@ for /F "tokens=*" %%a in ('type "%TEMP%\git_branches.txt" ^| findstr "refs/heads
 del "%TEMP%\git_branches.txt" >nul 2>&1
 echo.
 
-if "%BRANCH_COUNT%"=="0" (
-  echo [!] Impossible de récupérer la liste des branches (git ls-remote a peut-être échoué).
-  set "BRANCH_INPUT="
-  set /p BRANCH_INPUT="[?] Entrez le nom de la branche à utiliser [main] : "
-  if "%BRANCH_INPUT%"=="" (
-    set "BRANCH=main"
-  ) else (
-    set "BRANCH=%BRANCH_INPUT%"
-  )
-) else (
-  set "BRANCH_SELECTION="
-  set /p BRANCH_SELECTION="[?] Choisissez le numéro de la branche [%DEFAULT_BRANCH_INDEX%] : "
-  if "%BRANCH_SELECTION%"=="" set "BRANCH_SELECTION=%DEFAULT_BRANCH_INDEX%"
+if "%BRANCH_COUNT%"=="0" goto BRANCH_CHOICE_MANUAL
+goto BRANCH_CHOICE_NUMERIC
 
-  set "BRANCH=%BRANCH_SELECTION%"
-  set /a BRANCH_INDEX=%BRANCH_SELECTION% 2>nul
-  if errorlevel 1 (
-    echo [i] Valeur non-numérique, utilisation directe de "%BRANCH%".
-  ) else (
-    if %BRANCH_INDEX% GEQ 1 if %BRANCH_INDEX% LEQ %BRANCH_COUNT% (
-      for %%i in (%BRANCH_INDEX%) do set "BRANCH=!BRANCH_%%i!"
-    ) else (
-      echo [!] Numéro invalide, utilisation de la branche par défaut.
-      for %%i in (%DEFAULT_BRANCH_INDEX%) do set "BRANCH=!BRANCH_%%i!"
-    )
-  )
-)
+:BRANCH_CHOICE_MANUAL
+echo [!] Impossible de récupérer la liste des branches (git ls-remote a peut-être échoué).
+set "BRANCH="
+set /p BRANCH="[?] Entrez le nom de la branche à utiliser [main] : "
+if "%BRANCH%"=="" set "BRANCH=main"
+goto BRANCH_CHOICE_DONE
+
+:BRANCH_CHOICE_NUMERIC
+set "BRANCH_SELECTION="
+set /p BRANCH_SELECTION="[?] Choisissez le numéro de la branche [%DEFAULT_BRANCH_INDEX%] : "
+if "%BRANCH_SELECTION%"=="" set "BRANCH_SELECTION=%DEFAULT_BRANCH_INDEX%"
+
+set /a BRANCH_INDEX=%BRANCH_SELECTION% 2>nul
+if errorlevel 1 goto BRANCH_CHOICE_CUSTOM
+if %BRANCH_INDEX% LSS 1 goto BRANCH_CHOICE_INVALID
+if %BRANCH_INDEX% GTR %BRANCH_COUNT% goto BRANCH_CHOICE_INVALID
+for /F "delims=" %%B in ("!BRANCH_%BRANCH_INDEX%!") do set "BRANCH=%%B"
+goto BRANCH_CHOICE_DONE
+
+:BRANCH_CHOICE_INVALID
+echo [!] Numéro invalide, utilisation de la branche par défaut.
+for /F "delims=" %%B in ("!BRANCH_%DEFAULT_BRANCH_INDEX%!") do set "BRANCH=%%B"
+goto BRANCH_CHOICE_DONE
+
+:BRANCH_CHOICE_CUSTOM
+echo [i] Valeur non-numérique, utilisation directe de "%BRANCH_SELECTION%".
+set "BRANCH=%BRANCH_SELECTION%"
+goto BRANCH_CHOICE_DONE
+
+:BRANCH_CHOICE_DONE
 echo [i] Branche sélectionnée : %BRANCH%
 echo.
 

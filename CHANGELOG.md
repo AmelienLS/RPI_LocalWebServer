@@ -1,5 +1,9 @@
 # Journal des modifications
 
+## [2.1.3] - 2025-12-19
+### Corrigé
+- Fiabilisation de la sélection de branche dans `Demarrage_selection_branche.bat` (boucles `goto` explicites plutôt que blocs imbriqués) pour éviter les erreurs « . était inattendu » et garantir l'affichage des invites.
+
 ## [2.1.2] - 2025-12-18
 ### Corrigé
 - Lancement via double-clic maintient désormais la console ouverte (le script se relance automatiquement dans une session `cmd /k`), garantissant l'affichage des invites de saisie.
