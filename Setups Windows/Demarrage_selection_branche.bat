@@ -91,7 +91,7 @@ for /F "tokens=*" %%a in ('type "%TEMP%\git_branches.txt" ^| findstr "refs/heads
   for /F "tokens=3 delims=/" %%b in ("%%a") do (
     set /a BRANCH_COUNT+=1
     set "BRANCH_!BRANCH_COUNT!=%%b"
-    if /I "%%b"=="main" set "DEFAULT_BRANCH_INDEX=!BRANCH_COUNT!"
+    if /I "%%b"=="main" set "DEFAULT_BRANCH_INDEX=!BRANCH_COUNT+1!"
     echo   !BRANCH_COUNT!. %%b
   )
 )
