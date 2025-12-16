@@ -1,4 +1,16 @@
 @echo off
+setlocal EnableDelayedExpansion
+set "INTERACTIVE_MODE=0"
+set "SKIP_BRANCH_MENU=0"
+
+if /I "%~1"=="--run" (
+  shift
+  set "BRANCH=%~1"
+  shift
+  set "SKIP_BRANCH_MENU=1"
+  goto CONTINUE_EXECUTION
+)
+
 set "CMD_ORIGINAL=%CMDCMDLINE%"
 echo %CMD_ORIGINAL% | find /I "/c" >nul
 if %errorlevel%==0 (
@@ -11,8 +23,10 @@ if %errorlevel%==0 (
 ) else (
   if /I "%~1"=="--persist" shift
 )
+set "INTERACTIVE_MODE=1"
+
+:CONTINUE_EXECUTION
 chcp 65001 >nul
-setlocal EnableDelayedExpansion
 
 :: Variables
 set "PROJECT_DIR=%USERPROFILE%\RPI_LocalWebServer-Release"
@@ -63,6 +77,8 @@ if errorlevel 1 (
 )
 echo [OK] Prérequis OK.
 echo.
+
+if "%SKIP_BRANCH_MENU%"=="1" goto BRANCH_CHOICE_DONE
 
 :: Affichage des branches disponibles
 echo [i] Récupération des branches disponibles...
@@ -115,6 +131,13 @@ set "BRANCH=%BRANCH_SELECTION%"
 goto BRANCH_CHOICE_DONE
 
 :BRANCH_CHOICE_DONE
+if "%SKIP_BRANCH_MENU%"=="1" goto BRANCH_SELECTED
+if "%INTERACTIVE_MODE%"=="1" (
+  start "" cmd /c "%~f0" --run "%BRANCH%"
+  exit /b
+)
+
+:BRANCH_SELECTED
 echo [i] Branche sélectionnée : %BRANCH%
 echo.
 

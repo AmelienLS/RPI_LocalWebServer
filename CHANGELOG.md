@@ -1,5 +1,9 @@
 # Journal des modifications
 
+## [2.1.4] - 2025-12-20
+### Modifié
+- Séparation du script `Demarrage_selection_branche.bat` en deux phases : la sélection de branche reste interactive (fenêtre persistante) puis relance automatiquement l'exécution standard avec la branche choisie afin que la fenêtre se referme ensuite, comme demandé.
+
 ## [2.1.3] - 2025-12-19
 ### Corrigé
 - Fiabilisation de la sélection de branche dans `Demarrage_selection_branche.bat` (boucles `goto` explicites plutôt que blocs imbriqués) pour éviter les erreurs « . était inattendu » et garantir l'affichage des invites.
