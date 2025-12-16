@@ -71,8 +71,14 @@ del "%TEMP%\git_branches.txt" >nul 2>&1
 echo.
 
 if "%BRANCH_COUNT%"=="0" (
-  echo [!] Aucune branche détectée. Utilisation de "main".
-  set "BRANCH=main"
+  echo [!] Impossible de récupérer la liste des branches (git ls-remote a peut-être échoué).
+  set "BRANCH_INPUT="
+  set /p BRANCH_INPUT="[?] Entrez le nom de la branche à utiliser [main] : "
+  if "%BRANCH_INPUT%"=="" (
+    set "BRANCH=main"
+  ) else (
+    set "BRANCH=%BRANCH_INPUT%"
+  )
 ) else (
   set "BRANCH_SELECTION="
   set /p BRANCH_SELECTION="[?] Choisissez le numéro de la branche [%DEFAULT_BRANCH_INDEX%] : "

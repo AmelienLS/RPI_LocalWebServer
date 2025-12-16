@@ -1,5 +1,9 @@
 # Journal des modifications
 
+## [2.1.1] - 2025-12-17
+### Corrigé
+- `Demarrage_selection_branche.bat` redemande maintenant le nom d'une branche si la liste distante n'est pas disponible, évitant la fermeture immédiate du script au double-clic.
+
 ## [2.1.0] - 2025-12-16
 ### Modifié
 - Le script Windows `Demarrage_selection_branche.bat` affiche désormais les branches numérotées et permet de sélectionner la branche cible en saisissant son numéro plutôt que le nom complet.
