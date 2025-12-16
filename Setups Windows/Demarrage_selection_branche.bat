@@ -1,4 +1,16 @@
 @echo off
+set "CMD_ORIGINAL=%CMDCMDLINE%"
+echo %CMD_ORIGINAL% | find /I "/c" >nul
+if %errorlevel%==0 (
+  if /I not "%~1"=="--persist" (
+    start "" cmd /k "%~f0" --persist
+    exit /b
+  ) else (
+    shift
+  )
+) else (
+  if /I "%~1"=="--persist" shift
+)
 chcp 65001 >nul
 setlocal EnableDelayedExpansion
 

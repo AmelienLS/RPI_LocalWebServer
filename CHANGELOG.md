@@ -1,5 +1,9 @@
 # Journal des modifications
 
+## [2.1.2] - 2025-12-18
+### Corrigé
+- Lancement via double-clic maintient désormais la console ouverte (le script se relance automatiquement dans une session `cmd /k`), garantissant l'affichage des invites de saisie.
+
 ## [2.1.1] - 2025-12-17
 ### Corrigé
 - `Demarrage_selection_branche.bat` redemande maintenant le nom d'une branche si la liste distante n'est pas disponible, évitant la fermeture immédiate du script au double-clic.
