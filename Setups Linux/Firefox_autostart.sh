@@ -1,40 +1,44 @@
+#!/bin/bash
 # ===== Firefox_autostart.sh =====
+# Configure un service systemd --user pour lancer Firefox en mode kiosque
+# après le démarrage du service Flask.
+
+set -euo pipefail
+
+TARGET_USER="${TARGET_USER:-$(logname 2>/dev/null || whoami)}"
+TARGET_HOME="${TARGET_HOME:-$(eval echo "~$TARGET_USER")}"
+LAUNCH_SCRIPT_PATH="${LAUNCH_SCRIPT_PATH:-$TARGET_HOME/launch_firefox_release.sh}"
+FIREFOX_SERVICE_NAME="${FIREFOX_SERVICE_NAME:-firefox-local-release.service}"
+APP_SERVICE_NAME="${APP_SERVICE_NAME:-armoire-release-$TARGET_USER.service}"
+SYSTEMD_USER_DIR="$TARGET_HOME/.config/systemd/user"
+FIREFOX_URL="${FIREFOX_URL:-http://127.0.0.1:5000}"
+FIREFOX_FLAGS="${FIREFOX_FLAGS:---kiosk}"
+DELAY_SECONDS="${DELAY_SECONDS:-20}"
+
+echo "[i] Configuration du lancement automatique de Firefox pour l'utilisateur $TARGET_USER"
+
+echo "[i] Création du script de lancement : $LAUNCH_SCRIPT_PATH"
+cat <<EOF | sudo tee "$LAUNCH_SCRIPT_PATH" >/dev/null
 #!/bin/bash
-
-echo "🛠️ Configuration du lancement automatique de Firefox pour l'application de production"
-
-# --- Variables ---
-USER_NAME="amelien"
-LAUNCH_SCRIPT_PATH="/home/$USER_NAME/launch_firefox_release.sh"
-FIREFOX_SERVICE_NAME="firefox-local-release.service"
-APP_SERVICE_NAME="armoire-release.service"
-SYSTEMD_USER_DIR="/home/$USER_NAME/.config/systemd/user"
-
-# 1. Générer le script de lancement
-echo "📄 Création du script de lancement : $LAUNCH_SCRIPT_PATH"
-cat <<EOF > "$LAUNCH_SCRIPT_PATH"
-#!/bin/bash
-# Attendre 20 secondes pour que Gunicorn soit UP
-sleep 20
-# Lancer Firefox en mode kiosk sur l'app locale
-firefox --kiosk http://127.0.0.1:5000
+sleep $DELAY_SECONDS
+firefox $FIREFOX_FLAGS $FIREFOX_URL
 EOF
-chmod +x "$LAUNCH_SCRIPT_PATH"
-sudo chown $USER_NAME:$USER_NAME "$LAUNCH_SCRIPT_PATH"
+sudo chmod +x "$LAUNCH_SCRIPT_PATH"
+sudo chown "$TARGET_USER:$TARGET_USER" "$LAUNCH_SCRIPT_PATH"
 
-# 2. Préparer le dossier user-systemd
-mkdir -p "$SYSTEMD_USER_DIR"
+echo "[i] Préparation du dossier systemd user : $SYSTEMD_USER_DIR"
+sudo -u "$TARGET_USER" mkdir -p "$SYSTEMD_USER_DIR"
 
-# 3. Créer le service systemd utilisateur pour Firefox
-echo "📝 Création du service systemd user : $FIREFOX_SERVICE_NAME"
-cat <<EOF > "$SYSTEMD_USER_DIR/$FIREFOX_SERVICE_NAME"
+SERVICE_PATH="$SYSTEMD_USER_DIR/$FIREFOX_SERVICE_NAME"
+echo "[i] Création du service $SERVICE_PATH"
+cat <<EOF | sudo -u "$TARGET_USER" tee "$SERVICE_PATH" >/dev/null
 [Unit]
-Description=Launch Firefox in Kiosk mode for the release app
+Description=Launch Firefox in kiosk mode for RPI_LocalWebServer
 After=graphical-session.target network-online.target $APP_SERVICE_NAME
 Requires=$APP_SERVICE_NAME
 
 [Service]
-ExecStartPre=/bin/bash -c 'dbus-launch'
+Type=simple
 ExecStart=$LAUNCH_SCRIPT_PATH
 Restart=on-failure
 
@@ -42,14 +46,10 @@ Restart=on-failure
 WantedBy=graphical-session.target
 EOF
 
-# 4. Activer et démarrer le service user
-echo "🔄 Activation du service systemd pour $USER_NAME..."
-sudo loginctl enable-linger "$USER_NAME"
-sudo -u "$USER_NAME" systemctl --user daemon-reload
-sudo -u "$USER_NAME" systemctl --user enable "$FIREFOX_SERVICE_NAME"
-sudo -u "$USER_NAME" systemctl --user start "$FIREFOX_SERVICE_NAME"
+echo "[i] Activation du service utilisateur"
+sudo loginctl enable-linger "$TARGET_USER"
+sudo -u "$TARGET_USER" systemctl --user daemon-reload
+sudo -u "$TARGET_USER" systemctl --user enable "$FIREFOX_SERVICE_NAME"
+sudo -u "$TARGET_USER" systemctl --user restart "$FIREFOX_SERVICE_NAME"
 
-echo ""
-echo "✅ Firefox en kiosk démarrera automatiquement après le boot ! 🎉"
-echo "🔧 Pour tester tout de suite :"
-echo "    sudo -u $USER_NAME systemctl --user start $FIREFOX_SERVICE_NAME"
+echo "[✓] Firefox sera lancé automatiquement après le démarrage de $APP_SERVICE_NAME"

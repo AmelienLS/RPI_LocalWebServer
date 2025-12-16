@@ -10,6 +10,7 @@ set "SERVICE_NAME=armoire_server"
 set "VENV_DIR=%PROJECT_DIR%\venv"
 set "WSGI_FILE=%PROJECT_DIR%\wsgi.py"
 set "RUN_SCRIPT_PATH=%PROJECT_DIR%\run_server.bat"
+set "INSTANCE_DIR=%PROJECT_DIR%\instance"
 
 :: Verifier les prerequis
 echo [i] Verification des prerequis (Python et Git)...
@@ -56,9 +57,15 @@ pip install --upgrade pip
 pip install flask waitress
 call "%VENV_DIR%\Scripts\deactivate.bat"
 
-:: 4. Generer le fichier wsgi.py
+:: 4. Initialiser la base de donnees
 echo.
-echo [4] Generation du fichier wsgi.py...
+echo [4] Initialisation de la base de donnees...
+if not exist "%INSTANCE_DIR%" mkdir "%INSTANCE_DIR%"
+python "%PROJECT_DIR%\scripts\init_db.py" --database "%INSTANCE_DIR%\armoire.db" --force --admin-identifiant admin --admin-prenom Admin --admin-nom Utilisateur
+
+:: 5. Generer le fichier wsgi.py
+echo.
+echo [5] Generation du fichier wsgi.py...
 (
     echo from APP import app
     echo.
@@ -66,18 +73,18 @@ echo [4] Generation du fichier wsgi.py...
     echo     app.run()
 ) > "%WSGI_FILE%"
 
-:: 5. Creer le script de lancement pour la tache planifiee
+:: 6. Creer le script de lancement pour la tache planifiee
 echo.
-echo [5] Creation du script de lancement du serveur...
+echo [6] Creation du script de lancement du serveur...
 (
     echo @echo off
     echo call "%VENV_DIR%\Scripts\activate.bat"
     echo waitress-serve --host 127.0.0.1 --port 5000 wsgi:app
 ) > "%RUN_SCRIPT_PATH%"
 
-:: 6. Creer la tache planifiee pour lancer le serveur au demarrage
+:: 7. Creer la tache planifiee pour lancer le serveur au demarrage
 echo.
-echo [6] Creation de la tache planifiee (%SERVICE_NAME%)...
+echo [7] Creation de la tache planifiee (%SERVICE_NAME%)...
 schtasks /query /tn "%SERVICE_NAME%" >nul 2>nul
 if %errorlevel% equ 0 (
     echo [i] La tache planifiee existe deja. Mise a jour...
