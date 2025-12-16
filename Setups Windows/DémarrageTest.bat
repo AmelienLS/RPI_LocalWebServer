@@ -1,32 +1,6 @@
 @echo off
-setlocal EnableDelayedExpansion
-set "INTERACTIVE_MODE=0"
-set "SKIP_BRANCH_MENU=0"
-
-if /I "%~1"=="--run" (
-  shift
-  set "BRANCH=%~1"
-  shift
-  set "SKIP_BRANCH_MENU=1"
-  goto CONTINUE_EXECUTION
-)
-
-set "CMD_ORIGINAL=%CMDCMDLINE%"
-echo %CMD_ORIGINAL% | find /I "/c" >nul
-if %errorlevel%==0 (
-  if /I not "%~1"=="--persist" (
-    start "" cmd /k "set RPI_WRAPPER=1 & \"%~f0\" --persist"
-    exit /b
-  ) else (
-    shift
-  )
-) else (
-  if /I "%~1"=="--persist" shift
-)
-set "INTERACTIVE_MODE=1"
-
-:CONTINUE_EXECUTION
 chcp 65001 >nul
+setlocal
 
 :: Variables
 set "PROJECT_DIR=%USERPROFILE%\RPI_LocalWebServer-Release"
@@ -78,69 +52,22 @@ if errorlevel 1 (
 echo [OK] Prérequis OK.
 echo.
 
-if "%SKIP_BRANCH_MENU%"=="1" goto BRANCH_CHOICE_DONE
-
 :: Affichage des branches disponibles
 echo [i] Récupération des branches disponibles...
 echo.
 echo Branches disponibles:
 git ls-remote --heads "%REPO_URL%" > "%TEMP%\git_branches.txt"
-set "BRANCH_COUNT=0"
-set "DEFAULT_BRANCH_INDEX=1"
 for /F "tokens=*" %%a in ('type "%TEMP%\git_branches.txt" ^| findstr "refs/heads/"') do (
   for /F "tokens=3 delims=/" %%b in ("%%a") do (
-    set /a BRANCH_COUNT+=1
-    set "BRANCH_!BRANCH_COUNT!=%%b"
-    if /I "%%b"=="main" set "DEFAULT_BRANCH_INDEX=!BRANCH_COUNT!"
-    echo   !BRANCH_COUNT!. %%b
+    echo - %%b
   )
 )
 del "%TEMP%\git_branches.txt" >nul 2>&1
 echo.
 
-if "%BRANCH_COUNT%"=="0" goto BRANCH_CHOICE_MANUAL
-goto BRANCH_CHOICE_NUMERIC
-
-:BRANCH_CHOICE_MANUAL
-echo [!] Impossible de récupérer la liste des branches (git ls-remote a peut-être échoué).
-set "BRANCH="
-set /p BRANCH="[?] Entrez le nom de la branche à utiliser [main] : "
-if "%BRANCH%"=="" set "BRANCH=main"
-goto BRANCH_CHOICE_DONE
-
-:BRANCH_CHOICE_NUMERIC
-set "BRANCH_SELECTION="
-set /p BRANCH_SELECTION="[?] Choisissez le numéro de la branche [%DEFAULT_BRANCH_INDEX+1%] : "
-if "%BRANCH_SELECTION%"=="" set "BRANCH_SELECTION=%DEFAULT_BRANCH_INDEX%"
-
-set /a BRANCH_INDEX=%BRANCH_SELECTION% 2>nul
-if errorlevel 1 goto BRANCH_CHOICE_CUSTOM
-if %BRANCH_INDEX% LSS 1 goto BRANCH_CHOICE_INVALID
-if %BRANCH_INDEX% GTR %BRANCH_COUNT% goto BRANCH_CHOICE_INVALID
-for /F "delims=" %%B in ("!BRANCH_%BRANCH_INDEX%!") do set "BRANCH=%%B"
-goto BRANCH_CHOICE_DONE
-
-:BRANCH_CHOICE_INVALID
-echo [!] Numéro invalide, utilisation de la branche par défaut.
-for /F "delims=" %%B in ("!BRANCH_%DEFAULT_BRANCH_INDEX%!") do set "BRANCH=%%B"
-goto BRANCH_CHOICE_DONE
-
-:BRANCH_CHOICE_CUSTOM
-echo [i] Valeur non-numérique, utilisation directe de "%BRANCH_SELECTION%".
-set "BRANCH=%BRANCH_SELECTION%"
-goto BRANCH_CHOICE_DONE
-
-:BRANCH_CHOICE_DONE
-if "%SKIP_BRANCH_MENU%"=="1" goto BRANCH_SELECTED
-if "%RPI_WRAPPER%"=="1" (
-  echo [i] Branche sélectionnée : %BRANCH%
-  echo [i] Ouverture d'une nouvelle fenêtre pour le déploiement...
-  start "" cmd /c "%~f0" --run "%BRANCH%"
-  exit
-)
-goto BRANCH_SELECTED
-
-:BRANCH_SELECTED
+:: Demande de la branche à utiliser
+set /p BRANCH="[?] Quelle branche souhaitez-vous utiliser ? [main] : "
+if "%BRANCH%"=="" set BRANCH=main
 echo [i] Branche sélectionnée : %BRANCH%
 echo.
 
@@ -214,10 +141,5 @@ pushd "%PROJECT_DIR%"
     )
 popd
 call "%VENV_DIR%\Scripts\deactivate.bat"
-
-if "%INTERACTIVE_MODE%"=="1" (
-  echo.
-  pause
-)
 
 endlocal
