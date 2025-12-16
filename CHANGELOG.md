@@ -1,5 +1,9 @@
 # Journal des modifications
 
+## [2.1.5] - 2025-12-21
+### Modifié
+- Le script Windows se ferme automatiquement après l'exécution (et à l'arrêt du serveur) lorsque la branche a été choisie, en supprimant la pause finale hors mode interactif.
+
 ## [2.1.4] - 2025-12-20
 ### Modifié
 - Séparation du script `Demarrage_selection_branche.bat` en deux phases : la sélection de branche reste interactive (fenêtre persistante) puis relance automatiquement l'exécution standard avec la branche choisie afin que la fenêtre se referme ensuite, comme demandé.

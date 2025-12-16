@@ -212,7 +212,9 @@ pushd "%PROJECT_DIR%"
 popd
 call "%VENV_DIR%\Scripts\deactivate.bat"
 
-echo.
-pause
+if "%INTERACTIVE_MODE%"=="1" (
+  echo.
+  pause
+)
 
 endlocal
