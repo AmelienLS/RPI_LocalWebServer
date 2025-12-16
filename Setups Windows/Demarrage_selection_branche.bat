@@ -165,4 +165,7 @@ pushd "%PROJECT_DIR%"
 popd
 call "%VENV_DIR%\Scripts\deactivate.bat"
 
+echo.
+pause
+
 endlocal
