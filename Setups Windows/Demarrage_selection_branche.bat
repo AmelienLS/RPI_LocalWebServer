@@ -15,7 +15,7 @@ set "CMD_ORIGINAL=%CMDCMDLINE%"
 echo %CMD_ORIGINAL% | find /I "/c" >nul
 if %errorlevel%==0 (
   if /I not "%~1"=="--persist" (
-    start "" cmd /k "%~f0" --persist
+    start "" cmd /k "set RPI_WRAPPER=1 & \"%~f0\" --persist"
     exit /b
   ) else (
     shift
@@ -132,10 +132,13 @@ goto BRANCH_CHOICE_DONE
 
 :BRANCH_CHOICE_DONE
 if "%SKIP_BRANCH_MENU%"=="1" goto BRANCH_SELECTED
-if "%INTERACTIVE_MODE%"=="1" (
+if "%RPI_WRAPPER%"=="1" (
+  echo [i] Branche sélectionnée : %BRANCH%
+  echo [i] Ouverture d'une nouvelle fenêtre pour le déploiement...
   start "" cmd /c "%~f0" --run "%BRANCH%"
-  exit /b
+  exit
 )
+goto BRANCH_SELECTED
 
 :BRANCH_SELECTED
 echo [i] Branche sélectionnée : %BRANCH%

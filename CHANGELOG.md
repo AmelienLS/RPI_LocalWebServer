@@ -1,22 +1,22 @@
 # Journal des modifications
 
-## [2.1.5] - 2025-12-21
+## [2.1.5] - 2025-12-16
 ### Modifié
 - Le script Windows se ferme automatiquement après l'exécution (et à l'arrêt du serveur) lorsque la branche a été choisie, en supprimant la pause finale hors mode interactif.
 
-## [2.1.4] - 2025-12-20
+## [2.1.4] - 2025-12-16
 ### Modifié
 - Séparation du script `Demarrage_selection_branche.bat` en deux phases : la sélection de branche reste interactive (fenêtre persistante) puis relance automatiquement l'exécution standard avec la branche choisie afin que la fenêtre se referme ensuite, comme demandé.
 
-## [2.1.3] - 2025-12-19
+## [2.1.3] - 2025-12-16
 ### Corrigé
 - Fiabilisation de la sélection de branche dans `Demarrage_selection_branche.bat` (boucles `goto` explicites plutôt que blocs imbriqués) pour éviter les erreurs « . était inattendu » et garantir l'affichage des invites.
 
-## [2.1.2] - 2025-12-18
+## [2.1.2] - 2025-12-16
 ### Corrigé
 - Lancement via double-clic maintient désormais la console ouverte (le script se relance automatiquement dans une session `cmd /k`), garantissant l'affichage des invites de saisie.
 
-## [2.1.1] - 2025-12-17
+## [2.1.1] - 2025-12-16
 ### Corrigé
 - `Demarrage_selection_branche.bat` redemande maintenant le nom d'une branche si la liste distante n'est pas disponible, évitant la fermeture immédiate du script au double-clic.
 
