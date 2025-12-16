@@ -1,10 +1,10 @@
 # Journal des modifications
 
-## [2.1.0] - 2025-09-05
+## [2.1.0] - 2025-12-16
 ### Modifié
 - Le script Windows `Demarrage_selection_branche.bat` affiche désormais les branches numérotées et permet de sélectionner la branche cible en saisissant son numéro plutôt que le nom complet.
 
-## [2.0.0] - 2025-09-01
+## [2.0.0] - 2025-12-16
 ### Ajouté
 - Script d'initialisation `scripts/init_db.py` et schéma partagé pour générer localement la base SQLite.
 - Documentation enrichie pour détailler la structure du projet, la configuration multiplateforme et les commandes d'exécution.

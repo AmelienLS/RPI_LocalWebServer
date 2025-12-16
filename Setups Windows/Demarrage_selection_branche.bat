@@ -2,6 +2,16 @@
 chcp 65001 >nul
 setlocal EnableDelayedExpansion
 
+:: Assure qu'un double-clic (cmd /c) relance le script dans une console persistante
+if not defined __KEEP_CONSOLE_OPEN__ (
+  echo %CMDCMDLINE% | find /I " /c " >nul
+  if not errorlevel 1 (
+    set "__KEEP_CONSOLE_OPEN__=1"
+    start "" /D "%~dp0" cmd /k ""%~f0" %*"
+    exit /b
+  )
+)
+
 :: Variables
 set "PROJECT_DIR=%USERPROFILE%\RPI_LocalWebServer-Release"
 set "REPO_URL=https://github.com/AmelienLS/RPI_LocalWebServer.git"
