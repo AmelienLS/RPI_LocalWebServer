@@ -13,10 +13,9 @@ Application web développée avec Flask pour gérer des sérigraphies sur une Ra
 Le projet est organisé comme suit :
 
 - **Racine du projet**  
-  - `APP.py` : Point d'entrée principal de l’application. Il configure Flask, définit les routes et gère la connexion à la base de données via la fonction [`get_db_connection`](app.py#L11).
-  - `armoire.db` : Fichier SQLite contenant les données des sérigraphies et des utilisateurs. Il n'est plus versionné pour
-    éviter de conserver des données personnelles dans l'historique Git ; créez ou restaurez ce fichier depuis une sauvegarde
-    locale lors du déploiement.
+  - `APP.py` : Point d'entrée principal de l’application. Il configure Flask, définit les routes et gère la connexion à la base de données via la fonction [`get_db_connection`](APP.py#L76).
+  - `instance/` : Répertoire ignoré par Git qui héberge la base SQLite générée localement (`instance/armoire.db`).
+  - `scripts/init_db.py` : Script CLI qui crée/réinitialise la base en appliquant le schéma situé dans [`database/schema.sql`](database/schema.sql).
   - `README.md` : Documentation principale du projet.
   
 - **Dossier Templates/**  
@@ -37,20 +36,18 @@ Le projet est organisé comme suit :
 ## Explications détaillées du Code
 
 ### Configuration et Lancement
-- **Fichier [app.py](app.py)**  
+- **Fichier [APP.py](APP.py)**  
   Ce fichier initialise l’application Flask :
-  - **Clé secrète** : Générée dynamiquement pour sécuriser les sessions (via `secrets.token_hex(16)`).
-  - **Connexion à la base de données** : La fonction `get_db_connection()` crée et retourne une connexion à la base SQLite avec une `row_factory` pour permettre l’accès par noms de colonnes.
-  - **Structure optimisée** : Le code a été refactorisé pour inclure des décorateurs pour la sécurité et des fonctions utilitaires pour réduire la duplication de code.
-  - **Ouverture automatique** : La page principale s’ouvre automatiquement par `webbrowser.open('http://localhost:5000/')`.
+  - **Clé secrète** : Chargée depuis la variable d'environnement `FLASK_SECRET_KEY`. À défaut, une valeur aléatoire sécurise les sessions pour l'exécution courante.
+  - **Connexion à la base de données** : La fonction `get_db_connection()` ouvre le fichier `instance/armoire.db`. Ce fichier est généré via `scripts/init_db.py` et n'est jamais versionné.
+  - **Paramètres runtime** : Les variables `APP_HOST`, `APP_PORT`, `APP_AUTO_OPEN_BROWSER` ou `APP_BROWSER_CMD` permettent d'adapter l'exécution sans modifier le code (serveur accessible sur le réseau, ouverture automatique du navigateur, etc.).
 
-### Décorateurs et Fonctions Utilitaires
-Pour améliorer la lisibilité et la maintenance, le code utilise :
-- **Décorateurs `@login_required` et `@admin_required`** : Ces décorateurs sont appliqués aux routes pour s'assurer que seul un utilisateur connecté (ou un administrateur) peut y accéder. Cela centralise la logique de sécurité et évite la répétition de code.
-- **Fonction `get_ecran_by_ref()`** : Une fonction utilitaire qui factorise la logique de recherche d'un écran dans la base de données, la rendant réutilisable à travers plusieurs routes.
+### Gestion des accès et fonctions utilitaires
+- Les routes sensibles vérifient systématiquement la présence de `session['prenom']` et le flag `session['admin']` pour limiter l'accès aux utilisateurs connectés ou aux administrateurs.
+- La fonction `get_db_connection()` centralise l'ouverture de la base et garantit que les résultats peuvent être parcourus par nom de colonne (`sqlite3.Row`).
 
 ### Routes Principales
-La plupart des routes sont protégées par les décorateurs `@login_required` et/ou `@admin_required` pour sécuriser l'accès.
+Chaque route sensible commence par vérifier les informations présentes dans la session Flask et redirige vers `/` en cas d'accès non autorisé.
 - **Route `/` (login)**  
   Gère l’authentification en vérifiant l’identifiant dans la table `users` de la base de données.
   
@@ -73,7 +70,7 @@ La plupart des routes sont protégées par les décorateurs `@login_required` et
   Le statut `sorti` et une indication relative au lavage (via `lave`) sont mis à jour dans la base.
 
 - **Route `/shutdown`**  
-  Accessible uniquement par les administrateurs de la raspberry, cette route permet d'éteindre proprement le système (la Raspberry Pi). Elle exécute une commande système (`sudo shutdown -h now`). Un bouton rouge sur la page de connexion permet de déclencher cette action, mais elle ne fonctionnera que si une session administrateur est déjà active dans le navigateur.
+  Ferme proprement le service Gunicorn (Windows) ou exécute `sudo shutdown -h now` (Linux). Cette action doit être restreinte au navigateur de la Raspberry via les mécanismes d'authentification décrits plus haut.
 
 ### Gestion du Frontend
 - **Templates HTML**  
@@ -87,16 +84,38 @@ La plupart des routes sont protégées par les décorateurs `@login_required` et
 - **Scripts JavaScript**  
   Les fichiers dans le dossier [Functions](Functions/) contiennent des scripts permettant, par exemple, de filtrer dynamiquement les tableaux d’affichage ([Ecran.js](Functions/Ecran.js)).
 
+## Initialiser la base de données
+
+Le dépôt ne contient plus de fichier `.db`. Chaque environnement doit générer sa base à partir du schéma partagé :
+
+```bash
+python -m venv .venv
+source .venv/bin/activate            # Windows : .venv\Scripts\activate
+pip install -r requirements.txt
+python scripts/init_db.py --force \
+  --admin-identifiant admin \
+  --admin-prenom Admin \
+  --admin-nom Utilisateur
+```
+
+Options utiles :
+
+- `--database /chemin/custom.db` : change l’emplacement du fichier SQLite (par défaut `instance/armoire.db`).
+- `--skip-admin` : n’ajoute aucun utilisateur. À utiliser si vous souhaitez injecter vos propres données avec un autre outil.
+- `--force` : remplace un fichier existant (utile lors d’un reset complet).
+
+Le script peut être relancé à tout moment pour repartir d’une base propre.
+
 ## Conseils pour la Maintenance
 
 - **Validation et Gestion des Erreurs**  
   L’application inclut des validations pour s’assurer que les données utilisateurs respectent des contraintes précises (longueur des chaînes, format particulier, etc.). Vérifier que les conditions correspondent bien aux besoins.
   
 - **Sécurité**  
-  La clé secrète de l’application, générée au démarrage, sécurise la gestion des sessions. De plus, les décorateurs `@login_required` et `@admin_required` protègent les routes sensibles contre les accès non autorisés.
+  La clé secrète de l’application, générée au démarrage ou fournie via `FLASK_SECRET_KEY`, sécurise la gestion des sessions. Les routes vérifient explicitement la présence d'un utilisateur connecté et de son statut admin avant de poursuivre.
   
 - **Modularité**  
-  La séparation entre le backend (Flask et SQLite) et le frontend (HTML, CSS, JavaScript) facilite la compréhension et la maintenance du code. L'utilisation de décorateurs et de fonctions utilitaires renforce cette modularité en isolant les logiques spécifiques (sécurité, accès aux données). Attention a bien vérifier que les chemins relatifs sont bien correct pour permettre une bonne discussion entre le back et le front.
+  La séparation entre le backend (Flask et SQLite) et le frontend (HTML, CSS, JavaScript) facilite la compréhension et la maintenance du code. Les helpers centrés sur l'accès à la base et la gestion de session évitent la duplication et clarifient les responsabilités.
 
 - **Base de donnée**
   la base de donnée SQLite permet de stocker toute les données. Il faut bien faire attention que les contraintes de la base de données correspondent aux contraintes donnée par le backend. Pour lire la DB, il est possible soit d'utiliser une application tierce (DB browser for SQLite par exemple) ou bien une extension Visual Studio Code (SQLite3 Editor par exemple)
@@ -107,32 +126,40 @@ Pour assurer un fonctionnement autonome sur une Raspberry Pi équipée d'Ubuntu,
 
 ### 1. Démarrage automatique de l'application (Service Systemd)
 
-Le script [`setup_armoire.sh`](Setups%20Linux/setup_armoire.sh) configure l'application Flask pour qu'elle s'exécute en tant que service `systemd` au démarrage du système. Voici ses actions principales :
+Le script [`Setup_release.sh`](Setups%20Linux/Setup_release.sh) prépare une instance autonome dans `~/RPI_LocalWebServer-release` :
 - **Installation des dépendances** : Installe `python3`, `venv` et `pip`.
-- **Environnement virtuel** : Crée un environnement virtuel dans le dossier du projet pour isoler les dépendances Python.
-- **Installation de Flask & Gunicorn** : Installe les bibliothèques nécessaires dans l'environnement virtuel. Gunicorn est utilisé comme serveur WSGI, plus robuste que le serveur de développement de Flask.
-- **Création du service `armoire.service`** : Un fichier de service est créé dans `/etc/systemd/system/`. Ce service lance l'application via Gunicorn sur le port 5000.
+- **Environnement virtuel** : Crée un environnement virtuel dans le dossier de release pour isoler les dépendances Python, puis installe `Flask`, `gunicorn`, etc. via `requirements.txt`.
+- **Base de données** : Exécute `scripts/init_db.py --force --admin-identifiant <id>` pour générer une base propre dans `instance/armoire.db`. Aucun fichier utilisateur n'est copié.
+- **Création du service `armoire-release-<user>.service`** : Le service `systemd` lance l'application via Gunicorn sur le port 5000 (IPv4 et IPv6) et redémarre automatiquement en cas de crash.
 - **Activation du service** : Le service est activé pour se lancer automatiquement à chaque démarrage (`systemctl enable armoire`).
 
 ### 2. Lancement automatique de Firefox en mode Kiosque
 
-Pour que l'interface soit directement accessible, Firefox est configuré pour se lancer en plein écran (mode kiosque) et afficher l'application. Deux méthodes sont proposées via des scripts :
+Le script [`Firefox_autostart.sh`](Setups%20Linux/Firefox_autostart.sh) crée un service `systemd --user` qui attend le démarrage du service web, puis lance Firefox en mode kiosque sur `http://127.0.0.1:5000`. Le script accepte désormais des variables d'environnement (`TARGET_USER`, `APP_SERVICE_NAME`, `FIREFOX_ARGS`, etc.) pour l'adapter facilement à n'importe quel compte sans éditer le fichier.
 
-- **Méthode 1 (Autostart Desktop)** : Le script [`setup_firefox_autostart.sh`](Setups%20Linux/setup_firefox_autostart.sh) crée un fichier `.desktop` dans le dossier `~/.config/autostart`. Ce fichier exécute un script qui attend 10 secondes (pour laisser le temps au service de démarrer) puis lance Firefox en mode kiosque sur `http://localhost:5000`.
+Grâce à cette configuration, la Raspberry Pi devient un terminal dédié à l'application : au démarrage, le serveur web se lance en arrière-plan, puis le navigateur s'ouvre automatiquement en plein écran sur l'interface.
 
-- **Méthode 2 (Service Systemd Utilisateur)** : Le script [`install_firefox_autostart_systemd.sh`](Setups%20Linux/install_firefox_autostart_systemd.sh) crée un service `systemd` au niveau de l'utilisateur. Ce service se lance après le démarrage de la session graphique et exécute la même commande pour lancer Firefox. Cette méthode est souvent plus fiable.
+## Comment Lancer le Projet (usage générique)
 
-Grâce à cette configuration, la Raspberry Pi devient un terminal dédié à l'application : au démarrage, le serveur web se lance en arrière-plan et le navigateur s'ouvre automatiquement en plein écran sur l'interface de l'application.
-
-## Comment Lancer le Projet
-Le projet se lance automatiquement grace a la configuration de la raspberry. Dans le cas contraire, effectuer la manipultion suivante:
-1. Assurez-vous que Python et Flask sont installés.
-2. Placez-vous dans le dossier du projet.
-3. Double cliquez sur appStartWindows ou appStartLinux selon votre environnement.
-   En cas de probleme, lancez la commande :
-   flask --app "app.py" run
-4. Le navigateur s’ouvrira automatiquement pour afficher l’application.
-5. Pour terminer le serveur, utilisez Ctrl+C dans l’invite de commande.
+1. **Installer les dépendances**
+   ```bash
+   python -m venv .venv
+   source .venv/bin/activate            # Windows : .venv\Scripts\activate
+   pip install -r requirements.txt
+   ```
+2. **Initialiser la base**
+   ```bash
+   python scripts/init_db.py --force --admin-identifiant admin
+   ```
+   Vous pouvez passer vos propres noms/prénoms ou l’option `--skip-admin`.
+3. **Démarrer l’application**
+   ```bash
+   export APP_AUTO_OPEN_BROWSER=1        # Optionnel
+   python APP.py                         # ou: flask --app APP run
+   ```
+   Les variables `APP_HOST` et `APP_PORT` permettent d’exposer l’application sur une IP différente (`APP_HOST=0.0.0.0` pour accepter les connexions réseau).
+4. **Arrêter le serveur**  
+   Appuyez sur `Ctrl+C` dans le terminal ou arrêtez le service systemd / la tâche planifiée suivant votre environnement.
 
 ## Création d'un exécutable Windows
 Pour faciliter le déploiement sur un nouvel ordinateur, un script `build_exe.bat`

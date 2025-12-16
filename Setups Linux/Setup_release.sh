@@ -16,6 +16,10 @@ readonly VENV_DIR="$RELEASE_DIR/venv"
 readonly WSGI_FILE="$RELEASE_DIR/wsgi.py"
 readonly PYTHON_BIN="$(which python3)"
 readonly SERVICE_FILE="/etc/systemd/system/$SERVICE_NAME.service"
+readonly ADMIN_IDENT="${ADMIN_IDENT:-admin}"
+readonly ADMIN_PRENOM="${ADMIN_PRENOM:-Admin}"
+readonly ADMIN_NOM="${ADMIN_NOM:-User}"
+readonly SKIP_ADMIN="${SKIP_ADMIN:-false}"
 
 # Détection automatique du groupe
 if getent group www-data >/dev/null 2>&1; then
@@ -100,7 +104,7 @@ copy_project_files() {
     done
     
     # Dossiers optionnels
-    local optional_dirs=("Templates" "Styles" "Functions" "Images" "static")
+    local optional_dirs=("Templates" "Styles" "Functions" "Images" "static" "scripts" "database")
     for dir in "${optional_dirs[@]}"; do
         if [[ -d "$PROJECT_SRC_DIR/$dir" ]]; then
             cp -r "$PROJECT_SRC_DIR/$dir" "$RELEASE_DIR/"
@@ -135,6 +139,22 @@ setup_virtual_environment() {
     
     deactivate
     log_success "Environnement virtuel configuré"
+}
+
+initialize_database() {
+    log_info "Initialisation de la base de données..."
+
+    mkdir -p "$RELEASE_DIR/instance"
+    local cmd=("$PYTHON_BIN" "$RELEASE_DIR/scripts/init_db.py" "--database" "$RELEASE_DIR/instance/armoire.db" "--force")
+
+    if [[ "${SKIP_ADMIN,,}" == "true" ]]; then
+        cmd+=("--skip-admin")
+    else
+        cmd+=("--admin-identifiant" "$ADMIN_IDENT" "--admin-prenom" "$ADMIN_PRENOM" "--admin-nom" "$ADMIN_NOM")
+    fi
+
+    "${cmd[@]}" >/dev/null
+    log_success "Base de données initialisée"
 }
 
 # Fonction pour générer le fichier WSGI
@@ -206,8 +226,8 @@ setup_permissions() {
     sudo chmod -R g+w "$RELEASE_DIR"
     
     # Sécuriser les fichiers sensibles
-    if [[ -f "$RELEASE_DIR/armoire.db" ]]; then
-        chmod 640 "$RELEASE_DIR/armoire.db"
+    if [[ -f "$RELEASE_DIR/instance/armoire.db" ]]; then
+        chmod 640 "$RELEASE_DIR/instance/armoire.db"
     fi
     
     log_success "Permissions configurées"
@@ -308,6 +328,7 @@ main() {
     
     copy_project_files
     setup_virtual_environment
+    initialize_database
     create_wsgi_file
     create_systemd_service
     setup_permissions

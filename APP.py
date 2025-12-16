@@ -1,84 +1,63 @@
-from flask import *
-import sqlite3, secrets, os, webbrowser, subprocess, platform
+import os
+import platform
+import secrets
+import shlex
+import sqlite3
+import subprocess
+import webbrowser
+from pathlib import Path
 
-# Configuration d'écran pour Windows
-SCREEN_CONFIG = {
-    "screen_number": 0,  # 0 = écran principal, 1 = écran secondaire, etc.
-    "use_screen_selection": True  # Activer/désactiver la sélection d'écran
-}
+from flask import Flask, redirect, render_template, request, send_from_directory, session
 
-SCREEN_CONFIG = {
-    "use_screen_selection": True,
-    "screen_number": 1  # change selon tes besoins
-}
+# Répertoires de base
+BASE_DIR = Path(__file__).resolve().parent
+TEMPLATE_DIR = BASE_DIR / "Templates"
+STATIC_DIR = BASE_DIR / "Styles"
+INSTANCE_DIR = Path(os.environ.get("APP_INSTANCE_DIR", BASE_DIR / "instance"))
+INSTANCE_DIR.mkdir(parents=True, exist_ok=True)
 
-def open_browser_on_screen(url):
-    system_os = platform.system()
+# Fichier de base de données (non versionné)
+DATABASE_PATH = Path(os.environ.get("DATABASE_PATH", INSTANCE_DIR / "armoire.db"))
+DB_SETUP_HINT = "La base de données est introuvable. Lancez `python scripts/init_db.py` pour l'initialiser."
 
-    if system_os == "Windows" and SCREEN_CONFIG["use_screen_selection"]:
-        try:
-            # Chemin standard pour Microsoft Edge (Windows 10/11)
-            edge_path = r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"
-            if not os.path.exists(edge_path):
-                edge_path = r"C:\Program Files\Microsoft\Edge\Application\msedge.exe"
-
-            if not os.path.exists(edge_path):
-                raise FileNotFoundError("Microsoft Edge non trouvé au chemin habituel.")
-
-            # Position écran
-            screen_width = 1920
-            position_x = SCREEN_CONFIG["screen_number"] * screen_width
-
-            edge_args = [
-                edge_path,
-                f"--window-position={position_x},0",
-                f"--start-fullscreen",  # mode kiosque
-                "--disable-infobars",
-                "--disable-extensions",
-                url
-            ]
-
-            subprocess.Popen(edge_args)
-            print(f"Edge ouvert en mode kiosque sur l'écran {SCREEN_CONFIG['screen_number']} 🚀")
-
-        except Exception as e:
-            print(f"Erreur lors de l'ouverture de Edge 😱 : {e}")
-            webbrowser.open(url)
-
-    else:
-        webbrowser.open(url)
-
-# Ouvrir automatiquement le navigateur à l'URL locale
-# On lance le navigateur web pour afficher l'application Flask dès le démarrage
-open_browser_on_screen('http://localhost:5000/')
-
-# Détermination du répertoire de base du projet
-# On récupère le chemin absolu du fichier courant pour définir le répertoire de base
-base_dir = os.path.dirname(os.path.abspath(__file__))
+# Configuration d'ouverture automatique du navigateur (désactivée par défaut)
+AUTO_OPEN_BROWSER = os.environ.get("APP_AUTO_OPEN_BROWSER", "0").lower() in {"1", "true", "yes", "on"}
+BROWSER_CMD = os.environ.get("APP_BROWSER_CMD")
 
 # Initialisation de l'application Flask en précisant les dossiers pour les templates et les fichiers statiques (styles)
 app = Flask(
     __name__,
-    template_folder=os.path.join(base_dir, "Templates"),
-    static_folder=os.path.join(base_dir, "Styles"),
+    template_folder=str(TEMPLATE_DIR),
+    static_folder=str(STATIC_DIR),
     static_url_path='/Styles'
 )
-# Générer une clé secrète aléatoire pour sécuriser la session utilisateur
-def generate_secret_key():
-    app.secret_key = secrets.token_hex(16)
+app.secret_key = os.environ.get("FLASK_SECRET_KEY", secrets.token_hex(32))
 
-generate_secret_key()
 
-# Définition du chemin vers la base de données SQLite
-project_root = os.path.dirname(os.path.realpath(__file__))
-database = os.path.join(project_root, 'armoire.db')
+def maybe_open_browser(url: str) -> None:
+    """Ouvre le navigateur local si l'option est activée."""
+    if not AUTO_OPEN_BROWSER:
+        return
+
+    try:
+        if BROWSER_CMD:
+            args = shlex.split(BROWSER_CMD) + [url]
+            subprocess.Popen(args)
+        else:
+            webbrowser.open(url)
+    except Exception as exc:  # pragma: no cover - dépendant d'OS
+        print(f"Impossible d'ouvrir un navigateur automatiquement: {exc}")
+
+def database_ready() -> bool:
+    return DATABASE_PATH.exists()
+
 
 def get_db_connection():
     """Renvoie une connexion à la base de données SQLite.
        - Crée une connexion à la base SQLite.
        - Configure la connexion pour retourner des objets Row (accès par nom de colonne).
     """
-    conn = sqlite3.connect(database)
+    conn = sqlite3.connect(DATABASE_PATH)
     conn.row_factory = sqlite3.Row
     return conn
 
@@ -90,14 +69,20 @@ def login():
     - Méthode POST : récupère l'identifiant, vérifie son existence dans la BD et démarre la session.
     - Méthode GET  : affiche le formulaire de connexion.
     """
+    if not database_ready():
+        return render_template('login.html', error=DB_SETUP_HINT)
+
     if request.method == 'POST':
         identifiant = request.form['identifiant']
         
-        # Connexion à la base pour récupérer les informations de l'utilisateur
-        with get_db_connection() as conn:
-            cursor = conn.cursor()
-            cursor.execute('SELECT prenom, admin FROM users WHERE identifiant = ?', (identifiant,))
-            user = cursor.fetchone()
+        try:
+            # Connexion à la base pour récupérer les informations de l'utilisateur
+            with get_db_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute('SELECT prenom, admin FROM users WHERE identifiant = ?', (identifiant,))
+                user = cursor.fetchone()
+        except sqlite3.OperationalError as exc:
+            return render_template('login.html', error=f"Erreur base de données : {exc}")
 
         if user:
             prenom, admin = user
@@ -495,6 +480,11 @@ def send_images(filename):
     images_dir = os.path.join(base_dir, 'Images')
     return send_from_directory(images_dir, filename)
 
-# Lancement du serveur Flask (production avec debug désactivé)
+# Lancement du serveur Flask (production avec debug désactivé par défaut)
 if __name__ == '__main__':
-    app.run(debug=False)
+    host = os.environ.get("APP_HOST", "127.0.0.1")
+    port = int(os.environ.get("APP_PORT", "5000"))
+    browser_url = os.environ.get("APP_BROWSER_URL", f"http://127.0.0.1:{port}/")
+    maybe_open_browser(browser_url)
+    debug_enabled = os.environ.get("FLASK_DEBUG", "0").lower() in {"1", "true", "yes", "on"}
+    app.run(host=host, port=port, debug=debug_enabled)

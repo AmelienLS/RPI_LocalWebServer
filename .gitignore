@@ -1,17 +1,15 @@
+# Runtime artifacts
 __pycache__/
-venv/
 *.py[cod]
-*.pyo
-*.pyd
-.Python
-.env
-.pytest_cache/
-# Local databases and sensitive data dumps
 *.db
-!armoire.db
-*.sqlite
-*.sqlite3
-*.db-journal
+instance/
+!instance/.gitkeep
 
-# Local environment secrets
-.env.*
+# Environments
+venv/
+.env
+.venv/
+
+# OS / tools
+.DS_Store
+Thumbs.db
