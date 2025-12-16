@@ -4,4 +4,4 @@
 ### Ajouté
 - Publication initiale du projet.
 - Ajout de la licence MIT.
-- Documentation et guide de contribution en français.
+- Documentation et guide de contribution

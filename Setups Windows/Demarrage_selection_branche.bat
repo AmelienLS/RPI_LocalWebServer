@@ -1,6 +1,6 @@
 @echo off
 chcp 65001 >nul
-setlocal
+setlocal EnableDelayedExpansion
 
 :: Variables
 set "PROJECT_DIR=%USERPROFILE%\RPI_LocalWebServer-Release"
@@ -57,17 +57,40 @@ echo [i] Récupération des branches disponibles...
 echo.
 echo Branches disponibles:
 git ls-remote --heads "%REPO_URL%" > "%TEMP%\git_branches.txt"
+set "BRANCH_COUNT=0"
+set "DEFAULT_BRANCH_INDEX=1"
 for /F "tokens=*" %%a in ('type "%TEMP%\git_branches.txt" ^| findstr "refs/heads/"') do (
   for /F "tokens=3 delims=/" %%b in ("%%a") do (
-    echo - %%b
+    set /a BRANCH_COUNT+=1
+    set "BRANCH_!BRANCH_COUNT!=%%b"
+    if /I "%%b"=="main" set "DEFAULT_BRANCH_INDEX=!BRANCH_COUNT!"
+    echo   !BRANCH_COUNT!. %%b
   )
 )
 del "%TEMP%\git_branches.txt" >nul 2>&1
 echo.
 
-:: Demande de la branche à utiliser
-set /p BRANCH="[?] Quelle branche souhaitez-vous utiliser ? [main] : "
-if "%BRANCH%"=="" set BRANCH=main
+if "%BRANCH_COUNT%"=="0" (
+  echo [!] Aucune branche détectée. Utilisation de "main".
+  set "BRANCH=main"
+) else (
+  set "BRANCH_SELECTION="
+  set /p BRANCH_SELECTION="[?] Choisissez le numéro de la branche [%DEFAULT_BRANCH_INDEX%] : "
+  if "%BRANCH_SELECTION%"=="" set "BRANCH_SELECTION=%DEFAULT_BRANCH_INDEX%"
+
+  set "BRANCH=%BRANCH_SELECTION%"
+  set /a BRANCH_INDEX=%BRANCH_SELECTION% 2>nul
+  if errorlevel 1 (
+    echo [i] Valeur non-numérique, utilisation directe de "%BRANCH%".
+  ) else (
+    if %BRANCH_INDEX% GEQ 1 if %BRANCH_INDEX% LEQ %BRANCH_COUNT% (
+      for %%i in (%BRANCH_INDEX%) do set "BRANCH=!BRANCH_%%i!"
+    ) else (
+      echo [!] Numéro invalide, utilisation de la branche par défaut.
+      for %%i in (%DEFAULT_BRANCH_INDEX%) do set "BRANCH=!BRANCH_%%i!"
+    )
+  )
+)
 echo [i] Branche sélectionnée : %BRANCH%
 echo.
 
