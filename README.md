@@ -221,14 +221,24 @@ Les contributions sont les bienvenues ! Merci de consulter le fichier [CONTRIBU
 
 ## Tests
 
-Une suite de tests peut être exécutée avec [pytest](https://docs.pytest.org/) :
+Le dépôt embarque plusieurs suites automatisées :
 
-```bash
-pytest
-```
+- **Tests Flask/SQLite** : scripts, routes et workflows critiques vérifiés avec [pytest](https://docs.pytest.org/).  
+  ```bash
+  python -m venv .venv
+  source .venv/bin/activate            # Windows : .venv\Scripts\activate
+  pip install -r requirements.txt
+  pytest
+  ```
+- **Tests CLI et schéma** : `pytest` exécute aussi `scripts/init_db.py` dans un dossier temporaire et contrôle les contraintes définies dans `database/schema.sql`.
+- **Tests JavaScript** : le filtrage du tableau (`Functions/Ecran.js`) est validé avec [Vitest](https://vitest.dev/) et JSDOM dans `tests/js`.  
+  ```bash
+  cd tests/js
+  npm install
+  npm test
+  ```
 
-Si aucune vérification automatisée n’est définie, la commande s’exécutera tout de même pour confirmer qu’aucun test existant
-n’échoue.
+Des marqueurs Pytest (`tests/web`, `tests/db`, `tests/scripts`) permettent de cibler une zone précise si besoin (`pytest tests/web -q`).
 
 ## Licence
 
