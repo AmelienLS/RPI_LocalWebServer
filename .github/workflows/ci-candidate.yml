@@ -3,7 +3,9 @@ name: Candidate Tests
 on:
   push:
     branches:
-      - "*candidate"
+      - "**"
+    branches-ignore:
+      - "release"
 
 jobs:
   tests:
