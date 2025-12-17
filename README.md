@@ -1,6 +1,40 @@
 # RPI LocalWebServer
 
-Application web développée avec Flask pour gérer des sérigraphies sur une Raspberry Pi. Elle permet de suivre l'état des écrans, d'administrer les utilisateurs et de déployer facilement le service sur un environnement embarqué.
+Application web développée avec Flask pour gérer des sérigraphies sur une Raspberry Pi ou une inctance windows classique. Elle permet de suivre l'état des écrans, d'administrer les utilisateurs et de déployer facilement le service sur un environnement embarqué.
+
+## Continuité du projet
+
+La personne qui récupérera le projet pourra fork ce repo. Dans ce cas il faudra modifier les éléments suivants pour refléter le nouvel emplacement du dépôt :
+
+### Fichiers à modifier lors d'un changement d'emplacement du dépôt
+
+1. **Documentation (README.md)**
+   - Mettre à jour tous les liens vers les fichiers du projet (par exemple : `[APP.py](APP.py)`, `[ecran.html](Templates/ecran.html)`, etc.)
+   - Vérifier que les références au dépôt GitHub dans les liens correspondent au nouveau propriétaire/organisation
+
+2. **Scripts de déploiement Linux**
+   - **`Setups Linux/Setup_release.sh`** : Modifier la variable `Documentation=` dans la section `[Unit]` du service systemd (ligne ~235) pour pointer vers la nouvelle URL du dépôt
+   - Vérifier les commentaires et messages d'erreur qui pourraient référencer l'ancien dépôt
+
+3. **Scripts de déploiement Windows** 
+   - **`Setups Windows/Démarrage.bat`** : Modifier la ligne 7 `set "REPO_URL=https://github.com/AmelienLS/RPI_LocalWebServer.git"`
+   - **`Setups Windows/DémarrageTest.bat`** : Modifier la ligne 7 `set "REPO_URL=https://github.com/AmelienLS/RPI_LocalWebServer.git"`
+   - **`Setups Windows/Setup_armoire.bat`** : Modifier la ligne 8 `set "REPO_URL=https://github.com/AmelienLS/RPI_LocalWebServer.git"`
+   - Également vérifier toutes les références au nom du dossier `RPI_LocalWebServer-Release` si vous souhaitez le renommer
+
+4. **Configuration du projet**
+   - **`CONTRIBUTING.md`** : Mettre à jour les instructions de contribution et les liens vers le dépôt
+   - **`CHANGELOG.md`** : Ajouter une entrée mentionnant le changement d'emplacement du dépôt
+   - Vérifier les éventuelles configurations dans `package.json`, `setup.py` ou autres fichiers de métadonnées
+
+5. **Code source**
+   - Rechercher dans tous les fichiers Python (`.py`) et JavaScript (`.js`) les éventuelles références codées en dur à l'ancien dépôt
+   - Vérifier les commentaires de copyright ou de licence qui mentionnent le propriétaire original
+
+### Recommandations
+- Utiliser une recherche globale (par exemple `grep -r "AmelienLS/RPI_LocalWebServer"`) pour identifier toutes les références à l'ancien dépôt
+- Tester le déploiement après modification pour s'assurer que tous les liens et références fonctionnent correctement
+- Mettre à jour la documentation pour mentionner le fork et créditer le projet original
 
 ## Fonctionnalités
 
