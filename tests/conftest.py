@@ -36,8 +36,12 @@ def test_db(monkeypatch, tmp_path) -> Path:
 @pytest.fixture()
 def app(test_db):
     """Return a Flask app configured for testing with the temporary DB."""
-    from APP import app as flask_app
+    import APP as app_module
 
+    test_db_path = Path(os.environ["DATABASE_PATH"])
+    app_module.DATABASE_PATH = test_db_path
+
+    flask_app = app_module.app
     flask_app.config.update(
         {
             "TESTING": True,

@@ -411,17 +411,17 @@ def ranger():
             ref_ecran = request.form.get('ref_ecran')
             lavee = request.form.get('lavee') == 'oui'
 
-            cursor.execute("SELECT libelle, N FROM serigraphie WHERE ref_ecran = ? AND sorti = 1", (ref_ecran,))
+            cursor.execute("SELECT libelle, n FROM serigraphie WHERE ref_ecran = ? AND sorti = 1", (ref_ecran,))
             result = cursor.fetchone()
             if result:
                 cursor.execute("UPDATE serigraphie SET sorti = 0, lave = ? WHERE ref_ecran = ?",
                                (1 if lavee else 0, ref_ecran))
                 conn.commit()
-                emplacement = result['N']
+                emplacement = result['n']
             else:
                 error = "La écran sélectionnée n'existe pas ou n'est pas marquée comme sortie."
 
-        cursor.execute("SELECT ref_ecran, libelle, N FROM serigraphie WHERE sorti = 1")
+        cursor.execute("SELECT ref_ecran, libelle, n FROM serigraphie WHERE sorti = 1")
         serigraphies = cursor.fetchall()
 
     return render_template('ranger.html', serigraphies=serigraphies, emplacement=emplacement, error=error)
