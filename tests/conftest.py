@@ -29,6 +29,8 @@ def test_db(monkeypatch, tmp_path) -> Path:
     """
     db_path = tmp_path / "armoire.test.db"
     monkeypatch.setenv("DATABASE_PATH", str(db_path))
+    logs_dir = tmp_path / "logs"
+    monkeypatch.setenv("APP_LOGS_DIR", str(logs_dir))
     _init_database(db_path)
     return db_path
 

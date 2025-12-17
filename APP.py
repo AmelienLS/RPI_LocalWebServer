@@ -1,3 +1,4 @@
+import csv
 import os
 import platform
 import secrets
@@ -5,6 +6,7 @@ import shlex
 import sqlite3
 import subprocess
 import webbrowser
+from datetime import datetime, date
 from pathlib import Path
 
 from flask import Flask, redirect, render_template, request, send_from_directory, session
@@ -60,6 +62,95 @@ def get_db_connection():
     conn = sqlite3.connect(DATABASE_PATH)
     conn.row_factory = sqlite3.Row
     return conn
+
+
+def _ensure_log_tables(connection: sqlite3.Connection) -> None:
+    """Garantit la présence de la table de logs, utile pour les anciennes bases."""
+    connection.execute(
+        """
+        CREATE TABLE IF NOT EXISTS sortie_logs (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            ref_ecran INTEGER NOT NULL,
+            libelle TEXT NOT NULL,
+            personne TEXT NOT NULL,
+            sortie_ts TEXT NOT NULL,
+            rangement_ts TEXT,
+            lavee INTEGER,
+            FOREIGN KEY (ref_ecran) REFERENCES serigraphie (ref_ecran)
+        )
+        """
+    )
+    connection.execute(
+        "CREATE INDEX IF NOT EXISTS idx_sortie_logs_ref ON sortie_logs (ref_ecran, rangement_ts)"
+    )
+    connection.execute(
+        "CREATE INDEX IF NOT EXISTS idx_sortie_logs_date ON sortie_logs (sortie_ts)"
+    )
+
+
+def _current_timestamp() -> datetime:
+    """Point d'entrée centralisé pour l'heure courante (facile à surcharger dans les tests)."""
+    return datetime.now()
+
+
+def _get_logs_dir() -> Path:
+    """Retourne (et crée si besoin) le dossier où stocker les CSV journaliers."""
+    log_dir = Path(os.environ.get("APP_LOGS_DIR", INSTANCE_DIR / "logs"))
+    log_dir.mkdir(parents=True, exist_ok=True)
+    return log_dir
+
+
+def _log_file_path(log_date: date) -> Path:
+    return _get_logs_dir() / log_date.strftime("%d-%m-%Y.csv")
+
+
+def _sync_daily_log(connection: sqlite3.Connection, log_date: date) -> None:
+    """Regénère le fichier CSV du jour donné à partir de la table de logs."""
+    log_date_iso = log_date.isoformat()
+    cursor = connection.execute(
+        """
+        SELECT ref_ecran, libelle, personne, sortie_ts, rangement_ts, lavee
+        FROM sortie_logs
+        WHERE date(sortie_ts) = ?
+        ORDER BY datetime(sortie_ts) ASC, id ASC
+        """,
+        (log_date_iso,),
+    )
+    rows = cursor.fetchall()
+    log_path = _log_file_path(log_date)
+
+    if not rows:
+        if log_path.exists():
+            log_path.unlink()
+        return
+
+    with log_path.open("w", newline="", encoding="utf-8") as handle:
+        writer = csv.writer(handle, delimiter=";")
+        writer.writerow(
+            ["ref_ecran", "libelle", "personne", "heure_sortie", "heure_rangement", "lave"]
+        )
+        for row in rows:
+            sortie_dt = datetime.fromisoformat(row["sortie_ts"])
+            sortie_text = sortie_dt.strftime("%H:%M:%S")
+            rangement_text = ""
+            if row["rangement_ts"]:
+                rangement_dt = datetime.fromisoformat(row["rangement_ts"])
+                rangement_text = rangement_dt.strftime("%H:%M:%S")
+                if rangement_dt.date() != log_date:
+                    rangement_text += f" ({rangement_dt.strftime('%d-%m-%Y')})"
+            lave_text = ""
+            if row["lavee"] is not None:
+                lave_text = "Oui" if row["lavee"] == 1 else "Non"
+            writer.writerow(
+                [
+                    row["ref_ecran"],
+                    row["libelle"],
+                    row["personne"],
+                    sortie_text,
+                    rangement_text,
+                    lave_text,
+                ]
+            )
 
 # Route de connexion
 @app.route('/', methods=['GET', 'POST'])
@@ -256,6 +347,7 @@ def prendre():
         ref_ecran = request.form['ref_ecran']
         
         with get_db_connection() as conn:
+            _ensure_log_tables(conn)
             cursor = conn.cursor()
             cursor.execute('SELECT * FROM serigraphie WHERE ref_ecran = ?', (ref_ecran,))
             ecran = cursor.fetchone()
@@ -266,7 +358,16 @@ def prendre():
                     n_value = None
                 else:
                     cursor.execute('UPDATE serigraphie SET sorti = 1 WHERE ref_ecran = ?', (ref_ecran,))
+                    sortie_dt = _current_timestamp()
+                    cursor.execute(
+                        """
+                        INSERT INTO sortie_logs (ref_ecran, libelle, personne, sortie_ts)
+                        VALUES (?, ?, ?, ?)
+                        """,
+                        (ref_ecran, ecran['libelle'], session.get('prenom', 'Inconnu'), sortie_dt.isoformat()),
+                    )
                     conn.commit()
+                    _sync_daily_log(conn, sortie_dt.date())
                     libelle = ecran['libelle']
                     message = f"écran {libelle} prise avec succès."
                     n_value = ecran['n']
@@ -405,6 +506,7 @@ def ranger():
     emplacement = None
 
     with get_db_connection() as conn:
+        _ensure_log_tables(conn)
         cursor = conn.cursor()
 
         if request.method == 'POST':
@@ -416,7 +518,26 @@ def ranger():
             if result:
                 cursor.execute("UPDATE serigraphie SET sorti = 0, lave = ? WHERE ref_ecran = ?",
                                (1 if lavee else 0, ref_ecran))
+                log_row = cursor.execute(
+                    """
+                    SELECT id, sortie_ts FROM sortie_logs
+                    WHERE ref_ecran = ? AND rangement_ts IS NULL
+                    ORDER BY sortie_ts DESC
+                    LIMIT 1
+                    """,
+                    (ref_ecran,),
+                ).fetchone()
+                log_date = None
+                if log_row:
+                    rangement_dt = _current_timestamp()
+                    cursor.execute(
+                        "UPDATE sortie_logs SET rangement_ts = ?, lavee = ? WHERE id = ?",
+                        (rangement_dt.isoformat(), 1 if lavee else 0, log_row["id"]),
+                    )
+                    log_date = datetime.fromisoformat(log_row["sortie_ts"]).date()
                 conn.commit()
+                if log_date:
+                    _sync_daily_log(conn, log_date)
                 emplacement = result['n']
             else:
                 error = "La écran sélectionnée n'existe pas ou n'est pas marquée comme sortie."

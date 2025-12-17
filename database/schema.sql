@@ -17,3 +17,17 @@ CREATE TABLE IF NOT EXISTS serigraphie (
     sorti INTEGER DEFAULT 0,
     lave INTEGER DEFAULT 1
 );
+
+CREATE TABLE IF NOT EXISTS sortie_logs (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    ref_ecran INTEGER NOT NULL,
+    libelle TEXT NOT NULL,
+    personne TEXT NOT NULL,
+    sortie_ts TEXT NOT NULL,
+    rangement_ts TEXT,
+    lavee INTEGER,
+    FOREIGN KEY (ref_ecran) REFERENCES serigraphie (ref_ecran)
+);
+
+CREATE INDEX IF NOT EXISTS idx_sortie_logs_ref ON sortie_logs (ref_ecran, rangement_ts);
+CREATE INDEX IF NOT EXISTS idx_sortie_logs_date ON sortie_logs (sortie_ts);

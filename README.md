@@ -40,6 +40,7 @@ La personne qui récupérera le projet pourra fork ce repo. Dans ce cas il faudr
 
 - Ajout, modification, suppression et suivi des sérigraphies.
 - Authentification des utilisateurs et gestion des administrateurs.
+- Traçabilité quotidienne des sorties/rangements d'écrans via des journaux CSV datés.
 - Déploiement automatique sur Raspberry Pi (service systemd et lancement de Firefox en mode kiosque).
 
 ## Structure du Projet
@@ -74,7 +75,8 @@ Le projet est organisé comme suit :
   Ce fichier initialise l’application Flask :
   - **Clé secrète** : Chargée depuis la variable d'environnement `FLASK_SECRET_KEY`. À défaut, une valeur aléatoire sécurise les sessions pour l'exécution courante.
   - **Connexion à la base de données** : La fonction `get_db_connection()` ouvre le fichier `instance/armoire.db`. Ce fichier est généré via `scripts/init_db.py` et n'est jamais versionné.
-  - **Paramètres runtime** : Les variables `APP_HOST`, `APP_PORT`, `APP_AUTO_OPEN_BROWSER` ou `APP_BROWSER_CMD` permettent d'adapter l'exécution sans modifier le code (serveur accessible sur le réseau, ouverture automatique du navigateur, etc.).
+  - **Paramètres runtime** : Les variables `APP_HOST`, `APP_PORT`, `APP_AUTO_OPEN_BROWSER` ou `APP_BROWSER_CMD` permettent d'adapter l'exécution sans modifier le code (serveur accessible sur le réseau, ouverture automatique du navigateur, etc.).  
+  - **Destination des journaux quotidiens** : `APP_LOGS_DIR` peut être définie pour stocker les fichiers CSV de traçabilité dans un autre dossier (partage réseau, clé USB, etc.). Par défaut ils sont créés dans `instance/logs/`.
 
 ### Gestion des accès et fonctions utilitaires
 - Les routes sensibles vérifient systématiquement la présence de `session['prenom']` et le flag `session['admin']` pour limiter l'accès aux utilisateurs connectés ou aux administrateurs.
@@ -102,6 +104,7 @@ Chaque route sensible commence par vérifier les informations présentes dans la
 - **Route `/prendre` et `/ranger`**  
   Ces routes gèrent le changement de statut d’une sérigraphie (prise ou rangée).  
   Le statut `sorti` et une indication relative au lavage (via `lave`) sont mis à jour dans la base.
+  Chaque emprunt/rangement alimente également la table `sortie_logs` et produit un fichier CSV journalier dans `instance/logs/` (ou dans le dossier défini par `APP_LOGS_DIR`). Ces fichiers portent le nom `JJ-MM-AAAA.csv`, listent chronologiquement chaque manipulation avec : référence, libellé, personne, heure de sortie, heure de rangement (y compris la date si différente) et indication du lavage.
 
 - **Route `/shutdown`**  
   Ferme proprement le service Gunicorn (Windows) ou exécute `sudo shutdown -h now` (Linux). Cette action doit être restreinte au navigateur de la Raspberry via les mécanismes d'authentification décrits plus haut.
@@ -139,6 +142,10 @@ Options utiles :
 - `--force` : remplace un fichier existant (utile lors d’un reset complet).
 
 Le script peut être relancé à tout moment pour repartir d’une base propre.
+
+> ℹ️  Le schéma `database/schema.sql` comprend désormais la table `sortie_logs`.  
+> Chaque entrée y correspond à une sortie d'écran (heure de sortie, utilisateur, heure/état de rangement).  
+> Les fichiers CSV quotidiens sont régénérés automatiquement à partir de cette table, vous pouvez donc les supprimer ou les archiver sans perdre d'historique.
 
 ## Conseils pour la Maintenance
 
