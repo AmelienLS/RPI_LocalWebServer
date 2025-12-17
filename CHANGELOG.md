@@ -1,4 +1,12 @@
 # Journal des modifications
+## [3.0.0] - 2025-12-17
+### Ajouté
+- Traçabilité quotidienne des écrans : table `sortie_logs`, génération automatique d'un CSV `JJ-MM-AAAA` par jour (avec référence, utilisateur, heures de sortie/rangement et statut de lavage).
+- Variables d'environnement testées/overridables pour cibler le dossier de journaux (`APP_LOGS_DIR`) et nouvelles suites Pytest couvrant la génération de ces fichiers.
+### Modifié
+- Les routes `/prendre` et `/ranger` publient désormais chaque événement dans la table de logs puis régénèrent le fichier du jour, garantissant l'historique même si un écran est rangé un autre jour.
+- `README.md` décrit la nouvelle fonctionnalité (format des fichiers, configuration, archivage).
+
 ## [2.2.0] - 2025-12-17
 ### Ajouté
 - Suites Pytest couvrant l'authentification, les flux d'ajout/prise/rangement ainsi que les scripts CLI et le schéma SQLite (répertoires `tests/web`, `tests/db`, `tests/scripts`).
