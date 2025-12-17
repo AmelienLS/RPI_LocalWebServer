@@ -17,8 +17,6 @@ TEMPLATE_DIR = BASE_DIR / "Templates"
 STATIC_DIR = BASE_DIR / "Styles"
 INSTANCE_DIR = Path(os.environ.get("APP_INSTANCE_DIR", BASE_DIR / "instance"))
 INSTANCE_DIR.mkdir(parents=True, exist_ok=True)
-LOGS_DIR = Path(os.environ.get("APP_LOGS_DIR", INSTANCE_DIR / "logs"))
-LOGS_DIR.mkdir(parents=True, exist_ok=True)
 
 # Fichier de base de données (non versionné)
 DATABASE_PATH = Path(os.environ.get("DATABASE_PATH", INSTANCE_DIR / "armoire.db"))
@@ -95,8 +93,15 @@ def _current_timestamp() -> datetime:
     return datetime.now()
 
 
+def _get_logs_dir() -> Path:
+    """Retourne (et crée si besoin) le dossier où stocker les CSV journaliers."""
+    log_dir = Path(os.environ.get("APP_LOGS_DIR", INSTANCE_DIR / "logs"))
+    log_dir.mkdir(parents=True, exist_ok=True)
+    return log_dir
+
+
 def _log_file_path(log_date: date) -> Path:
-    return LOGS_DIR / log_date.strftime("%d-%m-%Y.csv")
+    return _get_logs_dir() / log_date.strftime("%d-%m-%Y.csv")
 
 
 def _sync_daily_log(connection: sqlite3.Connection, log_date: date) -> None:
@@ -119,7 +124,6 @@ def _sync_daily_log(connection: sqlite3.Connection, log_date: date) -> None:
             log_path.unlink()
         return
 
-    LOGS_DIR.mkdir(parents=True, exist_ok=True)
     with log_path.open("w", newline="", encoding="utf-8") as handle:
         writer = csv.writer(handle, delimiter=";")
         writer.writerow(
