@@ -38,7 +38,7 @@ prompt_branch() {
     if [[ -z "$selection" ]]; then
         selection="$DEFAULT_BRANCH"
     fi
-    printf '%s' "$selection"
+    SELECTED_BRANCH="$selection"
 }
 
 sync_repository() {
@@ -98,8 +98,8 @@ main() {
     require_cmd python3
     require_cmd git
 
-    local branch
-    branch=$(prompt_branch)
+    prompt_branch
+    local branch="$SELECTED_BRANCH"
     printf '[i] Branche sélectionnée : %s\n' "$branch"
 
     sync_repository "$branch"
