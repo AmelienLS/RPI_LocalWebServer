@@ -5,6 +5,7 @@
 - Tests front-end Vitest/JSDOM pour la logique de filtrage `Functions/Ecran.js` (`tests/js`).
 ### Modifié
 - Documentation `README.md` mise à jour avec les instructions détaillées pour exécuter les tests Python et JavaScript.
+- `requirements.txt` inclut désormais `pytest` afin que les environnements CI et locaux disposent automatiquement du runner de tests.
 
 ## [2.1.1] - 2025-12-16
 ### Modifié
