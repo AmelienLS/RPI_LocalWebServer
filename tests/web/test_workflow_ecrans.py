@@ -1,6 +1,8 @@
 import csv
+import io
 import os
 import sqlite3
+import zipfile
 from datetime import datetime
 from pathlib import Path
 
@@ -120,3 +122,27 @@ def test_ranger_updates_trace_even_cross_day(client, add_serigraphie, monkeypatc
         "11:45:00 (11-02-2024)",
         "Oui",
     ]
+
+
+def test_export_logs_requires_admin(client):
+    _set_user_session(client, admin=False)
+    response = client.get("/export_logs")
+    assert response.status_code == 302
+    assert response.headers["Location"].endswith("/index")
+
+
+def test_export_logs_builds_zip(client):
+    _set_user_session(client, admin=True)
+    logs_dir = Path(os.environ["APP_LOGS_DIR"])
+    logs_dir.mkdir(parents=True, exist_ok=True)
+    sample = logs_dir / "01-03-2024.csv"
+    sample.write_text("ref;libelle\n1;TEST\n", encoding="utf-8")
+
+    response = client.get("/export_logs")
+    assert response.status_code == 200
+    assert response.headers["Content-Type"].startswith("application/zip")
+    assert response.headers["Content-Disposition"].startswith("attachment; filename=screen_logs_")
+
+    with zipfile.ZipFile(io.BytesIO(response.data)) as archive:
+        names = archive.namelist()
+        assert "01-03-2024.csv" in names

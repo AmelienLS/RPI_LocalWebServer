@@ -6,10 +6,12 @@ import shlex
 import sqlite3
 import subprocess
 import webbrowser
+import zipfile
 from datetime import datetime, date
+from io import BytesIO
 from pathlib import Path
 
-from flask import Flask, redirect, render_template, request, send_from_directory, session
+from flask import Flask, redirect, render_template, request, send_file, send_from_directory, session
 
 # Répertoires de base
 BASE_DIR = Path(__file__).resolve().parent
@@ -331,6 +333,41 @@ def ecran():
 
     admin = session.get('admin', 0) == 1
     return render_template('ecran.html', ecrans=ecrans, admin=admin)
+
+
+@app.route("/export_logs", methods=["GET"])
+def export_logs():
+    """
+    Permet à un administrateur d'exporter tous les journaux quotidiens sous forme d'archive ZIP.
+    Le navigateur invite ensuite à choisir l'emplacement d'enregistrement.
+    """
+    if 'prenom' not in session:
+        return redirect('/')
+    if not session.get('admin'):
+        return redirect('/index')
+
+    logs_dir = _get_logs_dir()
+    archive_stream = BytesIO()
+    csv_files = sorted(logs_dir.glob("*.csv"))
+    with zipfile.ZipFile(archive_stream, mode="w", compression=zipfile.ZIP_DEFLATED) as archive:
+        if not csv_files:
+            archive.writestr(
+                "README.txt",
+                "Aucun journal disponible pour le moment.\n"
+                "Les fichiers seront générés lorsqu'un écran sera pris/rangé.",
+            )
+        else:
+            for csv_path in csv_files:
+                archive.write(csv_path, arcname=csv_path.name)
+
+    archive_stream.seek(0)
+    filename = f"screen_logs_{datetime.now().strftime('%Y%m%d_%H%M%S')}.zip"
+    return send_file(
+        archive_stream,
+        mimetype="application/zip",
+        as_attachment=True,
+        download_name=filename,
+    )
 
 # Route pour prendre un écran (marquer comme sorti)
 @app.route('/prendre', methods=['GET', 'POST'])

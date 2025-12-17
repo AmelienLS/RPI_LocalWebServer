@@ -41,6 +41,7 @@ La personne qui récupérera le projet pourra fork ce repo. Dans ce cas il faudr
 - Ajout, modification, suppression et suivi des sérigraphies.
 - Authentification des utilisateurs et gestion des administrateurs.
 - Traçabilité quotidienne des sorties/rangements d'écrans via des journaux CSV datés.
+- Export administrateur des journaux quotidiens en un clic (archive ZIP).
 - Déploiement automatique sur Raspberry Pi (service systemd et lancement de Firefox en mode kiosque).
 
 ## Structure du Projet
@@ -77,6 +78,7 @@ Le projet est organisé comme suit :
   - **Connexion à la base de données** : La fonction `get_db_connection()` ouvre le fichier `instance/armoire.db`. Ce fichier est généré via `scripts/init_db.py` et n'est jamais versionné.
   - **Paramètres runtime** : Les variables `APP_HOST`, `APP_PORT`, `APP_AUTO_OPEN_BROWSER` ou `APP_BROWSER_CMD` permettent d'adapter l'exécution sans modifier le code (serveur accessible sur le réseau, ouverture automatique du navigateur, etc.).  
   - **Destination des journaux quotidiens** : `APP_LOGS_DIR` peut être définie pour stocker les fichiers CSV de traçabilité dans un autre dossier (partage réseau, clé USB, etc.). Par défaut ils sont créés dans `instance/logs/`.
+  - **Export simplifié** : la route `/export_logs` (accessible via un bouton sur la page “Table écran” pour les administrateurs) regroupe tous les CSV du dossier de logs et renvoie une archive ZIP. Le navigateur du poste demande alors où enregistrer l’export.
 
 ### Gestion des accès et fonctions utilitaires
 - Les routes sensibles vérifient systématiquement la présence de `session['prenom']` et le flag `session['admin']` pour limiter l'accès aux utilisateurs connectés ou aux administrateurs.
@@ -101,10 +103,11 @@ Chaque route sensible commence par vérifier les informations présentes dans la
 - **Route `/supprimer`**  
   Permet de vérifier l’existence d’une sérigraphie et ensuite de la supprimer de la base.
 
-- **Route `/prendre` et `/ranger`**  
-  Ces routes gèrent le changement de statut d’une sérigraphie (prise ou rangée).  
-  Le statut `sorti` et une indication relative au lavage (via `lave`) sont mis à jour dans la base.
-  Chaque emprunt/rangement alimente également la table `sortie_logs` et produit un fichier CSV journalier dans `instance/logs/` (ou dans le dossier défini par `APP_LOGS_DIR`). Ces fichiers portent le nom `JJ-MM-AAAA.csv`, listent chronologiquement chaque manipulation avec : référence, libellé, personne, heure de sortie, heure de rangement (y compris la date si différente) et indication du lavage.
+  - **Route `/prendre` et `/ranger`**  
+    Ces routes gèrent le changement de statut d’une sérigraphie (prise ou rangée).  
+    Le statut `sorti` et une indication relative au lavage (via `lave`) sont mis à jour dans la base.
+    Chaque emprunt/rangement alimente également la table `sortie_logs` et produit un fichier CSV journalier dans `instance/logs/` (ou dans le dossier défini par `APP_LOGS_DIR`). Ces fichiers portent le nom `JJ-MM-AAAA.csv`, listent chronologiquement chaque manipulation avec : référence, libellé, personne, heure de sortie, heure de rangement (y compris la date si différente) et indication du lavage.
+    Un bouton “Exporter les journaux” visible uniquement pour les administrateurs sur la page `/ecran` déclenche l'export ZIP de tous les fichiers disponibles afin de les archiver ailleurs (clé USB, partage réseau, etc.).
 
 - **Route `/shutdown`**  
   Ferme proprement le service Gunicorn (Windows) ou exécute `sudo shutdown -h now` (Linux). Cette action doit être restreinte au navigateur de la Raspberry via les mécanismes d'authentification décrits plus haut.
