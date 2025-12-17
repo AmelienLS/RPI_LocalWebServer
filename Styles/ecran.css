@@ -15,6 +15,9 @@ table {
     border-collapse: collapse;
     margin-bottom: 1rem;
     text-align: left;
+    -webkit-user-select: none;
+    user-select: none;
+    touch-action: pan-y;
 }
 
 thead th {
@@ -37,6 +40,11 @@ tbody td {
     font-size: 0.9rem;
     border: 1px solid #2A2D46;
     text-align: center;
+}
+
+.filter-input {
+    -webkit-user-select: text;
+    user-select: text;
 }
 
 tbody tr:nth-child(odd) td {
