@@ -6,10 +6,12 @@ import shlex
 import sqlite3
 import subprocess
 import webbrowser
+import zipfile
 from datetime import datetime, date
+from io import BytesIO
 from pathlib import Path
 
-from flask import Flask, redirect, render_template, request, send_from_directory, session
+from flask import Flask, redirect, render_template, request, send_file, send_from_directory, session
 
 # Répertoires de base
 BASE_DIR = Path(__file__).resolve().parent
@@ -151,6 +153,33 @@ def _sync_daily_log(connection: sqlite3.Connection, log_date: date) -> None:
                     lave_text,
                 ]
             )
+
+
+def _build_logs_archive(delete_files: bool = False) -> BytesIO:
+    """Construit une archive ZIP contenant tous les journaux CSV puis, optionnellement, les supprime."""
+    logs_dir = _get_logs_dir()
+    archive_stream = BytesIO()
+    csv_files = sorted(logs_dir.glob("*.csv"))
+    with zipfile.ZipFile(archive_stream, mode="w", compression=zipfile.ZIP_DEFLATED) as archive:
+        if not csv_files:
+            archive.writestr(
+                "README.txt",
+                "Aucun journal disponible pour le moment.\n"
+                "Les fichiers seront générés lorsqu'un écran sera pris/rangé.",
+            )
+        else:
+            for csv_path in csv_files:
+                archive.write(csv_path, arcname=csv_path.name)
+
+    if delete_files and csv_files:
+        for csv_path in csv_files:
+            try:
+                csv_path.unlink()
+            except FileNotFoundError:
+                continue
+
+    archive_stream.seek(0)
+    return archive_stream
 
 # Route de connexion
 @app.route('/', methods=['GET', 'POST'])
@@ -331,6 +360,47 @@ def ecran():
 
     admin = session.get('admin', 0) == 1
     return render_template('ecran.html', ecrans=ecrans, admin=admin)
+
+
+@app.route("/export_logs", methods=["GET"])
+def export_logs():
+    """
+    Permet à un administrateur d'exporter tous les journaux quotidiens sous forme d'archive ZIP.
+    Le navigateur invite ensuite à choisir l'emplacement d'enregistrement.
+    """
+    if 'prenom' not in session:
+        return redirect('/')
+    if not session.get('admin'):
+        return redirect('/index')
+
+    archive_stream = _build_logs_archive(delete_files=False)
+    filename = f"screen_logs_{datetime.now().strftime('%Y%m%d_%H%M%S')}.zip"
+    return send_file(
+        archive_stream,
+        mimetype="application/zip",
+        as_attachment=True,
+        download_name=filename,
+    )
+
+
+@app.route("/purge_logs", methods=["POST"])
+def purge_logs():
+    """
+    Exporte tous les journaux puis supprime les fichiers CSV pour repartir sur un dossier vide.
+    """
+    if 'prenom' not in session:
+        return redirect('/')
+    if not session.get('admin'):
+        return redirect('/index')
+
+    archive_stream = _build_logs_archive(delete_files=True)
+    filename = f"screen_logs_cleared_{datetime.now().strftime('%Y%m%d_%H%M%S')}.zip"
+    return send_file(
+        archive_stream,
+        mimetype="application/zip",
+        as_attachment=True,
+        download_name=filename,
+    )
 
 # Route pour prendre un écran (marquer comme sorti)
 @app.route('/prendre', methods=['GET', 'POST'])

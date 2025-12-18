@@ -1,8 +1,8 @@
 # Runtime artifacts
 __pycache__/
 *.py[cod]
-*.db
-instance/
+#*.db
+#instance/
 !instance/.gitkeep
 
 # Environments
