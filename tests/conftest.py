@@ -59,6 +59,18 @@ def client(app):
 
 
 @pytest.fixture()
+def set_user_session(client):
+    """Helper fixture to populate the Flask session for routes requiring login."""
+
+    def _set_user_session(admin: bool = True, prenom: str = "TestUser") -> None:
+        with client.session_transaction() as session:
+            session["prenom"] = prenom
+            session["admin"] = 1 if admin else 0
+
+    return _set_user_session
+
+
+@pytest.fixture()
 def add_user(test_db) -> Callable[..., Dict[str, Any]]:
     """Utility fixture to insert a user in the temporary database."""
 
