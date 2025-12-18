@@ -41,7 +41,7 @@ La personne qui récupérera le projet pourra fork ce repo. Dans ce cas il faudr
 - Ajout, modification, suppression et suivi des sérigraphies.
 - Authentification des utilisateurs et gestion des administrateurs.
 - Traçabilité quotidienne des sorties/rangements d'écrans via des journaux CSV datés.
-- Export administrateur des journaux quotidiens en un clic (archive ZIP).
+- Export administrateur des journaux quotidiens en un clic (archive ZIP) et bouton “Vider” qui exporte puis supprime les CSV pour repartir sur un dossier propre.
 - Déploiement automatique sur Raspberry Pi (service systemd et lancement de Firefox en mode kiosque).
 
 ## Structure du Projet
@@ -107,7 +107,9 @@ Chaque route sensible commence par vérifier les informations présentes dans la
     Ces routes gèrent le changement de statut d’une sérigraphie (prise ou rangée).  
     Le statut `sorti` et une indication relative au lavage (via `lave`) sont mis à jour dans la base.
     Chaque emprunt/rangement alimente également la table `sortie_logs` et produit un fichier CSV journalier dans `instance/logs/` (ou dans le dossier défini par `APP_LOGS_DIR`). Ces fichiers portent le nom `JJ-MM-AAAA.csv`, listent chronologiquement chaque manipulation avec : référence, libellé, personne, heure de sortie, heure de rangement (y compris la date si différente) et indication du lavage.
-    Un bouton “Exporter les journaux” visible uniquement pour les administrateurs sur la page `/ecran` déclenche l'export ZIP de tous les fichiers disponibles afin de les archiver ailleurs (clé USB, partage réseau, etc.).
+    Deux boutons visibles uniquement pour les administrateurs sur la page `/ecran` permettent :
+    - d'exporter tous les journaux disponibles (archive ZIP) pour archivage,
+    - de “Vider les journaux”, ce qui télécharge aussi une archive complète puis supprime les CSV côté serveur pour repartir sur un dossier propre.
 
 - **Route `/shutdown`**  
   Ferme proprement le service Gunicorn (Windows) ou exécute `sudo shutdown -h now` (Linux). Cette action doit être restreinte au navigateur de la Raspberry via les mécanismes d'authentification décrits plus haut.

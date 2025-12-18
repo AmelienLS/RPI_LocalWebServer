@@ -5,6 +5,14 @@
     overflow-x: auto; /* Défilement horizontal si nécessaire */
 }
 
+.admin-actions {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin: 1rem 0;
+    flex-wrap: wrap;
+}
+
 .admin-link {
     position: fixed;
     z-index: 1000;
@@ -69,4 +77,13 @@ button.prendre {
 
 button.prendre:hover {
     background-color: #FFD700;
+}
+
+.purge-btn {
+    background-color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.purge-btn:hover {
+    background-color: #a71d2a;
 }

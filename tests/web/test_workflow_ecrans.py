@@ -146,3 +146,26 @@ def test_export_logs_builds_zip(client):
     with zipfile.ZipFile(io.BytesIO(response.data)) as archive:
         names = archive.namelist()
         assert "01-03-2024.csv" in names
+
+
+def test_purge_logs_requires_admin(client):
+    _set_user_session(client, admin=False)
+    response = client.post("/purge_logs")
+    assert response.status_code == 302
+    assert response.headers["Location"].endswith("/index")
+
+
+def test_purge_logs_exports_and_deletes(client):
+    _set_user_session(client, admin=True)
+    logs_dir = Path(os.environ["APP_LOGS_DIR"])
+    logs_dir.mkdir(parents=True, exist_ok=True)
+    sample = logs_dir / "02-03-2024.csv"
+    sample.write_text("ref;libelle\n2;TEST\n", encoding="utf-8")
+
+    response = client.post("/purge_logs")
+    assert response.status_code == 200
+    assert response.headers["Content-Disposition"].startswith("attachment; filename=screen_logs_cleared_")
+    assert not any(logs_dir.glob("*.csv"))
+
+    with zipfile.ZipFile(io.BytesIO(response.data)) as archive:
+        assert "02-03-2024.csv" in archive.namelist()

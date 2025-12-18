@@ -154,6 +154,33 @@ def _sync_daily_log(connection: sqlite3.Connection, log_date: date) -> None:
                 ]
             )
 
+
+def _build_logs_archive(delete_files: bool = False) -> BytesIO:
+    """Construit une archive ZIP contenant tous les journaux CSV puis, optionnellement, les supprime."""
+    logs_dir = _get_logs_dir()
+    archive_stream = BytesIO()
+    csv_files = sorted(logs_dir.glob("*.csv"))
+    with zipfile.ZipFile(archive_stream, mode="w", compression=zipfile.ZIP_DEFLATED) as archive:
+        if not csv_files:
+            archive.writestr(
+                "README.txt",
+                "Aucun journal disponible pour le moment.\n"
+                "Les fichiers seront générés lorsqu'un écran sera pris/rangé.",
+            )
+        else:
+            for csv_path in csv_files:
+                archive.write(csv_path, arcname=csv_path.name)
+
+    if delete_files and csv_files:
+        for csv_path in csv_files:
+            try:
+                csv_path.unlink()
+            except FileNotFoundError:
+                continue
+
+    archive_stream.seek(0)
+    return archive_stream
+
 # Route de connexion
 @app.route('/', methods=['GET', 'POST'])
 def login():
@@ -346,22 +373,28 @@ def export_logs():
     if not session.get('admin'):
         return redirect('/index')
 
-    logs_dir = _get_logs_dir()
-    archive_stream = BytesIO()
-    csv_files = sorted(logs_dir.glob("*.csv"))
-    with zipfile.ZipFile(archive_stream, mode="w", compression=zipfile.ZIP_DEFLATED) as archive:
-        if not csv_files:
-            archive.writestr(
-                "README.txt",
-                "Aucun journal disponible pour le moment.\n"
-                "Les fichiers seront générés lorsqu'un écran sera pris/rangé.",
-            )
-        else:
-            for csv_path in csv_files:
-                archive.write(csv_path, arcname=csv_path.name)
-
-    archive_stream.seek(0)
+    archive_stream = _build_logs_archive(delete_files=False)
     filename = f"screen_logs_{datetime.now().strftime('%Y%m%d_%H%M%S')}.zip"
+    return send_file(
+        archive_stream,
+        mimetype="application/zip",
+        as_attachment=True,
+        download_name=filename,
+    )
+
+
+@app.route("/purge_logs", methods=["POST"])
+def purge_logs():
+    """
+    Exporte tous les journaux puis supprime les fichiers CSV pour repartir sur un dossier vide.
+    """
+    if 'prenom' not in session:
+        return redirect('/')
+    if not session.get('admin'):
+        return redirect('/index')
+
+    archive_stream = _build_logs_archive(delete_files=True)
+    filename = f"screen_logs_cleared_{datetime.now().strftime('%Y%m%d_%H%M%S')}.zip"
     return send_file(
         archive_stream,
         mimetype="application/zip",

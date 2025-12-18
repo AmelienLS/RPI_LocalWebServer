@@ -18,6 +18,9 @@
             <form action="{{ url_for('export_logs') }}" method="get">
                 <button type="submit" class="button export-btn">Exporter les journaux</button>
             </form>
+            <form action="{{ url_for('purge_logs') }}" method="post" onsubmit="return confirm('Exporter et supprimer tous les journaux ?');">
+                <button type="submit" class="button purge-btn">Vider les journaux</button>
+            </form>
         </div>
         {% endif %}
         <table id="serigraphie-table">
