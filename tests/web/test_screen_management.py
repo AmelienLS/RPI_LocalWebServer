@@ -77,6 +77,49 @@ def test_modifier_rejects_duplicate_reference(client, add_serigraphie, test_db, 
     assert row == (entry_one["ref_ecran"],)
 
 
+def test_modifier_changes_reference_successfully(client, add_serigraphie, test_db, set_user_session):
+    set_user_session()
+    entry = add_serigraphie(ref_ecran=454, libelle="To Move", n="150")
+
+    response = client.post(
+        "/modifier",
+        data={
+            "old_ref_ecran": str(entry["ref_ecran"]),
+            "new_ref_ecran": "555",
+            "libelle": "To Move",
+            "pcb": "456",
+            "fab": "GH",
+            "n_fab": "F111222",
+            "type": "TypeZ",
+            "n": entry["n"],
+            "sorti": "0",
+            "lave": "1",
+        },
+    )
+    assert response.status_code == 200
+    assert "Nouvelle référence : 555" in response.data.decode("utf-8")
+
+    with sqlite3.connect(test_db) as connection:
+        original = connection.execute(
+            "SELECT 1 FROM serigraphie WHERE ref_ecran = ?",
+            (entry["ref_ecran"],),
+        ).fetchone()
+        updated = connection.execute(
+            "SELECT ref_ecran, libelle FROM serigraphie WHERE ref_ecran = ?",
+            (555,),
+        ).fetchone()
+
+    assert original is None
+    assert updated == (555, "To Move")
+
+
+def test_modifier_returns_error_when_reference_missing(client, set_user_session):
+    set_user_session()
+    response = client.post("/modifier", data={"ref_ecran": "9999"})
+    assert response.status_code == 200
+    assert "non trouvée" in response.data.decode("utf-8")
+
+
 def test_supprimer_requires_admin(client):
     response = client.get("/supprimer")
     assert response.status_code == 302

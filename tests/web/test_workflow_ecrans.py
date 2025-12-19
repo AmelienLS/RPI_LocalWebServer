@@ -163,3 +163,43 @@ def test_purge_logs_exports_and_deletes(client, set_user_session):
 
     with zipfile.ZipFile(io.BytesIO(response.data)) as archive:
         assert "02-03-2024.csv" in archive.namelist()
+
+
+def test_ranger_displays_error_for_unknown_reference(client, set_user_session):
+    set_user_session(prenom="Bob")
+
+    response = client.post(
+        "/ranger",
+        data={
+            "ref_ecran": "999",
+            "lavee": "oui",
+        },
+    )
+    assert response.status_code == 200
+    assert "n&#39;existe pas" in response.data.decode("utf-8")
+
+
+def test_ranger_handles_missing_log_entry(client, add_serigraphie, test_db, set_user_session, monkeypatch):
+    import APP
+
+    entry = add_serigraphie(ref_ecran=310, n="060", sorti=1, lave=0)
+    set_user_session(prenom="Bob")
+    sync_calls = []
+    monkeypatch.setattr(APP, "_sync_daily_log", lambda conn, day: sync_calls.append(day))
+
+    response = client.post(
+        "/ranger",
+        data={
+            "ref_ecran": str(entry["ref_ecran"]),
+            "lavee": "non",
+        },
+    )
+    assert response.status_code == 200
+    assert sync_calls == []
+
+    with sqlite3.connect(test_db) as connection:
+        row = connection.execute(
+            "SELECT sorti, lave FROM serigraphie WHERE ref_ecran = ?",
+            (entry["ref_ecran"],),
+        ).fetchone()
+    assert row == (0, 0)
