@@ -246,7 +246,7 @@ def logout():
 @app.route('/ajouter', methods=['GET', 'POST'])
 def ajouter():
     """
-    Permet l'ajout d'une nouvelle écran.
+    Permet l'ajout d'un nouvel écran.
     - Vérifie que l'utilisateur est un administrateur.
     - Valide les contraintes sur les champs et insère la donnée dans la BD.
     - Gère les erreurs d'unicité au niveau de la base de données.
@@ -291,7 +291,7 @@ def ajouter():
                     field_name = "Emplacement"
                     n = ""
                 error_message = f'Erreur: {field_name} déjà utilisée.'
-            return render_template('ajouter.html', error=error_message,
+            return render_template('ajouter.html', error=error_message, # type: ignore
                                    ref_ecran=ref_ecran, libelle=libelle, pcb=pcb, fab=fab, n_fab=n_fab, type=type_serigraphie, n=n)
 
     return render_template('ajouter.html')
@@ -306,6 +306,10 @@ def ajouterU():
     """
     if 'admin' not in session or not session['admin']:
         return redirect('/index')   
+
+    # Définit une valeur par défaut pour éviter la variable possiblement non liée
+    error = None
+
     if request.method == 'POST':
         identifiant = request.form['identifiant']
         prenom = request.form['prenom']
@@ -336,6 +340,9 @@ def ajouterU():
                     else:
                         field_name = constraint
                     error = f'Erreur: {field_name} déjà utilisé.'
+                else:
+                    # Cas générique si le message d'erreur n'est pas celui attendu
+                    error = f"Erreur lors de l'ajout de l'utilisateur : {error_str}"
                 return render_template('ajouterU.html', error=error,
                                        identifiant=identifiant, prenom=prenom, nom=nom)
 
@@ -388,7 +395,7 @@ def purge_logs():
     """
     Exporte tous les journaux puis supprime les fichiers CSV pour repartir sur un dossier vide.
     """
-    if 'prenom' not in session:
+    if 'prenom' not in  session:
         return redirect('/')
     if not session.get('admin'):
         return redirect('/index')
