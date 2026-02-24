@@ -1,4 +1,19 @@
 # Journal des modifications
+## [3.2.0] - 2026-02-24
+> Commit : `feat(ui): improve touch ergonomics for 12-inch touchscreen`
+### Modifié
+- `Styles/common.css` : padding des boutons augmenté (`0.85rem 1rem`) avec `min-height: 44px` pour respecter la taille minimale tactile recommandée.
+- `Styles/common.css` : liens de navigation (`.admin-link`, `.retour`, `.retour-menu`) agrandis (`padding: 0.75rem 1.25rem`, `min-height: 44px`) pour des cibles tactiles plus accessibles.
+- `Styles/ecran.css` : suppression de `touch-action: pan-y` sur la table pour permettre au JS de gérer le scroll dans les deux directions. Padding des boutons inline augmenté à `0.6rem 1rem`.
+- `Styles/login.css` : conteneur de connexion passé de largeur fixe (`300px`) à fluid (`width: 90%; max-width: 360px`). Padding des boutons augmenté à `14px`.
+- `Styles/prendre.css`, `ranger.css`, `supprimer.css`, `ajouterU.css` : conteneurs passés de largeur fixe (`400px`) à fluid (`width: 90%; max-width: 400px`).
+- `Styles/supprimer.css` : `.cancel-btn` agrandie avec `min-height: 44px` pour uniformiser la taille tactile.
+- `Styles/ajouterU.css` : checkbox "Admin" agrandie (`1.5rem × 1.5rem`) pour une utilisation tactile plus aisée.
+- `Functions/ecranDrag.js` : réécriture complète — scroll 1 doigt via `scrollLeft`/`scrollTop`, ajout d'un handler `touchend` pour réinitialiser l'état, suppression du positionnement via CSS `transform`.
+- `Templates/modifier.html` : remplacement du `alert()` JavaScript bloquant par une `<div class="error">` stylée, plus fiable en mode kiosque Chromium.
+- `Templates/prendre.html` : suppression de l'attribut `autofocus` pour éviter l'ouverture automatique du clavier virtuel à l'arrivée sur la page.
+- `Templates/supprimer.html` : correction de l'attribut `lang="en"` en `lang="fr"`.
+
 ## [3.1.0] - 2026-02-24
 > Commit : `chore(linux): revamp setup scripts with distro detection and graceful shutdown`
 ### Ajouté

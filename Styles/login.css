@@ -11,11 +11,12 @@ body {
     border-radius: 8px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     text-align: center;
-    width: 300px;
+    width: 90%;
+    max-width: 360px;
 }
 
 button {
-    padding: 10px;
+    padding: 14px;
     margin-bottom: 10px;
 }
 

@@ -5,7 +5,8 @@ body {
 }
 
 .container {
-    width: 400px;
+    width: 90%;
+    max-width: 400px;
 }
 
 .confirmer {
@@ -17,9 +18,13 @@ body {
 }
 
 .cancel-btn {
-    padding: 0.7rem;
+    padding: 0.85rem 1rem;
+    min-height: 44px;
     font-weight: bold;
     cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .button-group {

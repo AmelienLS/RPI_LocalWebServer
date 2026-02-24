@@ -5,7 +5,8 @@ body {
 }
 
 .form-container {
-    width: 400px;
+    width: 90%;
+    max-width: 400px;
 }
 
 form {
@@ -24,4 +25,12 @@ h2 {
 
 .confirmation-message {
     margin-top: 2rem;
+}
+
+input[type="checkbox"] {
+    width: 1.5rem;
+    height: 1.5rem;
+    accent-color: #feed00;
+    cursor: pointer;
+    vertical-align: middle;
 }
