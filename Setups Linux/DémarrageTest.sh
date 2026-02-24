@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 #
-# Script de démarrage local pour Fedora (ou tout Linux immuable) reproduisant
-# le comportement de Setups Windows/DémarrageTest.bat sans autostart.
+# Script de démarrage local pour Fedora (ou tout Linux immuable)
 
 set -euo pipefail
 
