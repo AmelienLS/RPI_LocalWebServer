@@ -34,6 +34,10 @@
         </form>
 
         <!-- Affiche l'emplacement si disponible -->
+        {% if error %}
+        <p class="error-message" style="color: red;">{{ error }}</p>
+        {% endif %}
+
         {% if emplacement %}
         <p class="success-message">L'emplacement pour ranger est : {{ emplacement }}</p>
         {% endif %}

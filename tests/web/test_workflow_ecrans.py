@@ -7,21 +7,15 @@ from datetime import datetime
 from pathlib import Path
 
 
-def _set_user_session(client, admin=False):
-    with client.session_transaction() as session:
-        session["prenom"] = "Bob"
-        session["admin"] = 1 if admin else 0
-
-
 def test_prendre_requires_login(client):
     response = client.post("/prendre", data={"ref_ecran": "999"})
     assert response.status_code == 302
     assert response.headers["Location"].endswith("/")
 
 
-def test_prendre_marks_screen_as_out(client, add_serigraphie, test_db):
+def test_prendre_marks_screen_as_out(client, add_serigraphie, test_db, set_user_session):
     entry = add_serigraphie(ref_ecran=300, n="045", sorti=0)
-    _set_user_session(client)
+    set_user_session(prenom="Bob")
 
     response = client.post("/prendre", data={"ref_ecran": str(entry["ref_ecran"])})
     assert response.status_code == 200
@@ -35,9 +29,9 @@ def test_prendre_marks_screen_as_out(client, add_serigraphie, test_db):
     assert sorti == 1
 
 
-def test_ranger_updates_flags(client, add_serigraphie, test_db):
+def test_ranger_updates_flags(client, add_serigraphie, test_db, set_user_session):
     entry = add_serigraphie(ref_ecran=301, n="046", sorti=1, lave=0)
-    _set_user_session(client)
+    set_user_session(prenom="Bob")
 
     response = client.post(
         "/ranger",
@@ -57,11 +51,11 @@ def test_ranger_updates_flags(client, add_serigraphie, test_db):
     assert row == (0, 1)
 
 
-def test_prendre_creates_daily_trace_file(client, add_serigraphie, monkeypatch):
+def test_prendre_creates_daily_trace_file(client, add_serigraphie, monkeypatch, set_user_session):
     import APP
 
     entry = add_serigraphie(ref_ecran=305, n="050", sorti=0)
-    _set_user_session(client)
+    set_user_session(prenom="Bob")
     fake_now = datetime(2024, 1, 15, 8, 30, 0)
     monkeypatch.setattr(APP, "_current_timestamp", lambda: fake_now)
 
@@ -86,11 +80,11 @@ def test_prendre_creates_daily_trace_file(client, add_serigraphie, monkeypatch):
     ]
 
 
-def test_ranger_updates_trace_even_cross_day(client, add_serigraphie, monkeypatch):
+def test_ranger_updates_trace_even_cross_day(client, add_serigraphie, monkeypatch, set_user_session):
     import APP
 
     entry = add_serigraphie(ref_ecran=306, n="051", sorti=0, lave=0)
-    _set_user_session(client)
+    set_user_session(prenom="Bob")
     timestamps = iter(
         (
             datetime(2024, 2, 10, 9, 0, 0),
@@ -124,15 +118,15 @@ def test_ranger_updates_trace_even_cross_day(client, add_serigraphie, monkeypatc
     ]
 
 
-def test_export_logs_requires_admin(client):
-    _set_user_session(client, admin=False)
+def test_export_logs_requires_admin(client, set_user_session):
+    set_user_session(admin=False)
     response = client.get("/export_logs")
     assert response.status_code == 302
     assert response.headers["Location"].endswith("/index")
 
 
-def test_export_logs_builds_zip(client):
-    _set_user_session(client, admin=True)
+def test_export_logs_builds_zip(client, set_user_session):
+    set_user_session(admin=True)
     logs_dir = Path(os.environ["APP_LOGS_DIR"])
     logs_dir.mkdir(parents=True, exist_ok=True)
     sample = logs_dir / "01-03-2024.csv"
@@ -148,15 +142,15 @@ def test_export_logs_builds_zip(client):
         assert "01-03-2024.csv" in names
 
 
-def test_purge_logs_requires_admin(client):
-    _set_user_session(client, admin=False)
+def test_purge_logs_requires_admin(client, set_user_session):
+    set_user_session(admin=False)
     response = client.post("/purge_logs")
     assert response.status_code == 302
     assert response.headers["Location"].endswith("/index")
 
 
-def test_purge_logs_exports_and_deletes(client):
-    _set_user_session(client, admin=True)
+def test_purge_logs_exports_and_deletes(client, set_user_session):
+    set_user_session(admin=True)
     logs_dir = Path(os.environ["APP_LOGS_DIR"])
     logs_dir.mkdir(parents=True, exist_ok=True)
     sample = logs_dir / "02-03-2024.csv"
@@ -169,3 +163,43 @@ def test_purge_logs_exports_and_deletes(client):
 
     with zipfile.ZipFile(io.BytesIO(response.data)) as archive:
         assert "02-03-2024.csv" in archive.namelist()
+
+
+def test_ranger_displays_error_for_unknown_reference(client, set_user_session):
+    set_user_session(prenom="Bob")
+
+    response = client.post(
+        "/ranger",
+        data={
+            "ref_ecran": "999",
+            "lavee": "oui",
+        },
+    )
+    assert response.status_code == 200
+    assert "n&#39;existe pas" in response.data.decode("utf-8")
+
+
+def test_ranger_handles_missing_log_entry(client, add_serigraphie, test_db, set_user_session, monkeypatch):
+    import APP
+
+    entry = add_serigraphie(ref_ecran=310, n="060", sorti=1, lave=0)
+    set_user_session(prenom="Bob")
+    sync_calls = []
+    monkeypatch.setattr(APP, "_sync_daily_log", lambda conn, day: sync_calls.append(day))
+
+    response = client.post(
+        "/ranger",
+        data={
+            "ref_ecran": str(entry["ref_ecran"]),
+            "lavee": "non",
+        },
+    )
+    assert response.status_code == 200
+    assert sync_calls == []
+
+    with sqlite3.connect(test_db) as connection:
+        row = connection.execute(
+            "SELECT sorti, lave FROM serigraphie WHERE ref_ecran = ?",
+            (entry["ref_ecran"],),
+        ).fetchone()
+    assert row == (0, 0)

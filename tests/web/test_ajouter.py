@@ -1,12 +1,6 @@
 import sqlite3
 
 
-def _set_admin_session(client):
-    with client.session_transaction() as session:
-        session["prenom"] = "Admin"
-        session["admin"] = 1
-
-
 def test_ajouter_requires_admin(client):
     response = client.get("/ajouter")
     # Non admin users are redirected to /index
@@ -14,8 +8,8 @@ def test_ajouter_requires_admin(client):
     assert response.headers["Location"].endswith("/index")
 
 
-def test_ajouter_validation_error(client):
-    _set_admin_session(client)
+def test_ajouter_validation_error(client, set_user_session):
+    set_user_session(admin=True, prenom="Admin")
     response = client.post(
         "/ajouter",
         data={
@@ -32,8 +26,8 @@ def test_ajouter_validation_error(client):
     assert b"ne respectent pas les contraintes" in response.data
 
 
-def test_ajouter_success_inserts_row(client, test_db):
-    _set_admin_session(client)
+def test_ajouter_success_inserts_row(client, test_db, set_user_session):
+    set_user_session(admin=True, prenom="Admin")
     response = client.post(
         "/ajouter",
         data={
