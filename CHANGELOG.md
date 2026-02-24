@@ -19,14 +19,12 @@
 - Bouton “Vider les journaux” : exporte puis supprime tous les CSV pour remettre le dossier de logs à blanc après archivage.
 ### Modifié
 - Les routes `/prendre` et `/ranger` publient désormais chaque événement dans la table de logs puis régénèrent le fichier du jour, garantissant l'historique même si un écran est rangé un autre jour.
-- `README.md` décrit la nouvelle fonctionnalité (format des fichiers, configuration, archivage).
 
 ## [2.2.0] - 2025-12-17
 ### Ajouté
 - Suites Pytest couvrant l'authentification, les flux d'ajout/prise/rangement ainsi que les scripts CLI et le schéma SQLite (répertoires `tests/web`, `tests/db`, `tests/scripts`).
 - Tests front-end Vitest/JSDOM pour la logique de filtrage `Functions/Ecran.js` (`tests/js`).
 ### Modifié
-- Documentation `README.md` mise à jour avec les instructions détaillées pour exécuter les tests Python et JavaScript.
 - `requirements.txt` inclut désormais `pytest` afin que les environnements CI et locaux disposent automatiquement du runner de tests.
 
 ## [2.1.1] - 2025-12-16

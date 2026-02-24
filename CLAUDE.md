@@ -97,3 +97,14 @@ docs(changelog): update 3.1.0 release notes
 - **Modification du comportement** : adapter les tests existants impactés par le changement.
 - Les tests doivent être placés dans `tests/` et suivre les conventions déjà en place dans ce dossier.
 - Ne jamais laisser des tests en échec après une modification : si un test échoue suite à un changement voulu, le mettre à jour plutôt que de le supprimer.
+
+
+## Mise à jour du README
+
+**Mettre à jour `README.md` si la modification impacte ce que l'utilisateur final doit savoir**, notamment :
+- Ajout ou suppression d'une fonctionnalité visible
+- Changement d'une commande de démarrage, d'installation ou d'utilisation
+- Modification des prérequis ou de la compatibilité
+- Nouveau script ou outil mis à disposition
+
+**Ne pas mettre à jour `README.md`** pour des changements purement internes (refactoring, ajout de tests, corrections de bugs sans impact sur l'usage).
