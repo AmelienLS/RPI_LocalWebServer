@@ -49,9 +49,10 @@ body {
 }
 
 .logout-button {
-    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     text-decoration: none;
-    display: block;
     margin-top: 1rem;
     background-color: #FF4C4C;
     color: #FFFFFF;
