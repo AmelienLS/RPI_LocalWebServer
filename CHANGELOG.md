@@ -1,4 +1,12 @@
 # Journal des modifications
+## [3.6.1] - 2026-02-26
+> Commit : `fix(ajouter): switch export to XLSX, use positional column mapping on import, match button style`
+### Modifié
+- `APP.py` : `_parse_import_file()` — mapping désormais par **position de colonne** (la première ligne est ignorée comme en-tête ; l'ordre attendu est `ref_ecran, libelle, pcb, fab, n_fab, type, n`). Route `/export_serigraphie` — export au format `.xlsx` (openpyxl) à la place du CSV.
+- `Templates/ajouter.html` : libellé du bouton "Exporter CSV" → "Exporter".
+- `Styles/ajouter.css` : `.ie-btn` reprend le style visuel des boutons `.retour` (fond jaune `#feed00`, texte sombre, gras, `border-radius: 4px`, même double ombre).
+- `tests/web/test_import_export.py` : tests d'export mis à jour pour vérifier le format XLSX et les en-têtes de colonnes en ordre positionnel.
+
 ## [3.6.0] - 2026-02-26
 > Commit : `feat(ajouter): add CSV export and CSV/XLSX import with conflict resolution`
 ### Ajouté

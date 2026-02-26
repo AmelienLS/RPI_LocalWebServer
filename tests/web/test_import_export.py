@@ -7,9 +7,11 @@ import sqlite3
 import openpyxl
 import pytest
 
+_COLUMNS = ["ref_ecran", "libelle", "pcb", "fab", "n_fab", "type", "n"]
+
 
 # ---------------------------------------------------------------------------
-# Export CSV
+# Export XLSX
 # ---------------------------------------------------------------------------
 
 def test_export_requires_login(client):
@@ -25,29 +27,30 @@ def test_export_requires_admin(client, set_user_session):
     assert response.headers["Location"].endswith("/index")
 
 
-def test_export_returns_csv(client, set_user_session, add_serigraphie):
+def test_export_returns_xlsx(client, set_user_session, add_serigraphie):
     set_user_session(admin=True)
     add_serigraphie(ref_ecran=700, libelle="Ecran export", fab="EX", type_="T1", n="001")
 
     response = client.get("/export_serigraphie")
     assert response.status_code == 200
-    assert "text/csv" in response.content_type
+    assert "spreadsheetml" in response.content_type
 
-    content = response.data.decode("utf-8-sig")
-    reader = csv.DictReader(io.StringIO(content))
-    rows = list(reader)
-    refs = [r["ref_ecran"] for r in rows]
+    wb = openpyxl.load_workbook(io.BytesIO(response.data))
+    ws = wb.active
+    rows = list(ws.iter_rows(min_row=2, values_only=True))
+    refs = [str(r[0]) for r in rows]
     assert "700" in refs
 
 
-def test_export_csv_has_expected_columns(client, set_user_session):
+def test_export_xlsx_has_expected_columns(client, set_user_session):
     set_user_session(admin=True)
     response = client.get("/export_serigraphie")
     assert response.status_code == 200
 
-    content = response.data.decode("utf-8-sig")
-    reader = csv.DictReader(io.StringIO(content))
-    assert set(reader.fieldnames or []) == {"ref_ecran", "libelle", "pcb", "fab", "n_fab", "type", "n"}
+    wb = openpyxl.load_workbook(io.BytesIO(response.data))
+    ws = wb.active
+    headers = [cell.value for cell in next(ws.iter_rows(max_row=1))]
+    assert headers == _COLUMNS
 
 
 # ---------------------------------------------------------------------------

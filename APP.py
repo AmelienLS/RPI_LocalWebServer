@@ -192,38 +192,42 @@ def _build_logs_archive(delete_files: bool = False) -> BytesIO:
     return archive_stream
 
 
+_SERI_COLUMNS = ['ref_ecran', 'libelle', 'pcb', 'fab', 'n_fab', 'type', 'n']
+
+
 def _parse_import_file(file_storage):
     """Parse un fichier CSV ou XLSX et retourne une liste de dicts représentant les lignes serigraphie.
 
-    Les colonnes obligatoires sont : ref_ecran, libelle, fab, type, n.
-    Les colonnes optionnelles sont : pcb, n_fab.
-    Lève ValueError si le format ou les colonnes sont invalides.
+    Le mapping se fait par position de colonne (ordre : ref_ecran, libelle, pcb, fab, n_fab, type, n).
+    La première ligne est toujours ignorée (en-tête).
+    Lève ValueError si le format est invalide ou si le fichier est vide.
     """
-    REQUIRED = {'ref_ecran', 'libelle', 'fab', 'type', 'n'}
     filename = file_storage.filename.lower()
 
     if filename.endswith('.csv'):
         stream = io.TextIOWrapper(file_storage.stream, encoding='utf-8-sig')
-        reader = csv.DictReader(stream)
-        rows = [dict(r) for r in reader]
+        reader = csv.reader(stream)
+        next(reader, None)  # ignorer la ligne d'en-tête
+        rows = []
+        for vals in reader:
+            rows.append({_SERI_COLUMNS[i]: str(vals[i]).strip() if i < len(vals) else ''
+                         for i in range(len(_SERI_COLUMNS))})
     elif filename.endswith('.xlsx'):
         wb = openpyxl.load_workbook(file_storage.stream, read_only=True, data_only=True)
         ws = wb.active
-        header_row = next(ws.iter_rows(max_row=1))
-        headers = [str(c.value).strip() if c.value is not None else '' for c in header_row]
+        rows_iter = ws.iter_rows()
+        next(rows_iter, None)  # ignorer la ligne d'en-tête
         rows = []
-        for row in ws.iter_rows(min_row=2):
-            rows.append({headers[i]: str(c.value or '').strip() for i, c in enumerate(row)})
+        for row in rows_iter:
+            vals = [str(c.value or '').strip() for c in row]
+            rows.append({_SERI_COLUMNS[i]: vals[i] if i < len(vals) else ''
+                         for i in range(len(_SERI_COLUMNS))})
         wb.close()
     else:
         raise ValueError("Format non supporté. Utilisez .csv ou .xlsx")
 
     if not rows:
         raise ValueError("Le fichier est vide.")
-
-    missing = REQUIRED - set(rows[0].keys())
-    if missing:
-        raise ValueError(f"Colonnes manquantes : {', '.join(sorted(missing))}")
 
     return rows
 
@@ -490,7 +494,7 @@ def export_logs():
 
 @app.route('/export_serigraphie')
 def export_serigraphie():
-    """Exporte la table serigraphie au format CSV. Admin uniquement."""
+    """Exporte la table serigraphie au format XLSX. Admin uniquement."""
     if 'prenom' not in session:
         return redirect('/')
     if not session.get('admin'):
@@ -501,15 +505,22 @@ def export_serigraphie():
         cursor.execute('SELECT ref_ecran, libelle, pcb, fab, n_fab, type, n FROM serigraphie ORDER BY ref_ecran')
         rows = cursor.fetchall()
 
-    output = io.StringIO()
-    writer = csv.DictWriter(output, fieldnames=['ref_ecran', 'libelle', 'pcb', 'fab', 'n_fab', 'type', 'n'])
-    writer.writeheader()
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.append(_SERI_COLUMNS)
     for row in rows:
-        writer.writerow(dict(row))
+        ws.append([row[c] for c in _SERI_COLUMNS])
 
-    csv_bytes = BytesIO(output.getvalue().encode('utf-8-sig'))
-    filename = f"serigraphie_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
-    return send_file(csv_bytes, mimetype='text/csv', as_attachment=True, download_name=filename)
+    buf = BytesIO()
+    wb.save(buf)
+    buf.seek(0)
+    filename = f"serigraphie_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx"
+    return send_file(
+        buf,
+        mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        as_attachment=True,
+        download_name=filename,
+    )
 
 
 @app.route('/import_serigraphie', methods=['POST'])
