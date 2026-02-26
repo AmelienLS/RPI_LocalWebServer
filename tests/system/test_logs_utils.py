@@ -45,8 +45,8 @@ def test_sync_daily_log_generates_csv(test_db):
     assert log_path.exists()
     with log_path.open(encoding="utf-8") as handle:
         rows = list(csv.reader(handle, delimiter=";"))
-    assert rows[0] == ["ref_ecran", "libelle", "personne", "heure_sortie", "heure_rangement", "lave"]
-    assert rows[1] == ["10", "Ecran Trace", "Bob", "08:15:00", "09:45:00", "Oui"]
+    assert rows[0] == ["ref_ecran", "libelle", "personne", "personne_rangement", "heure_sortie", "heure_rangement", "lave"]
+    assert rows[1] == ["10", "Ecran Trace", "Bob", "", "08:15:00", "09:45:00", "Oui"]
 
 
 def test_sync_daily_log_removes_file_when_no_entries(test_db):

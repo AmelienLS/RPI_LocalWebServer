@@ -69,11 +69,12 @@ def test_prendre_creates_daily_trace_file(client, add_serigraphie, monkeypatch, 
     with log_file.open(encoding="utf-8") as handle:
         rows = list(csv.reader(handle, delimiter=";"))
 
-    assert rows[0] == ["ref_ecran", "libelle", "personne", "heure_sortie", "heure_rangement", "lave"]
+    assert rows[0] == ["ref_ecran", "libelle", "personne", "personne_rangement", "heure_sortie", "heure_rangement", "lave"]
     assert rows[1] == [
         str(entry["ref_ecran"]),
         entry["libelle"],
         "Bob",
+        "",
         "08:30:00",
         "",
         "",
@@ -111,6 +112,7 @@ def test_ranger_updates_trace_even_cross_day(client, add_serigraphie, monkeypatc
     assert rows[-1] == [
         str(entry["ref_ecran"]),
         entry["libelle"],
+        "Bob",
         "Bob",
         "09:00:00",
         "11:45:00 (11-02-2024)",

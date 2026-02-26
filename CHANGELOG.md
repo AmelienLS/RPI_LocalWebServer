@@ -1,4 +1,16 @@
 # Journal des modifications
+## [3.5.0] - 2026-02-26
+> Commit : `feat(logs): track who returns and washes screens in sortie_logs`
+### Ajouté
+- `database/schema.sql` : colonne `personne_rangement TEXT` ajoutée à `sortie_logs` — enregistre qui a rangé ou lavé l'écran.
+- `APP.py` : migration automatique dans `_ensure_log_tables()` — ajout de `personne_rangement` via `ALTER TABLE` sur les bases existantes (vérification via `PRAGMA table_info`).
+- `APP.py` : `_sync_daily_log()` inclut désormais `personne_rangement` dans le SELECT et dans les CSV exportés (nouvelle colonne entre `personne` et `heure_sortie`).
+- `APP.py` : route `/ranger` — `personne_rangement` est renseigné avec `session['prenom']` lors de la mise à jour de `sortie_logs`.
+- `APP.py` : route `/laver` — `personne_rangement` est renseigné avec `session['prenom']` lors de la mise à jour de `sortie_logs`.
+### Modifié
+- `tests/web/test_workflow_ecrans.py` : mise à jour des assertions CSV pour refléter le nouvel en-tête et la nouvelle colonne `personne_rangement`.
+- `tests/system/test_logs_utils.py` : mise à jour des assertions CSV pour refléter le nouvel en-tête et la nouvelle colonne `personne_rangement`.
+
 ## [3.4.0] - 2026-02-26
 > Commit : `feat(laver): add washing management section on index page`
 ### Ajouté

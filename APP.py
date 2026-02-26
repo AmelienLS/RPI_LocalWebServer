@@ -75,6 +75,7 @@ def _ensure_log_tables(connection: sqlite3.Connection) -> None:
             ref_ecran INTEGER NOT NULL,
             libelle TEXT NOT NULL,
             personne TEXT NOT NULL,
+            personne_rangement TEXT,
             sortie_ts TEXT NOT NULL,
             rangement_ts TEXT,
             lavee INTEGER,
@@ -82,6 +83,10 @@ def _ensure_log_tables(connection: sqlite3.Connection) -> None:
         )
         """
     )
+    # Migration : ajout de personne_rangement pour les bases créées avant cette version
+    existing_cols = {row[1] for row in connection.execute("PRAGMA table_info(sortie_logs)")}
+    if "personne_rangement" not in existing_cols:
+        connection.execute("ALTER TABLE sortie_logs ADD COLUMN personne_rangement TEXT")
     connection.execute(
         "CREATE INDEX IF NOT EXISTS idx_sortie_logs_ref ON sortie_logs (ref_ecran, rangement_ts)"
     )
@@ -111,7 +116,7 @@ def _sync_daily_log(connection: sqlite3.Connection, log_date: date) -> None:
     log_date_iso = log_date.isoformat()
     cursor = connection.execute(
         """
-        SELECT ref_ecran, libelle, personne, sortie_ts, rangement_ts, lavee
+        SELECT ref_ecran, libelle, personne, personne_rangement, sortie_ts, rangement_ts, lavee
         FROM sortie_logs
         WHERE date(sortie_ts) = ?
         ORDER BY datetime(sortie_ts) ASC, id ASC
@@ -129,7 +134,7 @@ def _sync_daily_log(connection: sqlite3.Connection, log_date: date) -> None:
     with log_path.open("w", newline="", encoding="utf-8") as handle:
         writer = csv.writer(handle, delimiter=";")
         writer.writerow(
-            ["ref_ecran", "libelle", "personne", "heure_sortie", "heure_rangement", "lave"]
+            ["ref_ecran", "libelle", "personne", "personne_rangement", "heure_sortie", "heure_rangement", "lave"]
         )
         for row in rows:
             sortie_dt = datetime.fromisoformat(row["sortie_ts"])
@@ -148,6 +153,7 @@ def _sync_daily_log(connection: sqlite3.Connection, log_date: date) -> None:
                     row["ref_ecran"],
                     row["libelle"],
                     row["personne"],
+                    row["personne_rangement"] or "",
                     sortie_text,
                     rangement_text,
                     lave_text,
@@ -273,8 +279,8 @@ def laver():
             ).fetchone()
             if log_row:
                 cursor.execute(
-                    'UPDATE sortie_logs SET lavee = 1 WHERE id = ?',
-                    (log_row['id'],),
+                    'UPDATE sortie_logs SET lavee = 1, personne_rangement = ? WHERE id = ?',
+                    (session.get('prenom', 'Inconnu'), log_row['id']),
                 )
                 conn.commit()
                 _sync_daily_log(conn, datetime.fromisoformat(log_row['sortie_ts']).date())
@@ -701,8 +707,8 @@ def ranger():
                 if log_row:
                     rangement_dt = _current_timestamp()
                     cursor.execute(
-                        "UPDATE sortie_logs SET rangement_ts = ?, lavee = ? WHERE id = ?",
-                        (rangement_dt.isoformat(), 1 if lavee else 0, log_row["id"]),
+                        "UPDATE sortie_logs SET rangement_ts = ?, lavee = ?, personne_rangement = ? WHERE id = ?",
+                        (rangement_dt.isoformat(), 1 if lavee else 0, session.get('prenom', 'Inconnu'), log_row["id"]),
                     )
                     log_date = datetime.fromisoformat(log_row["sortie_ts"]).date()
                 conn.commit()
