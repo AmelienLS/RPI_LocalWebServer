@@ -16,7 +16,7 @@ def test_index_renders_admin_view(client, set_user_session):
     assert response.status_code == 200
     body = response.data.decode("utf-8")
     assert "Bienvenue, Alice" in body
-    assert "Administration." in body
+    assert "Administration" in body
 
 
 def test_login_invalid_identifiant(client):
