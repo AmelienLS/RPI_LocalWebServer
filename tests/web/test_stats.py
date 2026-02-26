@@ -21,13 +21,13 @@ def test_stats_accessible_as_admin(client, set_user_session):
     assert response.status_code == 200
 
 
-def test_stats_shows_screen_with_zero_passages(client, set_user_session, add_serigraphie):
+def test_stats_hides_screen_with_zero_passages(client, set_user_session, add_serigraphie):
     set_user_session(admin=True)
     ecran = add_serigraphie(ref_ecran=500, libelle="Ecran sans sortie", n="050")
     response = client.get("/stats")
     body = response.data.decode("utf-8")
-    assert str(ecran["ref_ecran"]) in body
-    assert ecran["libelle"] in body
+    assert str(ecran["ref_ecran"]) not in body
+    assert ecran["libelle"] not in body
 
 
 def test_stats_counts_passages(client, set_user_session, add_serigraphie, test_db):
