@@ -390,6 +390,48 @@ def export_logs():
     )
 
 
+@app.route('/stats')
+def stats():
+    """
+    Affiche les statistiques d'utilisation des écrans.
+    - Admin uniquement.
+    - Nombre de passages par écran (tri décroissant) et par personne.
+    """
+    if 'prenom' not in session:
+        return redirect('/')
+    if not session.get('admin'):
+        return redirect('/index')
+
+    with get_db_connection() as conn:
+        _ensure_log_tables(conn)
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT s.ref_ecran, s.libelle, s.fab, s.type, COUNT(sl.id) AS total_passages
+            FROM serigraphie s
+            LEFT JOIN sortie_logs sl ON s.ref_ecran = sl.ref_ecran
+            GROUP BY s.ref_ecran, s.libelle, s.fab, s.type
+            ORDER BY total_passages DESC
+        ''')
+        ecrans_stats = cursor.fetchall()
+
+        cursor.execute('''
+            SELECT personne, COUNT(*) AS total_passages
+            FROM sortie_logs
+            GROUP BY personne
+            ORDER BY total_passages DESC
+        ''')
+        personnes_stats = cursor.fetchall()
+
+        total_passages = sum(row['total_passages'] for row in ecrans_stats)
+
+    return render_template(
+        'stats.html',
+        ecrans_stats=ecrans_stats,
+        personnes_stats=personnes_stats,
+        total_passages=total_passages,
+    )
+
+
 @app.route("/purge_logs", methods=["POST"])
 def purge_logs():
     """

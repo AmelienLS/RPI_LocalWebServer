@@ -1,4 +1,13 @@
 # Journal des modifications
+## [3.3.0] - 2026-02-26
+> Commit : `feat(stats): add admin statistics page for screen usage`
+### Ajouté
+- `APP.py` : nouvelle route `/stats` (admin uniquement) — agrège les passages par écran via `sortie_logs` (LEFT JOIN sur `serigraphie`) et les passages par personne, transmet les résultats au template.
+- `Templates/stats.html` : page affichant le total des passages, un tableau "écrans les plus utilisés" (réf., libellé, fab, type, compteur) et un tableau "personnes les plus actives".
+- `Styles/stats.css` : styles dédiés à la page stats (tableau, badge total, surbrillance du premier résultat).
+- `Templates/index.html` : lien "Statistiques" ajouté dans la section administration.
+- `tests/web/test_stats.py` : couverture de la route `/stats` (accès non connecté, non admin, accès admin, comptage de passages, affichage du total).
+
 ## [3.2.5] - 2026-02-26
 > Commit : `fix(ui): unify red button style across all pages`
 ### Modifié
