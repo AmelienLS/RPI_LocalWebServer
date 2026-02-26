@@ -25,7 +25,6 @@ table {
     text-align: left;
     -webkit-user-select: none;
     user-select: none;
-    touch-action: pan-y;
 }
 
 thead th {
@@ -66,12 +65,13 @@ td, th {
 
 button {
     width: auto;
-    padding: 0.5rem 1rem;
+    padding: 0.6rem 1rem;
+    min-height: 44px;
 }
 
 button.prendre {
     font-size: 0.9rem;
-    padding: 0.4rem 0.8rem;
+    padding: 0.6rem 1rem;
     border: 1px solid #FFC800;
 }
 
@@ -79,11 +79,16 @@ button.prendre:hover {
     background-color: #FFD700;
 }
 
+.export-btn, .purge-btn {
+    padding: 0.75rem 1.5rem;
+    min-height: calc(44px + 1.5rem); /* Confort tactile 10" : égale la hauteur des boutons d'action principaux */
+}
+
 .purge-btn {
-    background-color: #721c24;
-    border: 1px solid #f5c6cb;
+    background-color: #FF4C4C;
+    color: #FFFFFF;
 }
 
 .purge-btn:hover {
-    background-color: #a71d2a;
+    background-color: #E04343;
 }

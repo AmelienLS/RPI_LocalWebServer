@@ -148,7 +148,7 @@ Options utiles :
 
 Le script peut être relancé à tout moment pour repartir d’une base propre.
 
-> ℹ️  Le schéma `database/schema.sql` comprend désormais la table `sortie_logs`.  
+> [i]  Le schéma `database/schema.sql` comprend désormais la table `sortie_logs`.  
 > Chaque entrée y correspond à une sortie d'écran (heure de sortie, utilisateur, heure/état de rangement).  
 > Les fichiers CSV quotidiens sont régénérés automatiquement à partir de cette table, vous pouvez donc les supprimer ou les archiver sans perdre d'historique.
 

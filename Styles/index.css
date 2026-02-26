@@ -11,12 +11,20 @@ body {
 
 .admin-link {
     position: static; /* Annule le positionnement absolu */
+    display: flex;
+    width: 100%;
+    box-sizing: border-box;
+    min-height: calc(44px + 1.5rem); /* border-box: compense le padding vertical pour égaler la hauteur des autres <a> (content-box) */
     margin-top: 1rem;
 }
 
 /* Ajout pour restaurer le style bouton des user-links */
 .user-link {
     position: static;
+    display: flex;
+    width: 100%;
+    box-sizing: border-box;
+    min-height: calc(44px + 1.5rem); /* border-box: compense le padding vertical pour égaler la hauteur des autres <a> (content-box) */
     margin-top: 1rem;
 }
 
@@ -43,17 +51,20 @@ body {
 }
 
 .logout-button {
-    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     text-decoration: none;
-    display: block;
     margin-top: 1rem;
     background-color: #FF4C4C;
     color: #FFFFFF;
-    padding: 0.7rem;
+    padding: 0.75rem 1rem;
+    min-height: 44px;
     border-radius: 4px;
     font-size: 1rem;
     font-weight: bold;
     cursor: pointer;
+    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.45), 0 3px 8px rgba(0, 0, 0, 0.4);
 }
 
 .logout-button:hover {

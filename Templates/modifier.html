@@ -70,10 +70,10 @@
 
         <!-- Affichage d'un message d'erreur si l'écran n'existe pas -->
         {% if error %}
-            <script type="text/javascript" class="error">
-                alert("écran non trouvé. Veuillez vérifier la référence et réessayer.");
-                window.location.href = '/modifier';
-            </script>
+            <div class="error">
+                <p>Écran non trouvé. Veuillez vérifier la référence et réessayer.</p>
+                <a href="/modifier" style="color: white; text-decoration: underline;">Réessayer</a>
+            </div>
         {% endif %}
 
         <!-- Bouton de retour -->

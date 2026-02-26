@@ -19,7 +19,7 @@ def test_prendre_marks_screen_as_out(client, add_serigraphie, test_db, set_user_
 
     response = client.post("/prendre", data={"ref_ecran": str(entry["ref_ecran"])})
     assert response.status_code == 200
-    assert b"prise avec" in response.data
+    assert b"pris avec" in response.data
 
     with sqlite3.connect(test_db) as connection:
         cursor = connection.execute(

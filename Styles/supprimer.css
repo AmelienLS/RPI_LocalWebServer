@@ -5,21 +5,28 @@ body {
 }
 
 .container {
-    width: 400px;
+    width: 90%;
+    max-width: 400px;
 }
 
 .confirmer {
-    background-color: #F44336;
+    background-color: #FF4C4C;
+    color: #FFFFFF;
 }
 
 .confirmer:hover {
-    background-color: #b63127;
+    background-color: #E04343;
 }
 
 .cancel-btn {
-    padding: 0.7rem;
+    padding: 0.85rem 1rem;
+    min-height: 44px;
     font-weight: bold;
     cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.45), 0 3px 8px rgba(0, 0, 0, 0.4);
 }
 
 .button-group {

@@ -1,82 +1,76 @@
-#!/bin/bash
+#!/usr/bin/env bash
+# ==============================================================================
+# purge.sh
+# Supprime tous les fichiers installés par demarrage_release.sh ou
+# demarrage_branche.sh : dépôt cloné, environnement virtuel, base de données,
+# journaux.
+#
+# Compatible : Ubuntu 20.04+  |  Fedora (standard + Silverblue/Kinoite)
+#
+# Usage :
+#   bash purge.sh
+#
+# Variables d'environnement optionnelles :
+#   PROJECT_DIR   Répertoire à supprimer  (défaut : ~/RPI_LocalWebServer)
+# ==============================================================================
+set -euo pipefail
 
-echo "🔥 Purge de l'environnement de production de RPI_LocalWebServer"
-echo "ATTENTION : Cette action est irréversible et supprimera les services et les fichiers."
-read -p "Voulez-vous continuer ? (o/N) " -n 1 -r
-echo
-if [[ ! $REPLY =~ ^[Oo]$ ]]
-then
-    echo "Abandon."
-    exit 1
-fi
+# ── Configuration ──────────────────────────────────────────────────────────────
+PROJECT_DIR="${PROJECT_DIR:-$HOME/RPI_LocalWebServer}"
 
-# --- Variables ---
-RELEASE_DIR="/home/amelien/RPI_LocalWebServer-release"
-APP_SERVICE_NAME="armoire-release"
-FIREFOX_SERVICE_NAME="firefox-local-release"
-USER_NAME="amelien"
-LAUNCH_SCRIPT_PATH="/home/$USER_NAME/launch_firefox_release.sh"
-APP_SERVICE_FILE="/etc/systemd/system/$APP_SERVICE_NAME.service"
-FIREFOX_SERVICE_FILE="/home/$USER_NAME/.config/systemd/user/$FIREFOX_SERVICE_NAME.service"
+# ── Couleurs ───────────────────────────────────────────────────────────────────
+info()    { printf '\033[34m[i]\033[0m %s\n'  "$*"; }
+ok()      { printf '\033[32m[✓]\033[0m %s\n'  "$*"; }
+warn()    { printf '\033[33m[!]\033[0m %s\n'  "$*" >&2; }
+die()     { printf '\033[31m[✗]\033[0m %s\n'  "$*" >&2; exit 1; }
+header()  { printf '\n\033[1m%s\033[0m\n\n'   "$*"; }
 
-# --- Début de la purge ---
+# ── Point d'entrée ─────────────────────────────────────────────────────────────
+main() {
+    header "=== RPI_LocalWebServer — Purge ==="
 
-# 1. Arrêter et désactiver les services
-echo "🛑 Arrêt et désactivation des services..."
+    # Vérifier que le répertoire cible existe
+    if [[ ! -d "$PROJECT_DIR" ]]; then
+        warn "Répertoire '$PROJECT_DIR' introuvable — rien à supprimer."
+        exit 0
+    fi
 
-# Service de l'application (system)
-if systemctl is-active --quiet "$APP_SERVICE_NAME"; then
-    sudo systemctl stop "$APP_SERVICE_NAME"
-    echo "   -> Service '$APP_SERVICE_NAME' arrêté."
-fi
-if systemctl is-enabled --quiet "$APP_SERVICE_NAME"; then
-    sudo systemctl disable "$APP_SERVICE_NAME"
-    echo "   -> Service '$APP_SERVICE_NAME' désactivé."
-fi
+    # Afficher ce qui va être supprimé
+    printf '\033[33mLe contenu suivant sera supprimé définitivement :\033[0m\n'
+    printf '  Répertoire : %s\n' "$PROJECT_DIR"
+    printf '  Contenu    : dépôt git, environnement virtuel, base de données, journaux\n\n'
 
-# Service Firefox (user)
-# Exécute les commandes en tant que l'utilisateur pour gérer son service
-if sudo -u "$USER_NAME" systemctl --user is-active --quiet "$FIREFOX_SERVICE_NAME"; then
-    sudo -u "$USER_NAME" systemctl --user stop "$FIREFOX_SERVICE_NAME"
-    echo "   -> Service utilisateur '$FIREFOX_SERVICE_NAME' arrêté."
-fi
-if sudo -u "$USER_NAME" systemctl --user is-enabled --quiet "$FIREFOX_SERVICE_NAME"; then
-    sudo -u "$USER_NAME" systemctl --user disable "$FIREFOX_SERVICE_NAME"
-    echo "   -> Service utilisateur '$FIREFOX_SERVICE_NAME' désactivé."
-fi
+    # Demander confirmation
+    read -rp "Voulez-vous continuer ? [o/N] : " confirm
+    case "$confirm" in
+        [oO]|[oO][uU][iI]) : ;;
+        *) info "Abandon."; exit 0 ;;
+    esac
 
-# 2. Supprimer les fichiers de service
-echo "🗑️  Suppression des fichiers de service..."
-if [ -f "$APP_SERVICE_FILE" ]; then
-    sudo rm "$APP_SERVICE_FILE"
-    echo "   -> Fichier '$APP_SERVICE_FILE' supprimé."
-fi
-if [ -f "$FIREFOX_SERVICE_FILE" ]; then
-    rm "$FIREFOX_SERVICE_FILE"
-    echo "   -> Fichier '$FIREFOX_SERVICE_FILE' supprimé."
-fi
+    printf '\n'
 
-# 3. Recharger les démons systemd
-echo "🔄 Rechargement des configurations systemd..."
-sudo systemctl daemon-reload
-sudo -u "$USER_NAME" systemctl --user daemon-reload
+    # Stopper gunicorn s'il tourne depuis ce répertoire
+    info "Vérification des processus gunicorn en cours..."
+    local gunicorn_pid
+    gunicorn_pid="$(pgrep -f "gunicorn.*wsgi:app" 2>/dev/null || true)"
+    if [[ -n "$gunicorn_pid" ]]; then
+        warn "Processus gunicorn détecté (PID : $gunicorn_pid). Arrêt en cours..."
+        kill "$gunicorn_pid" 2>/dev/null || true
+        sleep 1
+        ok "Processus gunicorn arrêté"
+    else
+        info "Aucun processus gunicorn en cours d'exécution"
+    fi
 
-# 4. Supprimer les fichiers de l'application et les scripts
-echo "🗑️  Suppression des fichiers de l'application..."
-if [ -d "$RELEASE_DIR" ]; then
-    sudo rm -rf "$RELEASE_DIR"
-    echo "   -> Répertoire de l'application '$RELEASE_DIR' supprimé."
-fi
-if [ -f "$LAUNCH_SCRIPT_PATH" ]; then
-    rm "$LAUNCH_SCRIPT_PATH"
-    echo "   -> Script de lancement '$LAUNCH_SCRIPT_PATH' supprimé."
-fi
+    # Supprimer le répertoire
+    info "Suppression de '$PROJECT_DIR'..."
+    rm -rf "$PROJECT_DIR"
+    ok "Répertoire supprimé"
 
-# 5. Désactiver Linger pour l'utilisateur
-echo "👤 Nettoyage de la configuration utilisateur..."
-sudo loginctl disable-linger "$USER_NAME"
-echo "   -> Linger désactivé pour l'utilisateur '$USER_NAME'."
+    printf '\n'
+    ok "=== Purge terminée ==="
+    printf '   Le système est revenu à un état propre.\n'
+    printf '   Relancez demarrage_release.sh ou demarrage_branche.sh pour réinstaller.\n\n'
+}
 
-echo ""
-echo "✅ Purge terminée ! Le système est revenu à un état normal."
-echo "ℹ️  Un redémarrage est conseillé pour s'assurer que tout est propre."
+main "$@"
