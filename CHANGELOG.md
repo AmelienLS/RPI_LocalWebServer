@@ -1,4 +1,10 @@
 # Journal des modifications
+## [3.2.1] - 2026-02-26
+> Commit : `fix(ui): make index buttons full-width and remove simple back button from ajouter`
+### Modifié
+- `Styles/index.css` : `.admin-link` et `.user-link` passés en `display: flex; width: 100%` pour occuper toute la largeur du conteneur et assurer une harmonie visuelle cohérente.
+- `Templates/ajouter.html` : suppression du bouton "Retour au menu" (lien `/index` sans fermeture de la DB), seul le bouton "Fermer connexion DB et retour au menu" reste présent.
+
 ## [3.2.0] - 2026-02-24
 > Commit : `feat(ui): improve touch ergonomics for 12-inch touchscreen`
 ### Modifié

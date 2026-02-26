@@ -11,12 +11,18 @@ body {
 
 .admin-link {
     position: static; /* Annule le positionnement absolu */
+    display: flex;
+    width: 100%;
+    box-sizing: border-box;
     margin-top: 1rem;
 }
 
 /* Ajout pour restaurer le style bouton des user-links */
 .user-link {
     position: static;
+    display: flex;
+    width: 100%;
+    box-sizing: border-box;
     margin-top: 1rem;
 }
 
