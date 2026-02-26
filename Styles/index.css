@@ -55,7 +55,8 @@ body {
     margin-top: 1rem;
     background-color: #FF4C4C;
     color: #FFFFFF;
-    padding: 0.7rem;
+    padding: 0.75rem 1rem;
+    min-height: 44px;
     border-radius: 4px;
     font-size: 1rem;
     font-weight: bold;
