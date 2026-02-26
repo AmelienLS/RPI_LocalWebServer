@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/Styles/common.css">
+    <link rel="stylesheet" href="/Styles/import_conflicts.css">
+    <link rel="icon" href="/Images/Logo.png" type="image/png">
+    <title>Conflits d'import</title>
+</head>
+<body>
+    <a href="/ajouter" class="retour">Retour à l'ajout</a>
+    <div class="container">
+        <h1>Résolution des conflits</h1>
+
+        {% if inserted %}
+        <p class="info-inserted">{{ inserted }} écran(s) ajouté(s) sans conflit.</p>
+        {% endif %}
+
+        <p class="info-conflicts">{{ conflicts | length }} écran(s) existent déjà en base. Choisissez l'action pour chacun :</p>
+
+        <form action="/import_serigraphie/confirm" method="POST">
+            <input type="hidden" name="conflicts_json" value="{{ conflicts_json | e }}">
+
+            <div class="conflict-actions-top">
+                <button type="button" class="button btn-overwrite-all" onclick="selectAll()">Écraser tout</button>
+                <button type="submit" class="button btn-confirm">Confirmer</button>
+            </div>
+
+            <div class="conflicts-list">
+                {% for c in conflicts %}
+                <div class="conflict-card">
+                    <div class="conflict-header">
+                        <span class="conflict-ref">Réf {{ c.incoming.ref_ecran }}</span>
+                        <label class="conflict-toggle">
+                            <input type="checkbox" name="overwrite" value="{{ c.incoming.ref_ecran }}" class="overwrite-cb">
+                            Écraser
+                        </label>
+                    </div>
+                    <table class="conflict-table">
+                        <thead>
+                            <tr>
+                                <th>Champ</th>
+                                <th>En base</th>
+                                <th>Fichier importé</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% set fields = [('libelle','Libellé'),('pcb','PCB'),('fab','Fabricant'),('n_fab','N° Fab'),('type','Type'),('n','N°')] %}
+                            {% for field, label in fields %}
+                            <tr class="{{ 'diff' if c.existing.get(field,'') != c.incoming.get(field,'') else '' }}">
+                                <td class="field-name">{{ label }}</td>
+                                <td>{{ c.existing.get(field, '—') }}</td>
+                                <td>{{ c.incoming.get(field, '—') }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="conflict-actions-bottom">
+                <button type="button" class="button btn-overwrite-all" onclick="selectAll()">Écraser tout</button>
+                <button type="submit" class="button btn-confirm">Confirmer</button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        function selectAll() {
+            document.querySelectorAll('.overwrite-cb').forEach(cb => cb.checked = true);
+        }
+    </script>
+</body>
+</html>

@@ -1,4 +1,6 @@
 import csv
+import io
+import json
 import os
 import platform
 import secrets
@@ -9,6 +11,8 @@ import webbrowser
 import zipfile
 from datetime import datetime, date
 from io import BytesIO
+
+import openpyxl
 from pathlib import Path
 
 from flask import Flask, redirect, render_template, request, send_file, send_from_directory, session
@@ -186,6 +190,43 @@ def _build_logs_archive(delete_files: bool = False) -> BytesIO:
 
     archive_stream.seek(0)
     return archive_stream
+
+
+def _parse_import_file(file_storage):
+    """Parse un fichier CSV ou XLSX et retourne une liste de dicts représentant les lignes serigraphie.
+
+    Les colonnes obligatoires sont : ref_ecran, libelle, fab, type, n.
+    Les colonnes optionnelles sont : pcb, n_fab.
+    Lève ValueError si le format ou les colonnes sont invalides.
+    """
+    REQUIRED = {'ref_ecran', 'libelle', 'fab', 'type', 'n'}
+    filename = file_storage.filename.lower()
+
+    if filename.endswith('.csv'):
+        stream = io.TextIOWrapper(file_storage.stream, encoding='utf-8-sig')
+        reader = csv.DictReader(stream)
+        rows = [dict(r) for r in reader]
+    elif filename.endswith('.xlsx'):
+        wb = openpyxl.load_workbook(file_storage.stream, read_only=True, data_only=True)
+        ws = wb.active
+        header_row = next(ws.iter_rows(max_row=1))
+        headers = [str(c.value).strip() if c.value is not None else '' for c in header_row]
+        rows = []
+        for row in ws.iter_rows(min_row=2):
+            rows.append({headers[i]: str(c.value or '').strip() for i, c in enumerate(row)})
+        wb.close()
+    else:
+        raise ValueError("Format non supporté. Utilisez .csv ou .xlsx")
+
+    if not rows:
+        raise ValueError("Le fichier est vide.")
+
+    missing = REQUIRED - set(rows[0].keys())
+    if missing:
+        raise ValueError(f"Colonnes manquantes : {', '.join(sorted(missing))}")
+
+    return rows
+
 
 # Route de connexion
 @app.route('/', methods=['GET', 'POST'])
@@ -445,6 +486,143 @@ def export_logs():
         as_attachment=True,
         download_name=filename,
     )
+
+
+@app.route('/export_serigraphie')
+def export_serigraphie():
+    """Exporte la table serigraphie au format CSV. Admin uniquement."""
+    if 'prenom' not in session:
+        return redirect('/')
+    if not session.get('admin'):
+        return redirect('/index')
+
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute('SELECT ref_ecran, libelle, pcb, fab, n_fab, type, n FROM serigraphie ORDER BY ref_ecran')
+        rows = cursor.fetchall()
+
+    output = io.StringIO()
+    writer = csv.DictWriter(output, fieldnames=['ref_ecran', 'libelle', 'pcb', 'fab', 'n_fab', 'type', 'n'])
+    writer.writeheader()
+    for row in rows:
+        writer.writerow(dict(row))
+
+    csv_bytes = BytesIO(output.getvalue().encode('utf-8-sig'))
+    filename = f"serigraphie_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
+    return send_file(csv_bytes, mimetype='text/csv', as_attachment=True, download_name=filename)
+
+
+@app.route('/import_serigraphie', methods=['POST'])
+def import_serigraphie():
+    """Importe des écrans depuis un fichier CSV ou XLSX. Admin uniquement.
+
+    - Insère les nouvelles lignes directement.
+    - Si des conflits (ref_ecran déjà existant) sont détectés, rend la page de résolution.
+    """
+    if 'prenom' not in session:
+        return redirect('/')
+    if not session.get('admin'):
+        return redirect('/index')
+
+    file = request.files.get('import_file')
+    if not file or file.filename == '':
+        return render_template('ajouter.html', error="Aucun fichier sélectionné.")
+
+    try:
+        rows = _parse_import_file(file)
+    except ValueError as e:
+        return render_template('ajouter.html', error=str(e))
+
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        existing = {str(r['ref_ecran']) for r in cursor.execute('SELECT ref_ecran FROM serigraphie').fetchall()}
+
+    new_rows = [r for r in rows if str(r.get('ref_ecran', '')).strip() not in existing]
+    conflict_rows = [r for r in rows if str(r.get('ref_ecran', '')).strip() in existing]
+
+    inserted = 0
+    if new_rows:
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            for r in new_rows:
+                try:
+                    cursor.execute(
+                        'INSERT OR IGNORE INTO serigraphie (ref_ecran, libelle, pcb, fab, n_fab, type, n) VALUES (?,?,?,?,?,?,?)',
+                        (r.get('ref_ecran', ''), r.get('libelle', ''), r.get('pcb', ''),
+                         r.get('fab', ''), r.get('n_fab', ''), r.get('type', ''), r.get('n', ''))
+                    )
+                    inserted += cursor.rowcount
+                except sqlite3.Error:
+                    pass
+            conn.commit()
+
+    if conflict_rows:
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            db_rows = {}
+            for r in conflict_rows:
+                ref = str(r.get('ref_ecran', '')).strip()
+                row = cursor.execute(
+                    'SELECT ref_ecran, libelle, pcb, fab, n_fab, type, n FROM serigraphie WHERE ref_ecran = ?', (ref,)
+                ).fetchone()
+                if row:
+                    db_rows[ref] = dict(row)
+
+        conflicts = [
+            {'incoming': r, 'existing': db_rows.get(str(r.get('ref_ecran', '')).strip(), {})}
+            for r in conflict_rows
+        ]
+        return render_template('import_conflicts.html',
+                               conflicts=conflicts,
+                               inserted=inserted,
+                               conflicts_json=json.dumps([c['incoming'] for c in conflicts]))
+
+    success_msg = f"{inserted} écran(s) ajouté(s) avec succès."
+    return render_template('ajouter.html', success=success_msg)
+
+
+@app.route('/import_serigraphie/confirm', methods=['POST'])
+def import_serigraphie_confirm():
+    """Applique les choix de résolution des conflits d'import. Admin uniquement."""
+    if 'prenom' not in session:
+        return redirect('/')
+    if not session.get('admin'):
+        return redirect('/index')
+
+    conflicts_json = request.form.get('conflicts_json', '[]')
+    overwrite_all = request.form.get('overwrite_all') == '1'
+
+    try:
+        conflict_rows = json.loads(conflicts_json)
+    except (json.JSONDecodeError, ValueError):
+        return render_template('ajouter.html', error="Données de conflit invalides.")
+
+    to_overwrite = []
+    if overwrite_all:
+        to_overwrite = conflict_rows
+    else:
+        selected = set(request.form.getlist('overwrite'))
+        to_overwrite = [r for r in conflict_rows if str(r.get('ref_ecran', '')) in selected]
+
+    updated = 0
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        for r in to_overwrite:
+            cursor.execute(
+                'UPDATE serigraphie SET libelle=?, pcb=?, fab=?, n_fab=?, type=?, n=? WHERE ref_ecran=?',
+                (r.get('libelle', ''), r.get('pcb', ''), r.get('fab', ''),
+                 r.get('n_fab', ''), r.get('type', ''), r.get('n', ''), r.get('ref_ecran', ''))
+            )
+            updated += cursor.rowcount
+        conn.commit()
+
+    kept = len(conflict_rows) - updated
+    parts = []
+    if updated:
+        parts.append(f"{updated} écran(s) écrasé(s)")
+    if kept:
+        parts.append(f"{kept} conflit(s) conservé(s)")
+    return render_template('ajouter.html', success=", ".join(parts) + ".")
 
 
 @app.route('/stats')

@@ -1,0 +1,136 @@
+/* --- Styles pour la page de résolution des conflits d'import --- */
+
+body {
+    align-items: center;
+    padding-top: 3rem;
+}
+
+.container {
+    width: 860px;
+    max-width: 95vw;
+}
+
+.info-inserted {
+    color: #6FCF97;
+    margin-bottom: 0.5rem;
+}
+
+.info-conflicts {
+    color: #E0E0E0;
+    margin-bottom: 1.5rem;
+}
+
+/* Barre d'actions */
+.conflict-actions-top,
+.conflict-actions-bottom {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.conflict-actions-bottom {
+    margin-top: 1.5rem;
+    margin-bottom: 0;
+}
+
+.btn-overwrite-all {
+    background-color: #E67E22;
+    color: #FFFFFF;
+    border: none;
+    border-radius: 6px;
+    padding: 0.5rem 1.2rem;
+    min-height: 40px;
+    cursor: pointer;
+}
+
+.btn-overwrite-all:hover {
+    background-color: #CA6F1E;
+}
+
+.btn-confirm {
+    background-color: #4A90D9;
+    color: #FFFFFF;
+    border: none;
+    border-radius: 6px;
+    padding: 0.5rem 1.2rem;
+    min-height: 40px;
+    cursor: pointer;
+}
+
+.btn-confirm:hover {
+    background-color: #357ABD;
+}
+
+/* Cards de conflit */
+.conflicts-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.conflict-card {
+    background-color: #191B2A;
+    border: 1px solid #2A2D46;
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+}
+
+.conflict-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.75rem;
+}
+
+.conflict-ref {
+    font-weight: bold;
+    color: #FF4C4C;
+    font-size: 1rem;
+}
+
+.conflict-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #E0E0E0;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+.conflict-toggle input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    accent-color: #4A90D9;
+}
+
+/* Tableau de comparaison */
+.conflict-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+}
+
+.conflict-table th {
+    text-align: left;
+    color: #A0A0C0;
+    padding: 0.35rem 0.6rem;
+    border-bottom: 1px solid #2A2D46;
+    font-weight: 600;
+}
+
+.conflict-table td {
+    padding: 0.3rem 0.6rem;
+    color: #D0D0D0;
+    border-bottom: 1px solid #1A1C2A;
+}
+
+.conflict-table td.field-name {
+    color: #A0A0C0;
+    font-size: 0.8rem;
+    width: 100px;
+}
+
+.conflict-table tr.diff td:not(.field-name) {
+    color: #F5A623;
+}

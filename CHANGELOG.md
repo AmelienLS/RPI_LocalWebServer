@@ -1,4 +1,15 @@
 # Journal des modifications
+## [3.6.0] - 2026-02-26
+> Commit : `feat(ajouter): add CSV export and CSV/XLSX import with conflict resolution`
+### Ajouté
+- `APP.py` : helper `_parse_import_file()` acceptant `.csv` et `.xlsx`. Route `GET /export_serigraphie` : export de la table `serigraphie` en CSV téléchargeable. Route `POST /import_serigraphie` : import d'un fichier CSV ou XLSX — insertion directe des nouvelles lignes, affichage de la page de résolution pour les conflits (ref_ecran déjà existant). Route `POST /import_serigraphie/confirm` : application des choix (garder / écraser par ligne, ou écraser tout).
+- `Templates/import_conflicts.html` : page de comparaison côte à côte (en base vs fichier importé) avec checkbox par ligne et bouton "Écraser tout".
+- `Styles/import_conflicts.css` : styles de la page de résolution des conflits.
+- `Templates/ajouter.html` : barre de deux boutons "Exporter CSV" et "Importer" en haut à gauche, avec formulaire d'upload masqué soumis automatiquement à la sélection du fichier.
+- `Styles/ajouter.css` : styles `.ie-bar` et `.ie-btn` pour la barre import/export.
+- `tests/web/test_import_export.py` : 13 tests couvrant export, import CSV, import XLSX, gestion des conflits et résolution.
+- `requirements.txt` : ajout de `openpyxl`.
+
 ## [3.5.4] - 2026-02-26
 > Commit : `fix(ui): match washing panel width to main container and add item separators`
 ### Modifié
