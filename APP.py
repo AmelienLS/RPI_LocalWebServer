@@ -465,7 +465,7 @@ def stats():
         cursor.execute('''
             SELECT s.ref_ecran, s.libelle, s.fab, s.type, COUNT(sl.id) AS total_passages
             FROM serigraphie s
-            LEFT JOIN sortie_logs sl ON s.ref_ecran = sl.ref_ecran
+            INNER JOIN sortie_logs sl ON s.ref_ecran = sl.ref_ecran
             GROUP BY s.ref_ecran, s.libelle, s.fab, s.type
             ORDER BY total_passages DESC
         ''')
