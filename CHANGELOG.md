@@ -1,4 +1,11 @@
 # Journal des modifications
+## [3.2.5] - 2026-02-26
+> Commit : `fix(ui): unify red button style across all pages`
+### Modifié
+- `Styles/login.css` : `.shutdown-button` — couleur `#d9534f` → `#FF4C4C`, hover `#c9302c` → `#E04343`.
+- `Styles/supprimer.css` : `.confirmer` — couleur `#F44336` → `#FF4C4C`, `color: #FFFFFF` ajouté, hover `#b63127` → `#E04343`.
+- `Styles/ecran.css` : `.purge-btn` — couleur `#721c24` → `#FF4C4C`, `color: #FFFFFF` ajouté, `border` supprimé, hover `#a71d2a` → `#E04343`.
+
 ## [3.2.4] - 2026-02-26
 > Commit : `fix(ui): improve touch ergonomics for inputs, selects and admin buttons on 12-inch screen`
 ### Modifié

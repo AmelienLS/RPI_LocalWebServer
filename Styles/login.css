@@ -21,12 +21,12 @@ button {
 }
 
 .shutdown-button {
-    background-color: #d9534f; /* Rouge */
-    color: white;
+    background-color: #FF4C4C;
+    color: #FFFFFF;
 }
 
 .shutdown-button:hover {
-    background-color: #c9302c; /* Rouge plus foncé */
+    background-color: #E04343;
 }
 
 .error {
