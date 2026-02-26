@@ -1,4 +1,10 @@
 # Journal des modifications
+## [3.5.1] - 2026-02-26
+> Commit : `fix(ui): move washing section outside main container on index page`
+### Modifié
+- `Templates/index.html` : la section "Écrans à laver" est déplacée hors du `.form-container` (au niveau du `<body>`).
+- `Styles/index.css` : `.laver-actions` passe en `position: absolute; top: 1rem; left: 1rem; width: 260px` avec `max-height` et scroll vertical — le container principal reste centré indépendamment. `body` passe en `position: relative` pour contenir le bloc absolu.
+
 ## [3.5.0] - 2026-02-26
 > Commit : `feat(logs): track who returns and washes screens in sortie_logs`
 ### Ajouté

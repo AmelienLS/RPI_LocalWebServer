@@ -2,6 +2,7 @@
 
 body {
     overflow-y: auto;
+    position: relative; /* Contient les éléments positionnés en absolu (laver-actions) */
 }
 
 .form-container {
@@ -51,11 +52,18 @@ body {
 }
 
 .laver-actions {
-    margin-bottom: 2rem;
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    width: 260px;
+    max-height: calc(100vh - 2rem);
+    overflow-y: auto;
     border: 1px solid #FF4C4C;
     padding: 1rem;
     border-radius: 8px;
     background-color: #2A2D46;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    box-sizing: border-box;
 }
 
 .laver-actions p {
