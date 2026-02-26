@@ -14,6 +14,7 @@ body {
     display: flex;
     width: 100%;
     box-sizing: border-box;
+    min-height: calc(44px + 1.5rem); /* border-box: compense le padding vertical pour égaler la hauteur des autres <a> (content-box) */
     margin-top: 1rem;
 }
 
@@ -23,6 +24,7 @@ body {
     display: flex;
     width: 100%;
     box-sizing: border-box;
+    min-height: calc(44px + 1.5rem); /* border-box: compense le padding vertical pour égaler la hauteur des autres <a> (content-box) */
     margin-top: 1rem;
 }
 
