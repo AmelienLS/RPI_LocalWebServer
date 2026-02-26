@@ -23,6 +23,7 @@
                     <button type="submit" class="laver-btn">Laver</button>
                 </form>
             </div>
+            {% if not loop.last %}<div class="laver-sep"></div>{% endif %}
             {% endfor %}
         </div>
         {% endif %}

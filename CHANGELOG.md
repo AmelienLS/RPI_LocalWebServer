@@ -1,4 +1,10 @@
 # Journal des modifications
+## [3.5.4] - 2026-02-26
+> Commit : `fix(ui): match washing panel width to main container and add item separators`
+### Modifié
+- `Styles/index.css` : `.laver-actions` passe de `width: fit-content` à `width: 400px; max-width: 400px` (même largeur que le container principal). `.laver-info` — ajout de `flex: 1` et `word-break: break-word` pour le retour automatique à la ligne. Ajout de `.laver-sep` : ligne fine centrée à 60% de largeur entre chaque item.
+- `Templates/index.html` : ajout d'un `<div class="laver-sep">` entre chaque item de la liste (via `{% if not loop.last %}`).
+
 ## [3.5.3] - 2026-02-26
 > Commit : `fix(ui): make washing panel self-contained with rounded corners and auto width`
 ### Modifié

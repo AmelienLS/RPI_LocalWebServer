@@ -60,8 +60,8 @@ body {
 
 /* Panneau "Écrans à laver" : container autonome à gauche */
 .laver-actions {
-    width: fit-content;
-    min-width: 220px;
+    width: 400px;
+    max-width: 400px;
     max-height: calc(100vh - 3rem);
     overflow-y: auto;
     background-color: #191B2A;
@@ -87,8 +87,16 @@ body {
 }
 
 .laver-info {
+    flex: 1;
     text-align: left;
     font-size: 0.9rem;
+    word-break: break-word;
+}
+
+.laver-sep {
+    width: 60%;
+    margin: 0.5rem auto;
+    border-top: 1px solid #2A2D46;
 }
 
 .laver-btn {
