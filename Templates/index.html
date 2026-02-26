@@ -9,47 +9,49 @@
     <title>Accueil</title>
 </head>
 <body>
-    {% if a_laver %}
-    <div class="laver-actions">
-        <p>Écrans à laver ({{ a_laver | length }})</p>
-        {% for ecran in a_laver %}
-        <div class="laver-item">
-            <span class="laver-info">
-                <strong>{{ ecran.ref_ecran }}</strong> — {{ ecran.libelle }} — Emp. {{ ecran.n }}
-            </span>
-            <form action="/laver" method="POST">
-                <input type="hidden" name="ref_ecran" value="{{ ecran.ref_ecran }}">
-                <button type="submit" class="laver-btn">Laver</button>
-            </form>
-        </div>
-        {% endfor %}
-    </div>
-    {% endif %}
-
-    <!--Page d'accueil affichant les actions disponibles selon le rôle -->
-    <div class="form-container">
-        <h1>Bienvenue, {{ prenom }}</h1>
-
-        {% if admin %}
-            <div class="admin-actions">
-                <p>Administration</p>
-                <a href="/ajouter" class="button admin-link">Ajouter un écran</a>
-                <a href="/modifier" class="button admin-link">Modifier un écran</a>
-                <a href="/supprimer" class="button admin-link">Supprimer un écran</a>
-                <a href="/ajouterU" class="button admin-link">Ajouter un utilisateur</a>
-                <a href="/stats" class="button admin-link">Statistiques</a>
+    <div class="page-wrapper{% if a_laver %} page-wrapper--with-laver{% endif %}">
+        {% if a_laver %}
+        <div class="laver-actions">
+            <p>Écrans à laver ({{ a_laver | length }})</p>
+            {% for ecran in a_laver %}
+            <div class="laver-item">
+                <span class="laver-info">
+                    <strong>{{ ecran.ref_ecran }}</strong> — {{ ecran.libelle }} — Emp. {{ ecran.n }}
+                </span>
+                <form action="/laver" method="POST">
+                    <input type="hidden" name="ref_ecran" value="{{ ecran.ref_ecran }}">
+                    <button type="submit" class="laver-btn">Laver</button>
+                </form>
             </div>
+            {% endfor %}
+        </div>
         {% endif %}
 
-        <div class="user-actions">
-            <a href="/ecran" class="button user-link">Voir les écrans</a>
-            <a href="/prendre" class="button user-link">Prendre un écran</a>
-            <a href="/ranger" class="button user-link">Ranger un écran</a>
-            <a href="/logout" class="button logout-button">Se déconnecter</a>
+        <!--Page d'accueil affichant les actions disponibles selon le rôle -->
+        <div class="form-container">
+            <h1>Bienvenue, {{ prenom }}</h1>
+
+            {% if admin %}
+                <div class="admin-actions">
+                    <p>Administration</p>
+                    <a href="/ajouter" class="button admin-link">Ajouter un écran</a>
+                    <a href="/modifier" class="button admin-link">Modifier un écran</a>
+                    <a href="/supprimer" class="button admin-link">Supprimer un écran</a>
+                    <a href="/ajouterU" class="button admin-link">Ajouter un utilisateur</a>
+                    <a href="/stats" class="button admin-link">Statistiques</a>
+                </div>
+            {% endif %}
+
+            <div class="user-actions">
+                <a href="/ecran" class="button user-link">Voir les écrans</a>
+                <a href="/prendre" class="button user-link">Prendre un écran</a>
+                <a href="/ranger" class="button user-link">Ranger un écran</a>
+                <a href="/logout" class="button logout-button">Se déconnecter</a>
+            </div>
+            {% if success %}
+                <div class="confirmation-message" style="color: green;">{{ success }}</div>
+            {% endif %}
         </div>
-        {% if success %}
-            <div class="confirmation-message" style="color: green;">{{ success }}</div>
-        {% endif %}
-    </div>    
+    </div>
 </body>
 </html>

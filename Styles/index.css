@@ -2,12 +2,29 @@
 
 body {
     overflow-y: auto;
-    position: relative; /* Contient les éléments positionnés en absolu (laver-actions) */
+}
+
+/* Wrapper flex centré dans le body */
+.page-wrapper {
+    display: flex;
+    align-items: flex-start;
+    margin-top: 1rem;
+}
+
+/* Quand le panneau "à laver" est présent : aspect de bloc unifié */
+.page-wrapper--with-laver {
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+}
+
+.page-wrapper--with-laver .form-container {
+    box-shadow: none;
 }
 
 .form-container {
+    width: 400px;
     max-width: 400px;
-    margin-top: 1rem;
 }
 
 .admin-link {
@@ -15,7 +32,7 @@ body {
     display: flex;
     width: 100%;
     box-sizing: border-box;
-    min-height: calc(44px + 1.5rem); /* border-box: compense le padding vertical pour égaler la hauteur des autres <a> (content-box) */
+    min-height: calc(44px + 1.5rem);
     margin-top: 1rem;
 }
 
@@ -25,7 +42,7 @@ body {
     display: flex;
     width: 100%;
     box-sizing: border-box;
-    min-height: calc(44px + 1.5rem); /* border-box: compense le padding vertical pour égaler la hauteur des autres <a> (content-box) */
+    min-height: calc(44px + 1.5rem);
     margin-top: 1rem;
 }
 
@@ -43,7 +60,7 @@ body {
     margin-bottom: 1rem;
 }
 
-.user-actions {    
+.user-actions {
     margin-bottom: 2rem;
     border: 1px solid #feed00;
     padding: 1rem;
@@ -51,18 +68,16 @@ body {
     background-color: #2A2D46;
 }
 
+/* Panneau "Écrans à laver" : collé à gauche du container principal */
 .laver-actions {
-    position: absolute;
-    top: 1rem;
-    left: 1rem;
     width: 260px;
-    max-height: calc(100vh - 2rem);
+    max-height: calc(100vh - 3rem);
     overflow-y: auto;
-    border: 1px solid #FF4C4C;
-    padding: 1rem;
-    border-radius: 8px;
-    background-color: #2A2D46;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    align-self: stretch;
+    background-color: #191B2A;
+    padding: 2rem;
+    border-right: 1px solid #2A2D46;
+    border-left: 4px solid #FF4C4C;
     box-sizing: border-box;
 }
 

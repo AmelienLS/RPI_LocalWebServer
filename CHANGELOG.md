@@ -1,4 +1,10 @@
 # Journal des modifications
+## [3.5.2] - 2026-02-26
+> Commit : `fix(ui): dock washing panel flush to the left of the main container`
+### Modifié
+- `Templates/index.html` : introduction d'un `div.page-wrapper` (avec modificateur `--with-laver`) enveloppant le panneau lavage et le container principal, rendant les deux blocs contigus dans un layout flex.
+- `Styles/index.css` : `.laver-actions` passe d'un positionnement absolu à un élément flex (`align-self: stretch`, `border-left: 4px solid #FF4C4C`, `border-right: 1px solid #2A2D46`, fond `#191B2A`). `.page-wrapper--with-laver` applique `overflow: hidden` + `border-radius: 8px` + `box-shadow` pour unifier visuellement les deux blocs. `.form-container` est élargi à `width: 400px` et son ombre supprimée dans ce contexte.
+
 ## [3.5.1] - 2026-02-26
 > Commit : `fix(ui): move washing section outside main container on index page`
 ### Modifié
