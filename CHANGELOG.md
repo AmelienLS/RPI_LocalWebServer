@@ -1,4 +1,10 @@
 # Journal des modifications
+## [3.2.4] - 2026-02-26
+> Commit : `fix(ui): improve touch ergonomics for inputs, selects and admin buttons on 12-inch screen`
+### Modifié
+- `Styles/common.css` : padding de `input, select` augmenté de `0.5rem` à `0.75rem 1rem` pour des cibles tactiles confortables (~44px de hauteur totale) sur les pages prendre et ranger. Non appliqué aux filtres du tableau (leur règle spécifique dans `ecran.css` prend le dessus).
+- `Styles/ecran.css` : ajout d'une règle `.export-btn, .purge-btn` avec `padding: 0.75rem 1.5rem` et `min-height: calc(44px + 1.5rem)` pour aligner leur hauteur sur celle des boutons d'action principaux (68px).
+
 ## [3.2.3] - 2026-02-26
 > Commit : `fix(ui): normalize button height and text centering across all pages`
 ### Modifié

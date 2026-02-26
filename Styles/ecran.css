@@ -79,6 +79,11 @@ button.prendre:hover {
     background-color: #FFD700;
 }
 
+.export-btn, .purge-btn {
+    padding: 0.75rem 1.5rem;
+    min-height: calc(44px + 1.5rem); /* Confort tactile 10" : égale la hauteur des boutons d'action principaux */
+}
+
 .purge-btn {
     background-color: #721c24;
     border: 1px solid #f5c6cb;
