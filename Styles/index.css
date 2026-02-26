@@ -50,6 +50,49 @@ body {
     background-color: #2A2D46;
 }
 
+.laver-actions {
+    margin-bottom: 2rem;
+    border: 1px solid #FF4C4C;
+    padding: 1rem;
+    border-radius: 8px;
+    background-color: #2A2D46;
+}
+
+.laver-actions p {
+    color: #FF4C4C;
+    font-weight: bold;
+    margin-bottom: 0.75rem;
+}
+
+.laver-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+}
+
+.laver-info {
+    flex: 1;
+    text-align: left;
+    font-size: 0.9rem;
+    word-break: break-word;
+}
+
+.laver-btn {
+    width: auto;
+    min-width: 80px;
+    padding: 0.5rem 1rem;
+    min-height: 44px;
+    background-color: #4A90D9;
+    color: #FFFFFF;
+    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.45), 0 3px 8px rgba(0, 0, 0, 0.4);
+}
+
+.laver-btn:hover {
+    background-color: #357ABD;
+}
+
 .logout-button {
     display: flex;
     align-items: center;

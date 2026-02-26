@@ -13,6 +13,23 @@
     <div class="form-container">
         <h1>Bienvenue, {{ prenom }}</h1>
         
+        {% if a_laver %}
+            <div class="laver-actions">
+                <p>Écrans à laver ({{ a_laver | length }})</p>
+                {% for ecran in a_laver %}
+                <div class="laver-item">
+                    <span class="laver-info">
+                        <strong>{{ ecran.ref_ecran }}</strong> — {{ ecran.libelle }} — Emp. {{ ecran.n }}
+                    </span>
+                    <form action="/laver" method="POST">
+                        <input type="hidden" name="ref_ecran" value="{{ ecran.ref_ecran }}">
+                        <button type="submit" class="laver-btn">Laver</button>
+                    </form>
+                </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
         {% if admin %}
             <div class="admin-actions">
                 <p>Administration</p>
@@ -23,7 +40,7 @@
                 <a href="/stats" class="button admin-link">Statistiques</a>
             </div>
         {% endif %}
-    
+
         <div class="user-actions">
             <a href="/ecran" class="button user-link">Voir les écrans</a>
             <a href="/prendre" class="button user-link">Prendre un écran</a>

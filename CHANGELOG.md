@@ -1,4 +1,13 @@
 # Journal des modifications
+## [3.4.0] - 2026-02-26
+> Commit : `feat(laver): add washing management section on index page`
+### Ajouté
+- `APP.py` : route `/laver` (POST, tous utilisateurs connectés) — vérifie que l'écran est rentré et non lavé (`sorti=0, lave=0`), met à jour `serigraphie.lave = 1`, met à jour `sortie_logs.lavee = 1` sur la dernière entrée de retour correspondante, puis synchronise le CSV journalier.
+- `APP.py` : la route `/index` récupère désormais la liste des écrans à laver (`sorti=0, lave=0`) et la transmet au template.
+- `Templates/index.html` : section "Écrans à laver" affichant, pour chaque écran concerné, sa référence, son libellé, son emplacement et un bouton "Laver" qui poste vers `/laver`.
+- `Styles/index.css` : styles `.laver-actions`, `.laver-item`, `.laver-info`, `.laver-btn` pour la section de lavage (bordure rouge, bouton bleu, ergonomie tactile 44 px).
+- `tests/web/test_laver.py` : 8 tests couvrant accès non connecté, marquage lavé, mise à jour des logs, cas limites (déjà lavé, sorti, sans entrée de log), et affichage conditionnel sur `/index`.
+
 ## [3.3.0] - 2026-02-26
 > Commit : `feat(stats): add admin statistics page for screen usage`
 ### Ajouté

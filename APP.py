@@ -224,13 +224,64 @@ def index():
     Affiche la page d'accueil.
     - Vérifie que l'utilisateur est connecté (présence du prénom dans la session).
     - Passe à la vue le prénom et le statut admin pour l'affichage conditionnel.
+    - Récupère la liste des écrans rentrés mais non lavés (sorti=0, lave=0).
     """
     if 'prenom' not in session:
         return redirect('/')
-    
+
     prenom = session['prenom']
     admin = session['admin'] == 1
-    return render_template('index.html', prenom=prenom, admin=admin)
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute(
+            'SELECT ref_ecran, libelle, n FROM serigraphie WHERE sorti = 0 AND lave = 0 ORDER BY n'
+        )
+        a_laver = cursor.fetchall()
+    return render_template('index.html', prenom=prenom, admin=admin, a_laver=a_laver)
+
+
+# Route pour marquer un écran comme lavé depuis l'accueil
+@app.route('/laver', methods=['POST'])
+def laver():
+    """
+    Marque un écran comme lavé.
+    - Met à jour serigraphie.lave = 1.
+    - Met à jour la dernière entrée sortie_logs concernée (lavee 0 → 1).
+    - Synchronise le CSV journalier correspondant.
+    """
+    if 'prenom' not in session:
+        return redirect('/')
+
+    ref_ecran = request.form.get('ref_ecran')
+    with get_db_connection() as conn:
+        _ensure_log_tables(conn)
+        cursor = conn.cursor()
+        cursor.execute(
+            'SELECT 1 FROM serigraphie WHERE ref_ecran = ? AND sorti = 0 AND lave = 0',
+            (ref_ecran,),
+        )
+        if cursor.fetchone():
+            cursor.execute('UPDATE serigraphie SET lave = 1 WHERE ref_ecran = ?', (ref_ecran,))
+            log_row = cursor.execute(
+                """
+                SELECT id, sortie_ts FROM sortie_logs
+                WHERE ref_ecran = ? AND rangement_ts IS NOT NULL AND lavee = 0
+                ORDER BY rangement_ts DESC
+                LIMIT 1
+                """,
+                (ref_ecran,),
+            ).fetchone()
+            if log_row:
+                cursor.execute(
+                    'UPDATE sortie_logs SET lavee = 1 WHERE id = ?',
+                    (log_row['id'],),
+                )
+                conn.commit()
+                _sync_daily_log(conn, datetime.fromisoformat(log_row['sortie_ts']).date())
+            else:
+                conn.commit()
+    return redirect('/index')
+
 
 # Route de déconnexion
 @app.route('/logout')
