@@ -1,4 +1,11 @@
 # Journal des modifications
+## [3.2.3] - 2026-02-26
+> Commit : `fix(ui): normalize button height and text centering across all pages`
+### Modifié
+- `Styles/common.css` : `box-shadow` étendu aux `<button>` ; `display: flex; align-items: center; justify-content: center` ajouté pour centrer le texte ; `min-height` passé à `calc(44px + 1.5rem)` pour compenser le `box-sizing: border-box` natif de Chromium sur `<button>` et égaler la hauteur des éléments `<a>` (`content-box`).
+- `Styles/index.css` : `.logout-button` passé en `display: flex; align-items: center; justify-content: center` pour centrer le texte verticalement ; `box-shadow`, `padding: 0.75rem 1rem` et `min-height: 44px` ajoutés. `.admin-link` et `.user-link` : `min-height: calc(44px + 1.5rem)` ajouté pour compenser le `box-sizing: border-box` explicite et uniformiser la hauteur avec les boutons de retour.
+- `Styles/supprimer.css` : `box-shadow` ajouté à `.cancel-btn`.
+
 ## [3.2.2] - 2026-02-26
 > Commit : `fix(ui): add outline shadow to navigation buttons for scroll visibility`
 ### Modifié
