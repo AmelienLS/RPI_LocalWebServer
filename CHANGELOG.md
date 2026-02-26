@@ -1,4 +1,9 @@
 # Journal des modifications
+## [3.2.2] - 2026-02-26
+> Commit : `fix(ui): add outline shadow to navigation buttons for scroll visibility`
+### Modifié
+- `Styles/common.css` : ajout d'un `box-shadow` sur `.retour`, `.retour-menu`, `.admin-link`, `.user-link` pour les distinguer visuellement de l'arrière-plan lors du défilement.
+
 ## [3.2.1] - 2026-02-26
 > Commit : `fix(ui): make index buttons full-width and remove simple back button from ajouter`
 ### Modifié
