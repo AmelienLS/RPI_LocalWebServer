@@ -1,4 +1,10 @@
 # Journal des modifications
+## [3.5.3] - 2026-02-26
+> Commit : `fix(ui): make washing panel self-contained with rounded corners and auto width`
+### Modifié
+- `Templates/index.html` : suppression du modificateur `page-wrapper--with-laver` (devenu inutile).
+- `Styles/index.css` : `.page-wrapper` — ajout de `gap: 1rem` entre les containers. `.laver-actions` — passe en `width: fit-content; min-width: 220px` (s'adapte au contenu), `border-radius: 8px` (coins arrondis), `border: 1px solid #FF4C4C`, `box-shadow` propre ; suppression de `align-self: stretch`, `border-left/right` et `width: 260px`. `.laver-info` — suppression de `flex: 1` et `word-break` devenus inutiles. Suppression des règles `.page-wrapper--with-laver`.
+
 ## [3.5.2] - 2026-02-26
 > Commit : `fix(ui): dock washing panel flush to the left of the main container`
 ### Modifié

@@ -8,18 +8,8 @@ body {
 .page-wrapper {
     display: flex;
     align-items: flex-start;
+    gap: 1rem;
     margin-top: 1rem;
-}
-
-/* Quand le panneau "à laver" est présent : aspect de bloc unifié */
-.page-wrapper--with-laver {
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-    overflow: hidden;
-}
-
-.page-wrapper--with-laver .form-container {
-    box-shadow: none;
 }
 
 .form-container {
@@ -68,16 +58,17 @@ body {
     background-color: #2A2D46;
 }
 
-/* Panneau "Écrans à laver" : collé à gauche du container principal */
+/* Panneau "Écrans à laver" : container autonome à gauche */
 .laver-actions {
-    width: 260px;
+    width: fit-content;
+    min-width: 220px;
     max-height: calc(100vh - 3rem);
     overflow-y: auto;
-    align-self: stretch;
     background-color: #191B2A;
+    border-radius: 8px;
+    border: 1px solid #FF4C4C;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
     padding: 2rem;
-    border-right: 1px solid #2A2D46;
-    border-left: 4px solid #FF4C4C;
     box-sizing: border-box;
 }
 
@@ -96,10 +87,8 @@ body {
 }
 
 .laver-info {
-    flex: 1;
     text-align: left;
     font-size: 0.9rem;
-    word-break: break-word;
 }
 
 .laver-btn {
