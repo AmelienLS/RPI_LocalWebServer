@@ -23,6 +23,7 @@ CREATE TABLE IF NOT EXISTS sortie_logs (
     ref_ecran INTEGER NOT NULL,
     libelle TEXT NOT NULL,
     personne TEXT NOT NULL,
+    personne_rangement TEXT,
     sortie_ts TEXT NOT NULL,
     rangement_ts TEXT,
     lavee INTEGER,

@@ -1,4 +1,58 @@
 # Journal des modifications
+## [3.5.4] - 2026-02-26
+> Commit : `fix(ui): match washing panel width to main container and add item separators`
+### Modifié
+- `Styles/index.css` : `.laver-actions` passe de `width: fit-content` à `width: 400px; max-width: 400px` (même largeur que le container principal). `.laver-info` — ajout de `flex: 1` et `word-break: break-word` pour le retour automatique à la ligne. Ajout de `.laver-sep` : ligne fine centrée à 60% de largeur entre chaque item.
+- `Templates/index.html` : ajout d'un `<div class="laver-sep">` entre chaque item de la liste (via `{% if not loop.last %}`).
+
+## [3.5.3] - 2026-02-26
+> Commit : `fix(ui): make washing panel self-contained with rounded corners and auto width`
+### Modifié
+- `Templates/index.html` : suppression du modificateur `page-wrapper--with-laver` (devenu inutile).
+- `Styles/index.css` : `.page-wrapper` — ajout de `gap: 1rem` entre les containers. `.laver-actions` — passe en `width: fit-content; min-width: 220px` (s'adapte au contenu), `border-radius: 8px` (coins arrondis), `border: 1px solid #FF4C4C`, `box-shadow` propre ; suppression de `align-self: stretch`, `border-left/right` et `width: 260px`. `.laver-info` — suppression de `flex: 1` et `word-break` devenus inutiles. Suppression des règles `.page-wrapper--with-laver`.
+
+## [3.5.2] - 2026-02-26
+> Commit : `fix(ui): dock washing panel flush to the left of the main container`
+### Modifié
+- `Templates/index.html` : introduction d'un `div.page-wrapper` (avec modificateur `--with-laver`) enveloppant le panneau lavage et le container principal, rendant les deux blocs contigus dans un layout flex.
+- `Styles/index.css` : `.laver-actions` passe d'un positionnement absolu à un élément flex (`align-self: stretch`, `border-left: 4px solid #FF4C4C`, `border-right: 1px solid #2A2D46`, fond `#191B2A`). `.page-wrapper--with-laver` applique `overflow: hidden` + `border-radius: 8px` + `box-shadow` pour unifier visuellement les deux blocs. `.form-container` est élargi à `width: 400px` et son ombre supprimée dans ce contexte.
+
+## [3.5.1] - 2026-02-26
+> Commit : `fix(ui): move washing section outside main container on index page`
+### Modifié
+- `Templates/index.html` : la section "Écrans à laver" est déplacée hors du `.form-container` (au niveau du `<body>`).
+- `Styles/index.css` : `.laver-actions` passe en `position: absolute; top: 1rem; left: 1rem; width: 260px` avec `max-height` et scroll vertical — le container principal reste centré indépendamment. `body` passe en `position: relative` pour contenir le bloc absolu.
+
+## [3.5.0] - 2026-02-26
+> Commit : `feat(logs): track who returns and washes screens in sortie_logs`
+### Ajouté
+- `database/schema.sql` : colonne `personne_rangement TEXT` ajoutée à `sortie_logs` — enregistre qui a rangé ou lavé l'écran.
+- `APP.py` : migration automatique dans `_ensure_log_tables()` — ajout de `personne_rangement` via `ALTER TABLE` sur les bases existantes (vérification via `PRAGMA table_info`).
+- `APP.py` : `_sync_daily_log()` inclut désormais `personne_rangement` dans le SELECT et dans les CSV exportés (nouvelle colonne entre `personne` et `heure_sortie`).
+- `APP.py` : route `/ranger` — `personne_rangement` est renseigné avec `session['prenom']` lors de la mise à jour de `sortie_logs`.
+- `APP.py` : route `/laver` — `personne_rangement` est renseigné avec `session['prenom']` lors de la mise à jour de `sortie_logs`.
+### Modifié
+- `tests/web/test_workflow_ecrans.py` : mise à jour des assertions CSV pour refléter le nouvel en-tête et la nouvelle colonne `personne_rangement`.
+- `tests/system/test_logs_utils.py` : mise à jour des assertions CSV pour refléter le nouvel en-tête et la nouvelle colonne `personne_rangement`.
+
+## [3.4.0] - 2026-02-26
+> Commit : `feat(laver): add washing management section on index page`
+### Ajouté
+- `APP.py` : route `/laver` (POST, tous utilisateurs connectés) — vérifie que l'écran est rentré et non lavé (`sorti=0, lave=0`), met à jour `serigraphie.lave = 1`, met à jour `sortie_logs.lavee = 1` sur la dernière entrée de retour correspondante, puis synchronise le CSV journalier.
+- `APP.py` : la route `/index` récupère désormais la liste des écrans à laver (`sorti=0, lave=0`) et la transmet au template.
+- `Templates/index.html` : section "Écrans à laver" affichant, pour chaque écran concerné, sa référence, son libellé, son emplacement et un bouton "Laver" qui poste vers `/laver`.
+- `Styles/index.css` : styles `.laver-actions`, `.laver-item`, `.laver-info`, `.laver-btn` pour la section de lavage (bordure rouge, bouton bleu, ergonomie tactile 44 px).
+- `tests/web/test_laver.py` : 8 tests couvrant accès non connecté, marquage lavé, mise à jour des logs, cas limites (déjà lavé, sorti, sans entrée de log), et affichage conditionnel sur `/index`.
+
+## [3.3.0] - 2026-02-26
+> Commit : `feat(stats): add admin statistics page for screen usage`
+### Ajouté
+- `APP.py` : nouvelle route `/stats` (admin uniquement) — agrège les passages par écran via `sortie_logs` (LEFT JOIN sur `serigraphie`) et les passages par personne, transmet les résultats au template.
+- `Templates/stats.html` : page affichant le total des passages, un tableau "écrans les plus utilisés" (réf., libellé, fab, type, compteur) et un tableau "personnes les plus actives".
+- `Styles/stats.css` : styles dédiés à la page stats (tableau, badge total, surbrillance du premier résultat).
+- `Templates/index.html` : lien "Statistiques" ajouté dans la section administration.
+- `tests/web/test_stats.py` : couverture de la route `/stats` (accès non connecté, non admin, accès admin, comptage de passages, affichage du total).
+
 ## [3.2.5] - 2026-02-26
 > Commit : `fix(ui): unify red button style across all pages`
 ### Modifié

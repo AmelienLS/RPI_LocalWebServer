@@ -1,0 +1,57 @@
+/* --- Styles spécifiques à la page des statistiques --- */
+
+.container {
+    max-width: 800px;
+    overflow-x: auto;
+}
+
+h2 {
+    color: #feed00;
+    margin-top: 2rem;
+    margin-bottom: 0.75rem;
+    font-size: 1.1rem;
+}
+
+.stat-total {
+    background-color: #2A2D46;
+    border-radius: 6px;
+    padding: 0.75rem 1.25rem;
+    margin-bottom: 1rem;
+    font-size: 1rem;
+    font-weight: bold;
+    text-align: center;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 1rem;
+    text-align: left;
+}
+
+thead th {
+    background-color: #2A2D46;
+    padding: 0.6rem 0.75rem;
+    font-size: 0.95rem;
+    text-align: center;
+}
+
+tbody td {
+    padding: 0.6rem 0.75rem;
+    font-size: 0.9rem;
+    border: 1px solid #2A2D46;
+    text-align: center;
+}
+
+tbody tr:nth-child(odd) td {
+    background-color: #1F2233;
+}
+
+.stat-count {
+    font-weight: bold;
+    color: #feed00;
+}
+
+.stat-count.top {
+    color: #4CAF50;
+}

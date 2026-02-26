@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/Styles/common.css">
+    <link rel="stylesheet" href="/Styles/stats.css">
+    <link rel="icon" href="/Images/Logo.png" type="image/png">
+    <title>Statistiques</title>
+</head>
+<body>
+    <a href="{{ url_for('index') }}" class="retour-menu">Retour au menu</a>
+    <div class="container">
+        <h1>Statistiques</h1>
+
+        <div class="stat-total">
+            Total des passages : <span class="stat-count">{{ total_passages }}</span>
+        </div>
+
+        <h2>Écrans les plus utilisés</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Réf. Écran</th>
+                    <th>Libellé</th>
+                    <th>FAB</th>
+                    <th>Type</th>
+                    <th>Passages</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in ecrans_stats %}
+                <tr>
+                    <td>{{ row.ref_ecran }}</td>
+                    <td>{{ row.libelle }}</td>
+                    <td>{{ row.fab }}</td>
+                    <td>{{ row.type }}</td>
+                    <td class="stat-count{% if loop.first and row.total_passages > 0 %} top{% endif %}">{{ row.total_passages }}</td>
+                </tr>
+                {% else %}
+                <tr><td colspan="5">Aucun écran en base.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <h2>Personnes les plus actives</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Personne</th>
+                    <th>Passages</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in personnes_stats %}
+                <tr>
+                    <td>{{ row.personne }}</td>
+                    <td class="stat-count">{{ row.total_passages }}</td>
+                </tr>
+                {% else %}
+                <tr><td colspan="2">Aucune opération enregistrée.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

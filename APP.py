@@ -75,6 +75,7 @@ def _ensure_log_tables(connection: sqlite3.Connection) -> None:
             ref_ecran INTEGER NOT NULL,
             libelle TEXT NOT NULL,
             personne TEXT NOT NULL,
+            personne_rangement TEXT,
             sortie_ts TEXT NOT NULL,
             rangement_ts TEXT,
             lavee INTEGER,
@@ -82,6 +83,10 @@ def _ensure_log_tables(connection: sqlite3.Connection) -> None:
         )
         """
     )
+    # Migration : ajout de personne_rangement pour les bases créées avant cette version
+    existing_cols = {row[1] for row in connection.execute("PRAGMA table_info(sortie_logs)")}
+    if "personne_rangement" not in existing_cols:
+        connection.execute("ALTER TABLE sortie_logs ADD COLUMN personne_rangement TEXT")
     connection.execute(
         "CREATE INDEX IF NOT EXISTS idx_sortie_logs_ref ON sortie_logs (ref_ecran, rangement_ts)"
     )
@@ -111,7 +116,7 @@ def _sync_daily_log(connection: sqlite3.Connection, log_date: date) -> None:
     log_date_iso = log_date.isoformat()
     cursor = connection.execute(
         """
-        SELECT ref_ecran, libelle, personne, sortie_ts, rangement_ts, lavee
+        SELECT ref_ecran, libelle, personne, personne_rangement, sortie_ts, rangement_ts, lavee
         FROM sortie_logs
         WHERE date(sortie_ts) = ?
         ORDER BY datetime(sortie_ts) ASC, id ASC
@@ -129,7 +134,7 @@ def _sync_daily_log(connection: sqlite3.Connection, log_date: date) -> None:
     with log_path.open("w", newline="", encoding="utf-8") as handle:
         writer = csv.writer(handle, delimiter=";")
         writer.writerow(
-            ["ref_ecran", "libelle", "personne", "heure_sortie", "heure_rangement", "lave"]
+            ["ref_ecran", "libelle", "personne", "personne_rangement", "heure_sortie", "heure_rangement", "lave"]
         )
         for row in rows:
             sortie_dt = datetime.fromisoformat(row["sortie_ts"])
@@ -148,6 +153,7 @@ def _sync_daily_log(connection: sqlite3.Connection, log_date: date) -> None:
                     row["ref_ecran"],
                     row["libelle"],
                     row["personne"],
+                    row["personne_rangement"] or "",
                     sortie_text,
                     rangement_text,
                     lave_text,
@@ -224,13 +230,64 @@ def index():
     Affiche la page d'accueil.
     - Vérifie que l'utilisateur est connecté (présence du prénom dans la session).
     - Passe à la vue le prénom et le statut admin pour l'affichage conditionnel.
+    - Récupère la liste des écrans rentrés mais non lavés (sorti=0, lave=0).
     """
     if 'prenom' not in session:
         return redirect('/')
-    
+
     prenom = session['prenom']
     admin = session['admin'] == 1
-    return render_template('index.html', prenom=prenom, admin=admin)
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute(
+            'SELECT ref_ecran, libelle, n FROM serigraphie WHERE sorti = 0 AND lave = 0 ORDER BY n'
+        )
+        a_laver = cursor.fetchall()
+    return render_template('index.html', prenom=prenom, admin=admin, a_laver=a_laver)
+
+
+# Route pour marquer un écran comme lavé depuis l'accueil
+@app.route('/laver', methods=['POST'])
+def laver():
+    """
+    Marque un écran comme lavé.
+    - Met à jour serigraphie.lave = 1.
+    - Met à jour la dernière entrée sortie_logs concernée (lavee 0 → 1).
+    - Synchronise le CSV journalier correspondant.
+    """
+    if 'prenom' not in session:
+        return redirect('/')
+
+    ref_ecran = request.form.get('ref_ecran')
+    with get_db_connection() as conn:
+        _ensure_log_tables(conn)
+        cursor = conn.cursor()
+        cursor.execute(
+            'SELECT 1 FROM serigraphie WHERE ref_ecran = ? AND sorti = 0 AND lave = 0',
+            (ref_ecran,),
+        )
+        if cursor.fetchone():
+            cursor.execute('UPDATE serigraphie SET lave = 1 WHERE ref_ecran = ?', (ref_ecran,))
+            log_row = cursor.execute(
+                """
+                SELECT id, sortie_ts FROM sortie_logs
+                WHERE ref_ecran = ? AND rangement_ts IS NOT NULL AND lavee = 0
+                ORDER BY rangement_ts DESC
+                LIMIT 1
+                """,
+                (ref_ecran,),
+            ).fetchone()
+            if log_row:
+                cursor.execute(
+                    'UPDATE sortie_logs SET lavee = 1, personne_rangement = ? WHERE id = ?',
+                    (session.get('prenom', 'Inconnu'), log_row['id']),
+                )
+                conn.commit()
+                _sync_daily_log(conn, datetime.fromisoformat(log_row['sortie_ts']).date())
+            else:
+                conn.commit()
+    return redirect('/index')
+
 
 # Route de déconnexion
 @app.route('/logout')
@@ -387,6 +444,48 @@ def export_logs():
         mimetype="application/zip",
         as_attachment=True,
         download_name=filename,
+    )
+
+
+@app.route('/stats')
+def stats():
+    """
+    Affiche les statistiques d'utilisation des écrans.
+    - Admin uniquement.
+    - Nombre de passages par écran (tri décroissant) et par personne.
+    """
+    if 'prenom' not in session:
+        return redirect('/')
+    if not session.get('admin'):
+        return redirect('/index')
+
+    with get_db_connection() as conn:
+        _ensure_log_tables(conn)
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT s.ref_ecran, s.libelle, s.fab, s.type, COUNT(sl.id) AS total_passages
+            FROM serigraphie s
+            INNER JOIN sortie_logs sl ON s.ref_ecran = sl.ref_ecran
+            GROUP BY s.ref_ecran, s.libelle, s.fab, s.type
+            ORDER BY total_passages DESC
+        ''')
+        ecrans_stats = cursor.fetchall()
+
+        cursor.execute('''
+            SELECT personne, COUNT(*) AS total_passages
+            FROM sortie_logs
+            GROUP BY personne
+            ORDER BY total_passages DESC
+        ''')
+        personnes_stats = cursor.fetchall()
+
+        total_passages = sum(row['total_passages'] for row in ecrans_stats)
+
+    return render_template(
+        'stats.html',
+        ecrans_stats=ecrans_stats,
+        personnes_stats=personnes_stats,
+        total_passages=total_passages,
     )
 
 
@@ -608,8 +707,8 @@ def ranger():
                 if log_row:
                     rangement_dt = _current_timestamp()
                     cursor.execute(
-                        "UPDATE sortie_logs SET rangement_ts = ?, lavee = ? WHERE id = ?",
-                        (rangement_dt.isoformat(), 1 if lavee else 0, log_row["id"]),
+                        "UPDATE sortie_logs SET rangement_ts = ?, lavee = ?, personne_rangement = ? WHERE id = ?",
+                        (rangement_dt.isoformat(), 1 if lavee else 0, session.get('prenom', 'Inconnu'), log_row["id"]),
                     )
                     log_date = datetime.fromisoformat(log_row["sortie_ts"]).date()
                 conn.commit()
