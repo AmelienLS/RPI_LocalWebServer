@@ -81,6 +81,7 @@ button {
     font-size: 1rem;
     font-weight: bold;
     min-height: 44px;
+    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.45), 0 3px 8px rgba(0, 0, 0, 0.4);
 }
 
 button:hover {

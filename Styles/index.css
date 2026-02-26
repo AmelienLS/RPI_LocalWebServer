@@ -60,6 +60,7 @@ body {
     font-size: 1rem;
     font-weight: bold;
     cursor: pointer;
+    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.45), 0 3px 8px rgba(0, 0, 0, 0.4);
 }
 
 .logout-button:hover {

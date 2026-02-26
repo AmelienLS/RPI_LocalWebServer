@@ -25,6 +25,7 @@ body {
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.45), 0 3px 8px rgba(0, 0, 0, 0.4);
 }
 
 .button-group {
