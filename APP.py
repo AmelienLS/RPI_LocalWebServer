@@ -431,7 +431,7 @@ def prendre():
 
             if ecran:
                 if ecran['sorti'] == 1:
-                    message = "Erreur : cet écran a déjà été prise."
+                    message = "Erreur : cet écran a déjà été pris."
                     n_value = None
                 else:
                     cursor.execute('UPDATE serigraphie SET sorti = 1 WHERE ref_ecran = ?', (ref_ecran,))
@@ -446,7 +446,7 @@ def prendre():
                     conn.commit()
                     _sync_daily_log(conn, sortie_dt.date())
                     libelle = ecran['libelle']
-                    message = f"écran {libelle} prise avec succès."
+                    message = f"écran {libelle} pris avec succès."
                     n_value = ecran['n']
             else:
                 message = "Erreur : écran non trouvée."
