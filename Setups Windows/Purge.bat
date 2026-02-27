@@ -32,7 +32,6 @@ echo [i] Suppression en cours...
 set "PROJECT_DIR=%USERPROFILE%\RPI_LocalWebServer-Release"
 set "SERVICE_NAME=armoire_server"
 set "EDGE_SHORTCUT_PATH=%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup\Edge Kiosk (Local App).lnk"
-set "APPDATA_CONFIG=%APPDATA%\RPI_LocalWebServer"
 
 :: 1. Arreter et supprimer la tache planifiee (necessite des droits admin)
 echo.
@@ -72,16 +71,6 @@ if exist "%PROJECT_DIR%" (
     echo [OK] Dossier du projet supprime.
 ) else (
     echo [i] Dossier du projet non trouve.
-)
-
-:: 4. Supprimer la configuration AppData (Lancer.bat)
-echo.
-echo [4] Suppression de la configuration AppData...
-if exist "%APPDATA_CONFIG%" (
-    rmdir /s /q "%APPDATA_CONFIG%"
-    echo [OK] Configuration AppData supprimee.
-) else (
-    echo [i] Configuration AppData non trouvee.
 )
 
 echo.

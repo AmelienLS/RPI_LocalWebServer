@@ -1,11 +1,8 @@
 # Journal des modifications
 ## [3.8.1] - 2026-02-27
-> Commit : `fix(windows): store project path in APPDATA config and read it from Lancer.bat`
+> Commit : `fix(windows): resolve project path via pushd/CD in Lancer.bat`
 ### Modifié
-- `Setups Windows/Démarrage.bat` : ajout d'une étape 4 qui sauvegarde `PROJECT_DIR` dans `%APPDATA%\RPI_LocalWebServer\config.ini` après le setup.
-- `Setups Windows/DémarrageTest.bat` : même sauvegarde du `PROJECT_DIR`.
-- `Setups Windows/Lancer.bat` : lit `PROJECT_DIR` depuis `%APPDATA%\RPI_LocalWebServer\config.ini` au lieu d'un chemin codé en dur. Affiche un message explicite si la configuration est absente. Utilise `EnableDelayedExpansion` pour une expansion de variables fiable. `pause` systématique en fin de script pour garder la fenêtre ouverte.
-- `Setups Windows/Purge.bat` : ajout d'une étape 4 qui supprime le dossier `%APPDATA%\RPI_LocalWebServer` (configuration de `Lancer.bat`).
+- `Setups Windows/Lancer.bat` : le chemin du projet est résolu via `pushd "%~dp0.." / set PROJECT_DIR=%CD% / popd` — remonte d'un niveau depuis `Setups Windows\` pour obtenir la racine du projet. `pause` systématique en fin de script. Aucune variable système restreinte requise.
 
 ## [3.8.0] - 2026-02-27
 > Commit : `feat(windows,linux): add simple launch scripts without setup or git operations`
