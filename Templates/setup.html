@@ -9,6 +9,18 @@
     <title>Configuration de la base de données</title>
 </head>
 <body>
+    <form method="POST" action="/setup/init_db" class="corner-form corner-form-left">
+        <button type="submit" class="corner-btn corner-btn-left"
+                onclick="return confirm('Créer une nouvelle base de données à l\'emplacement configuré ?\nLes données existantes seront effacées.')">
+            Nouvelle BDD
+        </button>
+    </form>
+    <form method="POST" action="/shutdown" class="corner-form corner-form-right">
+        <button type="submit" class="corner-btn corner-btn-right"
+                onclick="return confirm('Éteindre le système ?')">
+            Éteindre
+        </button>
+    </form>
     <div class="login-container">
         <h1>Configuration</h1>
         <p>La base de données est introuvable. Indiquez son chemin complet sur cette machine.</p>

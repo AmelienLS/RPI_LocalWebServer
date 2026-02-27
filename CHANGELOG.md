@@ -1,4 +1,13 @@
 # Journal des modifications
+## [3.9.0] - 2026-02-27
+> Commit : `feat(setup): add new DB and shutdown buttons to setup page`
+### Ajouté
+- Bouton **Nouvelle BDD** (en haut à gauche) sur la page de configuration : crée une nouvelle base de données SQLite vide depuis `database/schema.sql` à l'emplacement configuré, avec un compte administrateur par défaut (`admin`), et redirige vers la page de connexion.
+- Bouton **Éteindre** (en haut à droite) sur la page de configuration : déclenche l'arrêt du système via `POST /shutdown`, avec le même style rouge que le bouton éteindre de la page de connexion.
+- Route `POST /setup/init_db` dans `APP.py` : crée ou réinitialise la base de données depuis `schema.sql`, exemptée du garde `_check_db_configured`.
+- Constante `SCHEMA_PATH` dans `APP.py` pointant vers `database/schema.sql`.
+- Tests unitaires pour la route `/setup/init_db` dans `tests/system/test_db_setup.py`.
+
 ## [3.8.3] - 2026-02-27
 > Commit : `chore(windows): add run.bat shortcut at project root`
 ### Ajouté

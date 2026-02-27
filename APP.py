@@ -24,6 +24,7 @@ TEMPLATE_DIR = BASE_DIR / "Templates"
 STATIC_DIR = BASE_DIR / "Styles"
 INSTANCE_DIR = Path(os.environ.get("APP_INSTANCE_DIR", BASE_DIR / "instance"))
 INSTANCE_DIR.mkdir(parents=True, exist_ok=True)
+SCHEMA_PATH = BASE_DIR / "database" / "schema.sql"
 
 # Fichier de configuration local (non versionné)
 CONFIG_PATH = INSTANCE_DIR / "config.ini"
@@ -72,7 +73,7 @@ app.secret_key = os.environ.get("FLASK_SECRET_KEY", secrets.token_hex(32))
 @app.before_request
 def _check_db_configured():
     """Redirige vers /setup si la base de données est introuvable."""
-    exempt_paths = {"/setup", "/shutdown"}
+    exempt_paths = {"/setup", "/shutdown", "/setup/init_db"}
     if request.path in exempt_paths:
         return
     if request.path.startswith(("/Styles/", "/Images/", "/Functions/")):
@@ -276,6 +277,27 @@ def _parse_import_file(file_storage):
 def setup_get():
     """Affiche le formulaire de configuration du chemin de la base de données."""
     return render_template('setup.html', current_path=str(DATABASE_PATH), error=None)
+
+
+@app.route('/setup/init_db', methods=['POST'])
+def setup_init_db():
+    """Crée une nouvelle base de données SQLite à partir de schema.sql."""
+    global DATABASE_PATH
+    if not SCHEMA_PATH.exists():
+        return render_template('setup.html', current_path=str(DATABASE_PATH),
+                               error="Fichier schema.sql introuvable dans database/.")
+    try:
+        schema_sql = SCHEMA_PATH.read_text(encoding='utf-8')
+        DATABASE_PATH.parent.mkdir(parents=True, exist_ok=True)
+        if DATABASE_PATH.exists():
+            DATABASE_PATH.unlink()
+        with sqlite3.connect(DATABASE_PATH) as conn:
+            conn.executescript(schema_sql)
+        _save_db_path_to_config(DATABASE_PATH)
+        return redirect('/')
+    except Exception as e:
+        return render_template('setup.html', current_path=str(DATABASE_PATH),
+                               error=f"Erreur lors de la création : {e}")
 
 
 @app.route('/setup', methods=['POST'])

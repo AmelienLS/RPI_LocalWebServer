@@ -165,6 +165,68 @@ def test_before_request_no_redirect_for_setup_itself(app):
     assert resp.status_code != 302
 
 
+# ---------------------------------------------------------------------------
+# POST /setup/init_db
+# ---------------------------------------------------------------------------
+
+def test_setup_init_db_creates_database_and_redirects(tmp_path, monkeypatch):
+    """POST /setup/init_db crée la BDD depuis schema.sql et redirige vers /."""
+    monkeypatch.setenv("APP_INSTANCE_DIR", str(tmp_path))
+    import APP as app_module
+    importlib.reload(app_module)
+
+    target_db = tmp_path / "armoire.db"
+    app_module.DATABASE_PATH = target_db
+
+    flask_app = app_module.app
+    flask_app.config["TESTING"] = True
+    with flask_app.test_client() as c:
+        resp = c.post("/setup/init_db")
+
+    assert resp.status_code == 302
+    assert resp.headers["Location"] in ("/", "http://localhost/")
+    assert target_db.exists()
+
+    import sqlite3
+    with sqlite3.connect(target_db) as conn:
+        row = conn.execute("SELECT admin FROM users WHERE identifiant = 'admin'").fetchone()
+    assert row is not None and row[0] == 1
+
+
+def test_setup_init_db_overwrites_existing_file(tmp_path, monkeypatch):
+    """POST /setup/init_db écrase un fichier existant et crée une BDD propre."""
+    monkeypatch.setenv("APP_INSTANCE_DIR", str(tmp_path))
+    import APP as app_module
+    importlib.reload(app_module)
+
+    target_db = tmp_path / "armoire.db"
+    target_db.write_text("corrupted data")
+    app_module.DATABASE_PATH = target_db
+
+    flask_app = app_module.app
+    flask_app.config["TESTING"] = True
+    with flask_app.test_client() as c:
+        resp = c.post("/setup/init_db")
+
+    assert resp.status_code == 302
+    import sqlite3
+    with sqlite3.connect(target_db) as conn:
+        tables = {r[0] for r in conn.execute("SELECT name FROM sqlite_master WHERE type='table'").fetchall()}
+    assert "users" in tables
+    assert "serigraphie" in tables
+
+
+def test_setup_init_db_exempt_from_before_request(monkeypatch):
+    """POST /setup/init_db ne doit pas être bloqué par le garde DB manquante."""
+    import APP as app_module
+    app_module.DATABASE_PATH = Path("/nonexistent/armoire.db")
+    flask_app = app_module.app
+    flask_app.config["TESTING"] = True
+    with flask_app.test_client() as c:
+        resp = c.post("/setup/init_db")
+    assert "/setup" not in (resp.headers.get("Location") or "")
+
+
 def test_before_request_no_redirect_when_db_present(app, test_db):
     """Normal operation: login page is served when DB is present."""
     import APP as app_module

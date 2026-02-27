@@ -32,3 +32,5 @@ CREATE TABLE IF NOT EXISTS sortie_logs (
 
 CREATE INDEX IF NOT EXISTS idx_sortie_logs_ref ON sortie_logs (ref_ecran, rangement_ts);
 CREATE INDEX IF NOT EXISTS idx_sortie_logs_date ON sortie_logs (sortie_ts);
+
+INSERT OR IGNORE INTO users (identifiant, prenom, nom, admin) VALUES ('admin', 'amélien', 'larade', 1);
