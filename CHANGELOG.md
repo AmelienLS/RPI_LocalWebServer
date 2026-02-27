@@ -1,4 +1,10 @@
 # Journal des modifications
+## [3.8.0] - 2026-02-27
+> Commit : `feat(windows,linux): add simple launch scripts without setup or git operations`
+### Ajouté
+- `Setups Windows/Lancer.bat` : lance le serveur Waitress directement depuis le venv local, sans cloner ni vérifier les prérequis. Ouvre le navigateur après 3 secondes via PowerShell. Affiche un message clair si le venv est absent.
+- `Setups Linux/lancer.sh` : lance le serveur Gunicorn directement depuis le venv local, sans cloner ni vérifier les prérequis. Affiche l'adresse locale et réseau. Affiche un message clair si le venv est absent.
+
 ## [3.7.1] - 2026-02-27
 > Commit : `fix(windows): fix venv setup flow and delegate browser opening to PowerShell`
 ### Modifié
