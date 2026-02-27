@@ -1,4 +1,20 @@
 # Journal des modifications
+## [3.7.1] - 2026-02-27
+> Commit : `fix(windows): fix venv setup flow and delegate browser opening to PowerShell`
+### Modifié
+- `Setups Windows/Démarrage.bat` : correction du flux de création du venv (création et activation séparées). Installation des dépendances via `pip install -r requirements.txt` (au lieu d'une liste codée en dur). Ouverture automatique du navigateur déléguée à PowerShell avec délai de 3 secondes (`Start-Sleep -Seconds 3; Start-Process ...`), indépendamment du processus serveur.
+- `requirements.txt` : suppression de `configparser` (module de la bibliothèque standard Python 3, ne nécessite pas d'installation).
+
+## [3.7.0] - 2026-02-27
+> Commit : `feat(setup): add web-based DB path configuration with config.ini persistence`
+### Ajouté
+- `APP.py` : `CONFIG_PATH` — chemin vers `instance/config.ini` (ignoré par Git). `_load_db_path_from_config()` — lit le chemin de la DB depuis `config.ini`. `_save_db_path_to_config()` — sauvegarde le chemin dans `config.ini`. `_check_db_configured()` — hook `before_request` qui redirige vers `/setup` si la DB est introuvable (excepté `/setup`, `/shutdown` et les fichiers statiques). Routes `GET /setup` et `POST /setup` — page web permettant de saisir et enregistrer le chemin de la base de données.
+- `Templates/setup.html` : page de configuration du chemin de la base de données, réutilisant les styles `common.css` et `login.css`.
+- `.gitignore` : ajout de `instance/config.ini`.
+- `tests/system/test_db_setup.py` : 11 tests couvrant `database_ready()`, les routes `/setup`, le hook `before_request`, et le cycle lecture/écriture de `config.ini`.
+### Modifié
+- `APP.py` : initialisation de `DATABASE_PATH` — priorité variable d'environnement > `config.ini` > valeur par défaut. Suppression de la vérification `if not database_ready()` dans la route `/` (désormais gérée par `before_request`).
+
 ## [3.6.1] - 2026-02-26
 > Commit : `fix(ajouter): switch export to XLSX, use positional column mapping on import, match button style`
 ### Modifié

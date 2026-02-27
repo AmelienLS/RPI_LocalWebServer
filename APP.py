@@ -1,3 +1,4 @@
+import configparser
 import csv
 import io
 import json
@@ -24,9 +25,35 @@ STATIC_DIR = BASE_DIR / "Styles"
 INSTANCE_DIR = Path(os.environ.get("APP_INSTANCE_DIR", BASE_DIR / "instance"))
 INSTANCE_DIR.mkdir(parents=True, exist_ok=True)
 
-# Fichier de base de données (non versionné)
-DATABASE_PATH = Path(os.environ.get("DATABASE_PATH", INSTANCE_DIR / "armoire.db"))
-DB_SETUP_HINT = "La base de données est introuvable. Lancez `python scripts/init_db.py` pour l'initialiser."
+# Fichier de configuration local (non versionné)
+CONFIG_PATH = INSTANCE_DIR / "config.ini"
+
+
+def _load_db_path_from_config() -> "Path | None":
+    """Lit le chemin de la DB depuis config.ini, retourne None si absent ou invalide."""
+    if not CONFIG_PATH.exists():
+        return None
+    cfg = configparser.ConfigParser()
+    cfg.read(CONFIG_PATH, encoding="utf-8")
+    raw = cfg.get("database", "path", fallback=None)
+    return Path(raw) if raw else None
+
+
+def _save_db_path_to_config(path: Path) -> None:
+    """Sauvegarde le chemin de la DB dans config.ini."""
+    cfg = configparser.ConfigParser()
+    cfg["database"] = {"path": str(path)}
+    with CONFIG_PATH.open("w", encoding="utf-8") as f:
+        cfg.write(f)
+
+
+# Priorité : variable d'environnement > config.ini > valeur par défaut
+_env_db = os.environ.get("DATABASE_PATH")
+if _env_db:
+    DATABASE_PATH = Path(_env_db)
+else:
+    _cfg_db = _load_db_path_from_config()
+    DATABASE_PATH = _cfg_db if _cfg_db is not None else INSTANCE_DIR / "armoire.db"
 
 # Configuration d'ouverture automatique du navigateur (désactivée par défaut)
 AUTO_OPEN_BROWSER = os.environ.get("APP_AUTO_OPEN_BROWSER", "0").lower() in {"1", "true", "yes", "on"}
@@ -40,6 +67,18 @@ app = Flask(
     static_url_path='/Styles'
 )
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", secrets.token_hex(32))
+
+
+@app.before_request
+def _check_db_configured():
+    """Redirige vers /setup si la base de données est introuvable."""
+    exempt_paths = {"/setup", "/shutdown"}
+    if request.path in exempt_paths:
+        return
+    if request.path.startswith(("/Styles/", "/Images/", "/Functions/")):
+        return
+    if not DATABASE_PATH.exists():
+        return redirect("/setup")
 
 
 def maybe_open_browser(url: str) -> None:
@@ -232,6 +271,26 @@ def _parse_import_file(file_storage):
     return rows
 
 
+# Route de configuration de la base de données
+@app.route('/setup', methods=['GET'])
+def setup_get():
+    """Affiche le formulaire de configuration du chemin de la base de données."""
+    return render_template('setup.html', current_path=str(DATABASE_PATH), error=None)
+
+
+@app.route('/setup', methods=['POST'])
+def setup_post():
+    """Enregistre le chemin de la base de données fourni par l'utilisateur."""
+    global DATABASE_PATH
+    path = request.form.get('path', '').strip()
+    candidate = Path(path)
+    if not candidate.is_file():
+        return render_template('setup.html', current_path=path, error="Fichier introuvable à ce chemin.")
+    _save_db_path_to_config(candidate)
+    DATABASE_PATH = candidate
+    return redirect('/')
+
+
 # Route de connexion
 @app.route('/', methods=['GET', 'POST'])
 def login():
@@ -240,9 +299,6 @@ def login():
     - Méthode POST : récupère l'identifiant, vérifie son existence dans la BD et démarre la session.
     - Méthode GET  : affiche le formulaire de connexion.
     """
-    if not database_ready():
-        return render_template('login.html', error=DB_SETUP_HINT)
-
     if request.method == 'POST':
         identifiant = request.form['identifiant']
         
