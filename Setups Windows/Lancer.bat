@@ -17,7 +17,7 @@ if not exist "%VENV_DIR%\Scripts\activate.bat" (
 
 call "%VENV_DIR%\Scripts\activate.bat"
 
-echo [>>>] Démarrage du serveur...
+echo [^>^>^>] Démarrage du serveur...
 echo     URL : http://127.0.0.1:5000
 echo [!] CTRL+C pour arrêter.
 echo.
