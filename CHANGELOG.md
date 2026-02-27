@@ -1,4 +1,9 @@
 # Journal des modifications
+## [3.8.3] - 2026-02-27
+> Commit : `chore(windows): add run.bat shortcut at project root`
+### Ajouté
+- `run.bat` à la racine du projet : lance directement le serveur Waitress via le venv local (`.venv`), sans cloner ni vérifier les prérequis. Ouvre le navigateur après 3 secondes. Affiche un message d'erreur clair si le venv est absent.
+
 ## [3.8.2] - 2026-02-27
 > Commit : `fix(windows): hardcode installation path in Lancer.bat`
 ### Corrigé
