@@ -124,7 +124,16 @@ call "%VENV_DIR%\Scripts\deactivate.bat"
 echo [OK] Environnement virtuel prêt.
 echo.
 
-:: 4) Lancement du serveur
+:: 4) Sauvegarde du chemin du projet (pour Lancer.bat)
+if not exist "%APPDATA%\RPI_LocalWebServer" mkdir "%APPDATA%\RPI_LocalWebServer"
+(
+  echo [project]
+  echo dir=%PROJECT_DIR%
+) > "%APPDATA%\RPI_LocalWebServer\config.ini"
+echo [OK] Chemin du projet enregistré.
+echo.
+
+:: 5) Lancement du serveur
 echo [^>^>^>] Démarrage du serveur WSGI local...
 echo     URL : http://127.0.0.1:5000
 echo [!] CTRL+C pour arrêter.
