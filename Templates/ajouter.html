@@ -11,6 +11,14 @@
 <body>
     <!--Page pour ajouter une nouvelle écran dans la base de données -->
     <a href="/close_db" class="retour">Fermer connexion DB et retour au menu</a>
+    <div class="ie-bar">
+        <a href="/export_serigraphie" class="ie-btn">Exporter</a>
+        <button type="button" class="ie-btn" onclick="document.getElementById('import-input').click()">Importer</button>
+        <form id="import-form" action="/import_serigraphie" method="POST" enctype="multipart/form-data" style="display:none">
+            <input id="import-input" type="file" name="import_file" accept=".csv,.xlsx"
+                   onchange="document.getElementById('import-form').submit()">
+        </form>
+    </div>
     <div class="form-container">
         <h1>Ajouter un écran</h1>
         {% if error %}

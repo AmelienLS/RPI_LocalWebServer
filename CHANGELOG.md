@@ -1,4 +1,60 @@
 # Journal des modifications
+## [3.8.3] - 2026-02-27
+> Commit : `chore(windows): add run.bat shortcut at project root`
+### Ajouté
+- `run.bat` à la racine du projet : lance directement le serveur Waitress via le venv local (`.venv`), sans cloner ni vérifier les prérequis. Ouvre le navigateur après 3 secondes. Affiche un message d'erreur clair si le venv est absent.
+
+## [3.8.2] - 2026-02-27
+> Commit : `fix(windows): hardcode installation path in Lancer.bat`
+### Corrigé
+- `Setups Windows/Lancer.bat` : le chemin du projet est désormais codé en dur à `%USERPROFILE%\RPI_LocalWebServer-Release`, identique à celui utilisé par `Démarrage.bat`, pour éviter toute erreur de résolution de chemin relatif.
+
+## [3.8.1] - 2026-02-27
+> Commit : `fix(windows): resolve project path via pushd/CD in Lancer.bat`
+### Modifié
+- `Setups Windows/Lancer.bat` : le chemin du projet est résolu via `pushd "%~dp0.." / set PROJECT_DIR=%CD% / popd` — remonte d'un niveau depuis `Setups Windows\` pour obtenir la racine du projet. `pause` systématique en fin de script. Aucune variable système restreinte requise.
+
+## [3.8.0] - 2026-02-27
+> Commit : `feat(windows,linux): add simple launch scripts without setup or git operations`
+### Ajouté
+- `Setups Windows/Lancer.bat` : lance le serveur Waitress directement depuis le venv local, sans cloner ni vérifier les prérequis. Ouvre le navigateur après 3 secondes via PowerShell. Affiche un message clair si le venv est absent.
+- `Setups Linux/lancer.sh` : lance le serveur Gunicorn directement depuis le venv local, sans cloner ni vérifier les prérequis. Affiche l'adresse locale et réseau. Affiche un message clair si le venv est absent.
+
+## [3.7.1] - 2026-02-27
+> Commit : `fix(windows): fix venv setup flow and delegate browser opening to PowerShell`
+### Modifié
+- `Setups Windows/Démarrage.bat` : correction du flux de création du venv (création et activation séparées). Installation des dépendances via `pip install -r requirements.txt` (au lieu d'une liste codée en dur). Ouverture automatique du navigateur déléguée à PowerShell avec délai de 3 secondes (`Start-Sleep -Seconds 3; Start-Process ...`), indépendamment du processus serveur.
+- `requirements.txt` : suppression de `configparser` (module de la bibliothèque standard Python 3, ne nécessite pas d'installation).
+
+## [3.7.0] - 2026-02-27
+> Commit : `feat(setup): add web-based DB path configuration with config.ini persistence`
+### Ajouté
+- `APP.py` : `CONFIG_PATH` — chemin vers `instance/config.ini` (ignoré par Git). `_load_db_path_from_config()` — lit le chemin de la DB depuis `config.ini`. `_save_db_path_to_config()` — sauvegarde le chemin dans `config.ini`. `_check_db_configured()` — hook `before_request` qui redirige vers `/setup` si la DB est introuvable (excepté `/setup`, `/shutdown` et les fichiers statiques). Routes `GET /setup` et `POST /setup` — page web permettant de saisir et enregistrer le chemin de la base de données.
+- `Templates/setup.html` : page de configuration du chemin de la base de données, réutilisant les styles `common.css` et `login.css`.
+- `.gitignore` : ajout de `instance/config.ini`.
+- `tests/system/test_db_setup.py` : 11 tests couvrant `database_ready()`, les routes `/setup`, le hook `before_request`, et le cycle lecture/écriture de `config.ini`.
+### Modifié
+- `APP.py` : initialisation de `DATABASE_PATH` — priorité variable d'environnement > `config.ini` > valeur par défaut. Suppression de la vérification `if not database_ready()` dans la route `/` (désormais gérée par `before_request`).
+
+## [3.6.1] - 2026-02-26
+> Commit : `fix(ajouter): switch export to XLSX, use positional column mapping on import, match button style`
+### Modifié
+- `APP.py` : `_parse_import_file()` — mapping désormais par **position de colonne** (la première ligne est ignorée comme en-tête ; l'ordre attendu est `ref_ecran, libelle, pcb, fab, n_fab, type, n`). Route `/export_serigraphie` — export au format `.xlsx` (openpyxl) à la place du CSV.
+- `Templates/ajouter.html` : libellé du bouton "Exporter CSV" → "Exporter".
+- `Styles/ajouter.css` : `.ie-btn` reprend le style visuel des boutons `.retour` (fond jaune `#feed00`, texte sombre, gras, `border-radius: 4px`, même double ombre).
+- `tests/web/test_import_export.py` : tests d'export mis à jour pour vérifier le format XLSX et les en-têtes de colonnes en ordre positionnel.
+
+## [3.6.0] - 2026-02-26
+> Commit : `feat(ajouter): add CSV export and CSV/XLSX import with conflict resolution`
+### Ajouté
+- `APP.py` : helper `_parse_import_file()` acceptant `.csv` et `.xlsx`. Route `GET /export_serigraphie` : export de la table `serigraphie` en CSV téléchargeable. Route `POST /import_serigraphie` : import d'un fichier CSV ou XLSX — insertion directe des nouvelles lignes, affichage de la page de résolution pour les conflits (ref_ecran déjà existant). Route `POST /import_serigraphie/confirm` : application des choix (garder / écraser par ligne, ou écraser tout).
+- `Templates/import_conflicts.html` : page de comparaison côte à côte (en base vs fichier importé) avec checkbox par ligne et bouton "Écraser tout".
+- `Styles/import_conflicts.css` : styles de la page de résolution des conflits.
+- `Templates/ajouter.html` : barre de deux boutons "Exporter CSV" et "Importer" en haut à gauche, avec formulaire d'upload masqué soumis automatiquement à la sélection du fichier.
+- `Styles/ajouter.css` : styles `.ie-bar` et `.ie-btn` pour la barre import/export.
+- `tests/web/test_import_export.py` : 13 tests couvrant export, import CSV, import XLSX, gestion des conflits et résolution.
+- `requirements.txt` : ajout de `openpyxl`.
+
 ## [3.5.4] - 2026-02-26
 > Commit : `fix(ui): match washing panel width to main container and add item separators`
 ### Modifié

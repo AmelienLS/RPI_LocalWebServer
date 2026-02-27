@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/Styles/common.css">
+    <link rel="stylesheet" href="/Styles/login.css">
+    <link rel="icon" href="/Images/Logo.png" type="image/png">
+    <title>Configuration de la base de données</title>
+</head>
+<body>
+    <div class="login-container">
+        <h1>Configuration</h1>
+        <p>La base de données est introuvable. Indiquez son chemin complet sur cette machine.</p>
+        <form method="POST" action="/setup">
+            <input type="text" name="path" value="{{ current_path }}" placeholder="Ex : C:\Users\...\armoire.db" required>
+            <button type="submit">Enregistrer</button>
+        </form>
+        {% if error %}
+        <p class="error">{{ error }}</p>
+        {% endif %}
+    </div>
+</body>
+</html>

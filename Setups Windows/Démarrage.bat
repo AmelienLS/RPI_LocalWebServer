@@ -62,16 +62,16 @@ if not exist "%VENV_DIR%\Scripts\activate.bat" (
     echo [!] Impossible de créer le venv !
     pause & exit /b 1
   )
-  call "%VENV_DIR%\Scripts\activate.bat"
-    %USERPROFILE%\RPI_LocalWebServer-Release\vend\Scripts\python.exe -m pip install 
-    pip install flask waitress
-    if errorlevel 1 (
-      echo [!] Échec de l'installation des dépendances !
-      call "%VENV_DIR%\Scripts\deactivate.bat"
-      pause & exit /b 1
-    )
-  call "%VENV_DIR%\Scripts\deactivate.bat"
 )
+call "%VENV_DIR%\Scripts\activate.bat"
+echo     Mise à jour des dépendances...
+pip install -r "%PROJECT_DIR%\requirements.txt"
+if errorlevel 1 (
+  echo [!] Échec de l'installation des dépendances !
+  call "%VENV_DIR%\Scripts\deactivate.bat"
+  pause & exit /b 1
+)
+call "%VENV_DIR%\Scripts\deactivate.bat"
 echo [OK] Environnement virtuel prêt.
 echo.
 

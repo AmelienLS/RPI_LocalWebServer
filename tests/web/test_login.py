@@ -1,4 +1,5 @@
 import sqlite3
+from pathlib import Path
 
 import APP
 from flask import session
@@ -35,12 +36,12 @@ def test_login_success_sets_session(client, add_user):
         assert session["admin"] == 1
 
 
-def test_login_missing_database_shows_hint(client, monkeypatch):
-    monkeypatch.setattr(APP, "database_ready", lambda: False)
+def test_login_missing_database_redirects_to_setup(client, monkeypatch):
+    monkeypatch.setattr(APP, "DATABASE_PATH", Path("/nonexistent/armoire.db"))
 
     response = client.get("/")
-    assert response.status_code == 200
-    assert "La base de données est introuvable" in response.data.decode("utf-8")
+    assert response.status_code == 302
+    assert "/setup" in response.headers["Location"]
 
 
 def test_login_handles_db_operational_error(client, monkeypatch):
