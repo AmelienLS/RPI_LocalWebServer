@@ -2,11 +2,7 @@
 chcp 65001 >nul
 setlocal
 
-:: Remonte d'un niveau depuis "Setups Windows\" pour obtenir la racine du projet
-pushd "%~dp0.."
-set "PROJECT_DIR=%CD%"
-popd
-
+set "PROJECT_DIR=%USERPROFILE%\RPI_LocalWebServer-Release"
 set "VENV_DIR=%PROJECT_DIR%\venv"
 
 if not exist "%VENV_DIR%\Scripts\activate.bat" (

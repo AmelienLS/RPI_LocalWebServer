@@ -1,4 +1,9 @@
 # Journal des modifications
+## [3.8.2] - 2026-02-27
+> Commit : `fix(windows): hardcode installation path in Lancer.bat`
+### Corrigé
+- `Setups Windows/Lancer.bat` : le chemin du projet est désormais codé en dur à `%USERPROFILE%\RPI_LocalWebServer-Release`, identique à celui utilisé par `Démarrage.bat`, pour éviter toute erreur de résolution de chemin relatif.
+
 ## [3.8.1] - 2026-02-27
 > Commit : `fix(windows): resolve project path via pushd/CD in Lancer.bat`
 ### Modifié
