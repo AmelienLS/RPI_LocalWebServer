@@ -5,6 +5,7 @@ __pycache__/
 #instance/
 !instance/.gitkeep
 instance/config.ini
+CLAUDE.md
 
 # Environments
 venv/
