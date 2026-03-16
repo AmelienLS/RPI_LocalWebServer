@@ -1,6 +1,6 @@
 # RPI LocalWebServer
 
-Application web développée avec Flask pour gérer des **sérigraphies** (écrans de sérigraphie) dans un atelier. Elle permet de suivre l'état des écrans (sorti / rangé / à laver), d'administrer les utilisateurs, de tracer toutes les manipulations dans des journaux CSV quotidiens, et de se déployer facilement sur une Raspberry Pi ou une machine Windows.
+Application web développée avec Flask pour gérer des **écrans de sérigraphies** dans un atelier. Elle permet de suivre l'état des écrans (sorti / rangé / à laver), d'administrer les utilisateurs, de tracer toutes les manipulations dans des journaux CSV quotidiens, et de se déployer facilement sur une Raspberry Pi ou une machine Windows.
 
 **Version actuelle : 3.9.0**
 
