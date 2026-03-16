@@ -490,7 +490,7 @@ Si vous reprenez ce projet sur un nouveau dépôt, modifiez les éléments suiva
 
 ### 1. Scripts de déploiement Linux
 
-- **`Setups Linux/demarrage_release.sh`** : modifier la variable `Documentation=` dans la section `[Unit]` du service systemd (ligne ~235) et toute référence à l'URL du dépôt.
+- **`Setups Linux/demarrage_release.sh`** : modifier la variable `Documentation=` dans la section `[Unit]` du service systemd (ligne ~23) et toute référence à l'URL du dépôt.
 
 ### 2. Scripts de déploiement Windows
 
