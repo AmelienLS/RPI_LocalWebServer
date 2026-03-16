@@ -1,261 +1,500 @@
 # RPI LocalWebServer
 
-Application web développée avec Flask pour gérer des sérigraphies sur une Raspberry Pi ou une inctance windows classique. Elle permet de suivre l'état des écrans, d'administrer les utilisateurs et de déployer facilement le service sur un environnement embarqué.
+Application web développée avec Flask pour gérer des **sérigraphies** (écrans de sérigraphie) dans un atelier. Elle permet de suivre l'état des écrans (sorti / rangé / à laver), d'administrer les utilisateurs, de tracer toutes les manipulations dans des journaux CSV quotidiens, et de se déployer facilement sur une Raspberry Pi ou une machine Windows.
 
-## Continuité du projet
+**Version actuelle : 3.9.0**
 
-La personne qui récupérera le projet pourra fork ce repo. Dans ce cas il faudra modifier les éléments suivants pour refléter le nouvel emplacement du dépôt :
+---
 
-### Fichiers à modifier lors d'un changement d'emplacement du dépôt
+## Sommaire
 
-1. **Documentation (README.md)**
-   - Mettre à jour tous les liens vers les fichiers du projet (par exemple : `[APP.py](APP.py)`, `[ecran.html](Templates/ecran.html)`, etc.)
-   - Vérifier que les références au dépôt GitHub dans les liens correspondent au nouveau propriétaire/organisation
+1. [Fonctionnalités](#fonctionnalités)
+2. [Architecture du projet](#architecture-du-projet)
+3. [Stack technique](#stack-technique)
+4. [Base de données](#base-de-données)
+5. [Variables d'environnement](#variables-denvironnement)
+6. [Installation et lancement](#installation-et-lancement)
+   - [Développement local](#développement-local)
+   - [Déploiement Linux / Raspberry Pi](#déploiement-linux--raspberry-pi)
+   - [Déploiement Windows](#déploiement-windows)
+7. [Référence des routes](#référence-des-routes)
+8. [Tests](#tests)
+9. [Conseils de maintenance](#conseils-de-maintenance)
+10. [Continuité du projet (fork)](#continuité-du-projet-fork)
+11. [Contribuer](#contribuer)
+12. [Licence](#licence)
+13. [Historique des versions](#historique-des-versions)
 
-2. **Scripts de déploiement Linux**
-   - **`Setups Linux/Setup_release.sh`** : Modifier la variable `Documentation=` dans la section `[Unit]` du service systemd (ligne ~235) pour pointer vers la nouvelle URL du dépôt
-   - Vérifier les commentaires et messages d'erreur qui pourraient référencer l'ancien dépôt
-
-3. **Scripts de déploiement Windows** 
-   - **`Setups Windows/Démarrage.bat`** : Modifier la ligne 7 `set "REPO_URL=https://github.com/AmelienLS/RPI_LocalWebServer.git"`
-   - **`Setups Windows/DémarrageTest.bat`** : Modifier la ligne 7 `set "REPO_URL=https://github.com/AmelienLS/RPI_LocalWebServer.git"`
-   - **`Setups Windows/Setup_armoire.bat`** : Modifier la ligne 8 `set "REPO_URL=https://github.com/AmelienLS/RPI_LocalWebServer.git"`
-   - Également vérifier toutes les références au nom du dossier `RPI_LocalWebServer-Release` si vous souhaitez le renommer
-
-4. **Configuration du projet**
-   - **`CONTRIBUTING.md`** : Mettre à jour les instructions de contribution et les liens vers le dépôt
-   - **`CHANGELOG.md`** : Ajouter une entrée mentionnant le changement d'emplacement du dépôt
-   - Vérifier les éventuelles configurations dans `package.json`, `setup.py` ou autres fichiers de métadonnées
-
-5. **Code source**
-   - Rechercher dans tous les fichiers Python (`.py`) et JavaScript (`.js`) les éventuelles références codées en dur à l'ancien dépôt
-   - Vérifier les commentaires de copyright ou de licence qui mentionnent le propriétaire original
-
-### Recommandations
-- Utiliser une recherche globale (par exemple `grep -r "AmelienLS/RPI_LocalWebServer"`) pour identifier toutes les références à l'ancien dépôt
-- Tester le déploiement après modification pour s'assurer que tous les liens et références fonctionnent correctement
-- Mettre à jour la documentation pour mentionner le fork et créditer le projet original
+---
 
 ## Fonctionnalités
 
-- Ajout, modification, suppression et suivi des sérigraphies.
-- Authentification des utilisateurs et gestion des administrateurs.
-- Traçabilité quotidienne des sorties/rangements d'écrans via des journaux CSV datés.
-- Export administrateur des journaux quotidiens en un clic (archive ZIP) et bouton “Vider” qui exporte puis supprime les CSV pour repartir sur un dossier propre.
-- Déploiement automatique sur Raspberry Pi (service systemd et lancement de Firefox en mode kiosque).
+| Fonctionnalité | Détail |
+|---|---|
+| **Gestion des écrans** | Ajout, modification, suppression, et consultation de toutes les sérigraphies |
+| **Suivi d'état** | Marquer un écran comme sorti (`prendre`) ou rangé (`ranger`), avec indication du lavage |
+| **Traçabilité** | Chaque emprunt/rangement est logué dans `sortie_logs` (SQLite) **et** dans un fichier CSV quotidien horodaté |
+| **Authentification** | Connexion par identifiant, sessions Flask ; rôle utilisateur ou administrateur |
+| **Gestion des utilisateurs** | Ajout d'utilisateurs (admin seulement) |
+| **Statistiques** | Tableau de bord d'utilisation par écran et par personne (admin seulement) |
+| **Import / Export** | Import CSV/XLSX d'un catalogue d'écrans avec détection de conflits, export XLSX ; export ZIP des journaux CSV |
+| **Configuration web** | Page `/setup` pour choisir le chemin de la base de données et créer une nouvelle base sans toucher au code |
+| **Arrêt système** | Bouton d'arrêt de la machine (Linux) ou du serveur (Windows) directement depuis l'interface |
+| **Déploiement automatisé** | Scripts `bash` (Raspberry Pi / Ubuntu / Fedora) et `.bat` (Windows) pour installer et lancer le service en une commande |
+| **UI tactile** | Interface optimisée pour écran tactile 12 pouces (cibles tactiles ≥ 44 px, défilement au doigt) |
 
-## Structure du Projet
+---
 
-Le projet est organisé comme suit :
+## Architecture du projet
 
-- **Racine du projet**  
-  - `APP.py` : Point d'entrée principal de l’application. Il configure Flask, définit les routes et gère la connexion à la base de données via la fonction [`get_db_connection`](APP.py#L76).
-  - `instance/` : Répertoire ignoré par Git qui héberge la base SQLite générée localement (`instance/armoire.db`).
-  - `scripts/init_db.py` : Script CLI qui crée/réinitialise la base en appliquant le schéma situé dans [`database/schema.sql`](database/schema.sql).
-  - `README.md` : Documentation principale du projet.
-  
-- **Dossier Templates/**  
-  Contient tous les fichiers HTML utilisés pour l’affichage des pages. Chaque page utilise un fichier CSS dédié (situé dans le dossier Styles) et certains liens spécifiques dans les balises `<link>` permettent d’inclure une icône pour l’onglet du navigateur ([Logo.png](Images/Logo.png)).
-  - Exemple : [ecran.html](Templates/ecran.html) affiche le tableau des sérigraphies.
-  
-- **Dossier Styles/**  
-  Contient les fichiers CSS pour le style de chaque page.  
-  - Exemple : [ecran.css](Styles/ecran.css) assure la mise en forme du tableau présenté dans [ecran.html](Templates/ecran.html).
-  
-- **Dossier Functions/**  
-  Contient des fichiers JavaScript pour gérer des interactions côté client (filtrage de tableau, etc.).
-  - Exemple : [Ecran.js](Functions/Ecran.js) définit la logique de filtrage pour le tableau dans [ecran.html](Templates/ecran.html).
+```
+RPI_LocalWebServer/
+├── APP.py                      # Application Flask principale (routes, logique, BDD)
+├── wsgi.py                     # Point d'entrée WSGI pour Gunicorn
+├── requirements.txt            # Dépendances Python
+├── run.bat                     # Raccourci de lancement rapide (Windows, à la racine)
+│
+├── database/
+│   └── schema.sql              # Schéma SQLite (tables users, serigraphie, sortie_logs)
+│
+├── scripts/
+│   └── init_db.py              # CLI : crée/réinitialise la base depuis schema.sql
+│
+├── Templates/                  # Gabarits Jinja2 (une page = un fichier)
+│   ├── login.html
+│   ├── index.html
+│   ├── ecran.html              # Tableau des sérigraphies avec filtres
+│   ├── ajouter.html            # Formulaire ajout écran + import/export
+│   ├── ajouterU.html           # Formulaire ajout utilisateur
+│   ├── prendre.html            # Emprunter un écran
+│   ├── ranger.html             # Ranger un écran
+│   ├── modifier.html           # Modifier un écran
+│   ├── supprimer.html          # Supprimer un écran
+│   ├── stats.html              # Statistiques d'utilisation
+│   ├── setup.html              # Configuration du chemin de la BDD
+│   └── import_conflicts.html   # Résolution de conflits lors d'un import
+│
+├── Styles/                     # CSS dédié par page + common.css
+├── Functions/
+│   ├── Ecran.js                # Filtrage dynamique du tableau des écrans
+│   └── ecranDrag.js            # Défilement tactile (drag horizontal)
+├── Images/
+│   ├── Logo.png
+│   └── database.ico
+│
+├── Setups Linux/               # Scripts de déploiement Raspberry Pi / Ubuntu / Fedora
+│   ├── demarrage_release.sh    # Setup complet + service systemd (branche Release)
+│   ├── demarrage_branche.sh    # Idem avec sélection de branche
+│   ├── lancer.sh               # Lancement simple (venv déjà installé)
+│   ├── arreter.sh              # Arrêt propre du service
+│   └── purge.sh                # Désinstallation complète
+│
+├── Setups Windows/             # Scripts de déploiement Windows
+│   ├── Démarrage.bat           # Setup complet (clone, venv, pip, Waitress)
+│   ├── Lancer.bat              # Lancement simple (venv déjà installé)
+│   ├── Stop.bat                # Arrêt du serveur
+│   └── Purge.bat               # Désinstallation complète
+│
+├── tests/                      # Suites de tests automatisés
+│   ├── conftest.py             # Fixtures pytest (app, client, BDD en mémoire)
+│   ├── web/                    # Tests des routes Flask
+│   ├── db/                     # Tests du schéma SQLite
+│   ├── scripts/                # Tests du script init_db.py
+│   ├── system/                 # Tests d'intégration (logs, shutdown, setup)
+│   └── js/                     # Tests JavaScript (Vitest + JSDOM)
+│
+└── instance/                   # Répertoire runtime — ignoré par Git
+    ├── armoire.db              # Base SQLite générée localement
+    ├── config.ini              # Chemin de la BDD persisté (ignoré par Git)
+    └── logs/                   # Fichiers CSV quotidiens (JJ-MM-AAAA.csv)
+```
 
-- **Dossier Images/**  
-  Contient les fichiers image utilisés dans le projet, par exemple pour l’icône de l’onglet (`Logo.png` ou `database.ico`).
+> **`instance/`** n'est jamais versionné. Il est créé automatiquement au premier lancement ou lors de l'initialisation de la base.
 
-## Explications détaillées du Code
+---
 
-### Configuration et Lancement
-- **Fichier [APP.py](APP.py)**  
-  Ce fichier initialise l’application Flask :
-  - **Clé secrète** : Chargée depuis la variable d'environnement `FLASK_SECRET_KEY`. À défaut, une valeur aléatoire sécurise les sessions pour l'exécution courante.
-  - **Connexion à la base de données** : La fonction `get_db_connection()` ouvre le fichier `instance/armoire.db`. Ce fichier est généré via `scripts/init_db.py` et n'est jamais versionné.
-  - **Paramètres runtime** : Les variables `APP_HOST`, `APP_PORT`, `APP_AUTO_OPEN_BROWSER` ou `APP_BROWSER_CMD` permettent d'adapter l'exécution sans modifier le code (serveur accessible sur le réseau, ouverture automatique du navigateur, etc.).  
-  - **Destination des journaux quotidiens** : `APP_LOGS_DIR` peut être définie pour stocker les fichiers CSV de traçabilité dans un autre dossier (partage réseau, clé USB, etc.). Par défaut ils sont créés dans `instance/logs/`.
-  - **Export simplifié** : la route `/export_logs` (accessible via un bouton sur la page “Table écran” pour les administrateurs) regroupe tous les CSV du dossier de logs et renvoie une archive ZIP. Le navigateur du poste demande alors où enregistrer l’export.
+## Stack technique
 
-### Gestion des accès et fonctions utilitaires
-- Les routes sensibles vérifient systématiquement la présence de `session['prenom']` et le flag `session['admin']` pour limiter l'accès aux utilisateurs connectés ou aux administrateurs.
-- La fonction `get_db_connection()` centralise l'ouverture de la base et garantit que les résultats peuvent être parcourus par nom de colonne (`sqlite3.Row`).
+| Couche | Technologie |
+|---|---|
+| Backend | Python 3, Flask |
+| Base de données | SQLite 3 (via `sqlite3` stdlib) |
+| Serveur WSGI (Linux) | Gunicorn |
+| Serveur WSGI (Windows) | Waitress |
+| Génération / lecture Excel | openpyxl |
+| Templates | Jinja2 |
+| Frontend | HTML5, CSS3, JavaScript vanilla |
+| Tests Python | pytest |
+| Tests JavaScript | Vitest + JSDOM |
 
-### Routes Principales
-Chaque route sensible commence par vérifier les informations présentes dans la session Flask et redirige vers `/` en cas d'accès non autorisé.
-- **Route `/` (login)**  
-  Gère l’authentification en vérifiant l’identifiant dans la table `users` de la base de données.
-  
-- **Route `/index`**  
-  Affiche la page d’accueil une fois l’utilisateur authentifié.  
-  Selon son statut (admin ou non), différentes actions (ajout, modification, suppression, etc.) sont proposées.
+---
 
-- **Route `/ajouter`**  
-  Permet d’ajouter une nouvelle sérigraphie en collectant divers paramètres (référence, libellé, PCB, fabricant, etc.) et en effectuant des validations sur le format des données.
+## Base de données
 
-- **Route `/modifier`**  
-  Permet de rechercher une sérigraphie par sa référence et de mettre à jour ses informations.  
-  Vérifie également que la nouvelle référence n’existe pas déjà en cas de modification.
+### Schéma ([database/schema.sql](database/schema.sql))
 
-- **Route `/supprimer`**  
-  Permet de vérifier l’existence d’une sérigraphie et ensuite de la supprimer de la base.
+**Table `users`** — comptes de connexion
 
-  - **Route `/prendre` et `/ranger`**  
-    Ces routes gèrent le changement de statut d’une sérigraphie (prise ou rangée).  
-    Le statut `sorti` et une indication relative au lavage (via `lave`) sont mis à jour dans la base.
-    Chaque emprunt/rangement alimente également la table `sortie_logs` et produit un fichier CSV journalier dans `instance/logs/` (ou dans le dossier défini par `APP_LOGS_DIR`). Ces fichiers portent le nom `JJ-MM-AAAA.csv`, listent chronologiquement chaque manipulation avec : référence, libellé, personne, heure de sortie, heure de rangement (y compris la date si différente) et indication du lavage.
-    Deux boutons visibles uniquement pour les administrateurs sur la page `/ecran` permettent :
-    - d'exporter tous les journaux disponibles (archive ZIP) pour archivage,
-    - de “Vider les journaux”, ce qui télécharge aussi une archive complète puis supprime les CSV côté serveur pour repartir sur un dossier propre.
+| Colonne | Type | Contrainte | Description |
+|---|---|---|---|
+| `id` | INTEGER | PK auto | Identifiant interne |
+| `nom` | TEXT | NOT NULL | Nom de famille |
+| `prenom` | TEXT | NOT NULL | Prénom |
+| `identifiant` | TEXT | UNIQUE NOT NULL | Code de connexion |
+| `admin` | INTEGER | — | `1` = administrateur, `0` = utilisateur |
 
-- **Route `/shutdown`**  
-  Ferme proprement le service Gunicorn (Windows) ou exécute `sudo shutdown -h now` (Linux). Cette action doit être restreinte au navigateur de la Raspberry via les mécanismes d'authentification décrits plus haut.
+**Table `serigraphie`** — inventaire des écrans
 
-### Gestion du Frontend
-- **Templates HTML**  
-  Chaque fichier dans le dossier [Templates](Templates/) correspond à une vue de l’application, par exemple :
-  - [login.html](Templates/login.html) pour l’authentification,
-  - [modifier.html](Templates/modifier.html) pour modifier une sérigraphie, etc.
-  
-- **Feuilles de Style**  
-  Chaque fichier CSS du dossier [Styles](Styles/) correspond à une page ou un ensemble de pages et définit la présentation des éléments HTML.
+| Colonne | Type | Contrainte | Description |
+|---|---|---|---|
+| `ref_ecran` | INTEGER | PK | Référence de l'écran |
+| `libelle` | TEXT | NOT NULL | Libellé descriptif |
+| `pcb` | INTEGER | — | Numéro de PCB associé |
+| `fab` | TEXT (2 car.) | NOT NULL | Code fabricant |
+| `n_fab` | TEXT | — | Numéro fabricant (F + 6 car.) |
+| `type` | TEXT | NOT NULL | Type d'écran |
+| `n` | TEXT (3 car.) | UNIQUE NOT NULL | Emplacement physique (casier) |
+| `sorti` | INTEGER | DEFAULT 0 | `0` = rangé, `1` = sorti |
+| `lave` | INTEGER | DEFAULT 1 | `0` = à laver, `1` = propre |
 
-- **Scripts JavaScript**  
-  Les fichiers dans le dossier [Functions](Functions/) contiennent des scripts permettant, par exemple, de filtrer dynamiquement les tableaux d’affichage ([Ecran.js](Functions/Ecran.js)).
+**Table `sortie_logs`** — traçabilité des mouvements
 
-## Initialiser la base de données
+| Colonne | Type | Description |
+|---|---|---|
+| `id` | INTEGER PK | Identifiant interne |
+| `ref_ecran` | INTEGER | Référence de l'écran (FK logique) |
+| `libelle` | TEXT | Libellé au moment du mouvement |
+| `personne` | TEXT | Qui a pris l'écran |
+| `personne_rangement` | TEXT | Qui l'a rangé |
+| `sortie_ts` | TEXT | Horodatage de sortie (ISO 8601) |
+| `rangement_ts` | TEXT | Horodatage de rangement |
+| `lavee` | INTEGER | `0` = non lavé, `1` = lavé, NULL = en cours |
 
-Le dépôt ne contient plus de fichier `.db`. Chaque environnement doit générer sa base à partir du schéma partagé :
+### Initialiser ou réinitialiser la base
 
 ```bash
-python -m venv .venv
-source .venv/bin/activate            # Windows : .venv\Scripts\activate
-pip install -r requirements.txt
 python scripts/init_db.py --force \
   --admin-identifiant admin \
   --admin-prenom Admin \
   --admin-nom Utilisateur
 ```
 
-Options utiles :
+**Options disponibles :**
 
-- `--database /chemin/custom.db` : change l’emplacement du fichier SQLite (par défaut `instance/armoire.db`).
-- `--skip-admin` : n’ajoute aucun utilisateur. À utiliser si vous souhaitez injecter vos propres données avec un autre outil.
-- `--force` : remplace un fichier existant (utile lors d’un reset complet).
+| Option | Description |
+|---|---|
+| `--force` | Écrase un fichier `.db` existant |
+| `--database /chemin/custom.db` | Emplacement personnalisé (défaut : `instance/armoire.db`) |
+| `--admin-identifiant <id>` | Identifiant du compte admin créé |
+| `--admin-prenom <prénom>` | Prénom de l'admin |
+| `--admin-nom <nom>` | Nom de l'admin |
+| `--skip-admin` | Ne crée aucun utilisateur (utile si injection manuelle) |
 
-Le script peut être relancé à tout moment pour repartir d’une base propre.
+> Les CSV quotidiens dans `instance/logs/` sont régénérés depuis `sortie_logs`. Vous pouvez les supprimer sans perte de données : ils seront recréés à la prochaine manipulation.
 
-> [i]  Le schéma `database/schema.sql` comprend désormais la table `sortie_logs`.  
-> Chaque entrée y correspond à une sortie d'écran (heure de sortie, utilisateur, heure/état de rangement).  
-> Les fichiers CSV quotidiens sont régénérés automatiquement à partir de cette table, vous pouvez donc les supprimer ou les archiver sans perdre d'historique.
+---
 
-## Conseils pour la Maintenance
+## Variables d'environnement
 
-- **Validation et Gestion des Erreurs**  
-  L’application inclut des validations pour s’assurer que les données utilisateurs respectent des contraintes précises (longueur des chaînes, format particulier, etc.). Vérifier que les conditions correspondent bien aux besoins.
-  
-- **Sécurité**  
-  La clé secrète de l’application, générée au démarrage ou fournie via `FLASK_SECRET_KEY`, sécurise la gestion des sessions. Les routes vérifient explicitement la présence d'un utilisateur connecté et de son statut admin avant de poursuivre.
-  
-- **Modularité**  
-  La séparation entre le backend (Flask et SQLite) et le frontend (HTML, CSS, JavaScript) facilite la compréhension et la maintenance du code. Les helpers centrés sur l'accès à la base et la gestion de session évitent la duplication et clarifient les responsabilités.
+Toutes les variables sont optionnelles. Elles peuvent être définies dans le shell ou dans un fichier `.env` (non versionné).
 
-- **Base de donnée**
-  la base de donnée SQLite permet de stocker toute les données. Il faut bien faire attention que les contraintes de la base de données correspondent aux contraintes donnée par le backend. Pour lire la DB, il est possible soit d'utiliser une application tierce (DB browser for SQLite par exemple) ou bien une extension Visual Studio Code (SQLite3 Editor par exemple)
+| Variable | Défaut | Description |
+|---|---|---|
+| `DATABASE_PATH` | `instance/armoire.db` | Chemin absolu ou relatif vers le fichier SQLite |
+| `FLASK_SECRET_KEY` | Généré aléatoirement | Clé de chiffrement des sessions Flask |
+| `FLASK_DEBUG` | `0` | Mode debug Flask (`1` pour activer) |
+| `APP_HOST` | `127.0.0.1` | Adresse d'écoute du serveur (`0.0.0.0` pour accès réseau) |
+| `APP_PORT` | `5000` | Port d'écoute |
+| `APP_AUTO_OPEN_BROWSER` | `0` | Ouvre automatiquement le navigateur au démarrage (`1`) |
+| `APP_BROWSER_CMD` | Navigateur par défaut | Commande personnalisée pour ouvrir le navigateur |
+| `APP_LOGS_DIR` | `instance/logs` | Répertoire des CSV quotidiens (partage réseau, clé USB…) |
+| `APP_INSTANCE_DIR` | `instance/` | Répertoire d'instance (config.ini, base de données) |
 
-## Configuration sur Raspberry Pi (Ubuntu)
+> La priorité pour `DATABASE_PATH` est : variable d'environnement > `instance/config.ini` > valeur par défaut.
 
-Pour assurer un fonctionnement autonome sur une Raspberry Pi équipée d'Ubuntu, plusieurs scripts de configuration ont été créés pour automatiser le déploiement et le lancement de l'application.
+---
 
-### 1. Démarrage automatique de l'application (Service Systemd)
+## Installation et lancement
 
-Le script [`Setup_release.sh`](Setups%20Linux/Setup_release.sh) prépare une instance autonome dans `~/RPI_LocalWebServer-release` :
-- **Installation des dépendances** : Installe `python3`, `venv` et `pip`.
-- **Environnement virtuel** : Crée un environnement virtuel dans le dossier de release pour isoler les dépendances Python, puis installe `Flask`, `gunicorn`, etc. via `requirements.txt`.
-- **Base de données** : Exécute `scripts/init_db.py --force --admin-identifiant <id>` pour générer une base propre dans `instance/armoire.db`. Aucun fichier utilisateur n'est copié.
-- **Création du service `armoire-release-<user>.service`** : Le service `systemd` lance l'application via Gunicorn sur le port 5000 (IPv4 et IPv6) et redémarre automatiquement en cas de crash.
-- **Activation du service** : Le service est activé pour se lancer automatiquement à chaque démarrage (`systemctl enable armoire`).
+### Développement local
 
-### 2. Lancement automatique de Firefox en mode Kiosque
+**Prérequis :** Python 3.8+, Git
 
-Le script [`Firefox_autostart.sh`](Setups%20Linux/Firefox_autostart.sh) crée un service `systemd --user` qui attend le démarrage du service web, puis lance Firefox en mode kiosque sur `http://127.0.0.1:5000`. Le script accepte désormais des variables d'environnement (`TARGET_USER`, `APP_SERVICE_NAME`, `FIREFOX_ARGS`, etc.) pour l'adapter facilement à n'importe quel compte sans éditer le fichier.
+```bash
+# 1. Cloner le dépôt
+git clone https://github.com/AmelienLS/RPI_LocalWebServer.git
+cd RPI_LocalWebServer
 
-Grâce à cette configuration, la Raspberry Pi devient un terminal dédié à l'application : au démarrage, le serveur web se lance en arrière-plan, puis le navigateur s'ouvre automatiquement en plein écran sur l'interface.
+# 2. Créer et activer l'environnement virtuel
+python -m venv .venv
+source .venv/bin/activate        # Windows : .venv\Scripts\activate
 
-## Comment Lancer le Projet (usage générique)
+# 3. Installer les dépendances
+pip install -r requirements.txt
 
-1. **Installer les dépendances**
-   ```bash
-   python -m venv .venv
-   source .venv/bin/activate            # Windows : .venv\Scripts\activate
-   pip install -r requirements.txt
-   ```
-2. **Initialiser la base**
-   ```bash
-   python scripts/init_db.py --force --admin-identifiant admin
-   ```
-   Vous pouvez passer vos propres noms/prénoms ou l’option `--skip-admin`.
-3. **Démarrer l’application**
-   ```bash
-   export APP_AUTO_OPEN_BROWSER=1        # Optionnel
-   python APP.py                         # ou: flask --app APP run
-   ```
-   Les variables `APP_HOST` et `APP_PORT` permettent d’exposer l’application sur une IP différente (`APP_HOST=0.0.0.0` pour accepter les connexions réseau).
-4. **Arrêter le serveur**  
-   Appuyez sur `Ctrl+C` dans le terminal ou arrêtez le service systemd / la tâche planifiée suivant votre environnement.
+# 4. Créer la base de données
+python scripts/init_db.py --force --admin-identifiant admin
 
-## Création d'un exécutable Windows
-Pour faciliter le déploiement sur un nouvel ordinateur, un script `build_exe.bat`
-est fourni dans le dossier `Setups Windows`. Il utilise **PyInstaller** pour
-générer un programme autonome contenant l'application et toutes ses ressources.
+# 5. Lancer l'application
+python APP.py
+```
 
-### Étapes pour générer l'exécutable
-1. Installer Python sur la machine cible et s'assurer que la commande `python`
-   est accessible.
-2. Installer PyInstaller :
-   ```cmd
-   pip install pyinstaller
-   ```
-3. Depuis une invite de commandes, exécuter le script :
-   ```cmd
-   Setups Windows\build_exe.bat
-   ```
-4. L'exécutable sera créé dans le dossier `dist\APP\APP.exe`. Copiez ce
-   dossier sur la machine souhaitée puis lancez `APP.exe` pour démarrer le
-   serveur.
+L'application est accessible sur [http://127.0.0.1:5000](http://127.0.0.1:5000).
 
-## Contribuer
+Pour l'exposer sur le réseau local :
+```bash
+APP_HOST=0.0.0.0 python APP.py
+```
 
-Les contributions sont les bienvenues ! Merci de consulter le fichier [CONTRIBUTING.md](CONTRIBUTING.md) pour connaître les bonnes pratiques et le processus de soumission.
+#### Configuration de la base de données via l'interface web
+
+Si aucune base n'est configurée, le serveur redirige automatiquement vers `/setup`. Cette page permet :
+- de saisir le chemin vers une base existante,
+- de créer une nouvelle base vide (bouton **Nouvelle BDD**),
+- d'arrêter la machine (bouton **Éteindre**).
+
+Le chemin est persisté dans `instance/config.ini` (ignoré par Git).
+
+---
+
+### Déploiement Linux / Raspberry Pi
+
+**Prérequis :** Ubuntu, Fedora ou Silverblue avec accès Internet et `sudo`.
+
+#### Installation complète (une seule commande)
+
+```bash
+bash <(curl -fsSL https://raw.githubusercontent.com/AmelienLS/RPI_LocalWebServer/Release/Setups%20Linux/demarrage_release.sh)
+```
+
+Ou après avoir copié le script sur la machine :
+
+```bash
+bash "Setups Linux/demarrage_release.sh"
+```
+
+Ce script :
+1. Installe Python 3, `venv` et Git si absents (détecte Ubuntu/Fedora/Silverblue)
+2. Clone la branche `Release` dans `~/RPI_LocalWebServer-Release`
+3. Crée l'environnement virtuel et installe les dépendances
+4. Initialise la base de données avec un compte `admin` par défaut
+5. Crée et active un service **systemd** `armoire-release-<user>.service` (redémarre automatiquement, démarre au boot)
+6. Lance Firefox en mode kiosque sur `http://127.0.0.1:5000` via un service systemd utilisateur
+
+#### Commandes courantes sur Linux
+
+```bash
+# Lancer le serveur (venv déjà installé)
+bash "Setups Linux/lancer.sh"
+
+# Arrêter proprement le service
+bash "Setups Linux/arreter.sh"
+
+# Désinstaller complètement
+bash "Setups Linux/purge.sh"
+
+# Gérer le service systemd manuellement
+systemctl status armoire-release-<user>.service
+systemctl restart armoire-release-<user>.service
+journalctl -u armoire-release-<user>.service -f
+```
+
+---
+
+### Déploiement Windows
+
+**Prérequis :** Python 3 et Git installés et accessibles dans le PATH.
+
+#### Installation complète
+
+Double-cliquer sur `Setups Windows/Démarrage.bat` ou l'exécuter depuis une invite de commandes :
+
+```cmd
+"Setups Windows\Démarrage.bat"
+```
+
+Ce script :
+1. Vérifie la présence de Python et Git
+2. Clone ou met à jour le dépôt dans `%USERPROFILE%\RPI_LocalWebServer-Release`
+3. Crée l'environnement virtuel et installe les dépendances
+4. Lance le serveur Waitress
+5. Ouvre automatiquement le navigateur après 3 secondes
+
+#### Lancement rapide (après installation)
+
+Depuis la racine du projet :
+```cmd
+run.bat
+```
+
+Ou depuis le dossier `Setups Windows` :
+```cmd
+"Setups Windows\Lancer.bat"
+```
+
+#### Autres scripts Windows
+
+```cmd
+"Setups Windows\Stop.bat"    # Arrêter le serveur
+"Setups Windows\Purge.bat"   # Désinstaller complètement
+```
+
+---
+
+## Référence des routes
+
+| Route | Méthode | Accès | Description |
+|---|---|---|---|
+| `/` | GET / POST | Public | Page de connexion |
+| `/setup` | GET / POST | Public | Configuration du chemin de la BDD |
+| `/setup/init_db` | POST | Public | Créer/réinitialiser la BDD depuis `schema.sql` |
+| `/logout` | GET | Connecté | Déconnexion |
+| `/index` | GET | Connecté | Page d'accueil avec menu d'actions |
+| `/ecran` | GET | Connecté | Tableau de toutes les sérigraphies (filtres temps réel) |
+| `/prendre` | GET / POST | Connecté | Marquer un écran comme sorti |
+| `/ranger` | GET / POST | Connecté | Marquer un écran comme rangé |
+| `/laver` | POST | Connecté | Marquer un écran comme lavé |
+| `/close_db` | GET | Connecté | Fermer la session (rotation d'écran tactile) |
+| `/ajouter` | GET / POST | Admin | Ajouter un écran |
+| `/ajouterU` | GET / POST | Admin | Ajouter un utilisateur |
+| `/modifier` | GET / POST | Admin | Modifier un écran |
+| `/supprimer` | GET / POST | Admin | Supprimer un écran |
+| `/stats` | GET | Admin | Statistiques d'utilisation |
+| `/export_serigraphie` | GET | Admin | Télécharger le catalogue en `.xlsx` |
+| `/import_serigraphie` | POST | Admin | Importer un fichier CSV/XLSX |
+| `/import_serigraphie/confirm` | POST | Admin | Confirmer la résolution des conflits d'import |
+| `/export_logs` | GET | Admin | Télécharger tous les journaux CSV en `.zip` |
+| `/purge_logs` | POST | Admin | Exporter puis supprimer tous les journaux CSV |
+| `/shutdown` | POST | Public | Arrêter le système (Linux) ou le serveur (Windows) |
+| `/Functions/<fichier>` | GET | Public | Fichiers JavaScript statiques |
+| `/Images/<fichier>` | GET | Public | Images statiques |
+
+---
 
 ## Tests
 
-Le dépôt embarque plusieurs suites automatisées :
+Le projet dispose de trois suites de tests indépendantes.
 
-- **Tests Flask/SQLite** : scripts, routes et workflows critiques vérifiés avec [pytest](https://docs.pytest.org/).  
-  ```bash
-  python -m venv .venv
-  source .venv/bin/activate            # Windows : .venv\Scripts\activate
-  pip install -r requirements.txt
-  pytest
-  ```
-- **Tests CLI et schéma** : `pytest` exécute aussi `scripts/init_db.py` dans un dossier temporaire et contrôle les contraintes définies dans `database/schema.sql`.
-- **Tests JavaScript** : le filtrage du tableau (`Functions/Ecran.js`) est validé avec [Vitest](https://vitest.dev/) et JSDOM dans `tests/js`.  
-  ```bash
-  cd tests/js
-  npm install
-  npm test
-  ```
+### Tests Python (pytest)
 
-Des marqueurs Pytest (`tests/web`, `tests/db`, `tests/scripts`) permettent de cibler une zone précise si besoin (`pytest tests/web -q`).
+Couvrent les routes Flask, le schéma SQLite, le script `init_db.py`, les journaux, le shutdown et la configuration de la BDD.
+
+```bash
+# Depuis la racine du projet (venv activé)
+pytest
+
+# Cibler un sous-dossier
+pytest tests/web -q
+pytest tests/db -q
+pytest tests/system -q
+pytest tests/scripts -q
+```
+
+**Fixtures disponibles dans `tests/conftest.py` :**
+
+| Fixture | Description |
+|---|---|
+| `test_db` | BDD SQLite temporaire en mémoire initialisée depuis `schema.sql` |
+| `app` | Application Flask configurée pour les tests |
+| `client` | Client HTTP de test Flask |
+| `set_user_session` | Injecte une session utilisateur ou admin |
+| `add_user` | Insère un utilisateur dans la BDD de test |
+| `add_serigraphie` | Insère un écran dans la BDD de test |
+
+### Tests JavaScript (Vitest)
+
+Couvrent la logique de filtrage du tableau ([Functions/Ecran.js](Functions/Ecran.js)).
+
+```bash
+cd tests/js
+npm install
+npm test
+```
+
+---
+
+## Conseils de maintenance
+
+### Ajouter un champ à la table `serigraphie`
+
+1. Modifier [database/schema.sql](database/schema.sql)
+2. Mettre à jour toutes les routes concernées dans [APP.py](APP.py) (INSERT, UPDATE, SELECT)
+3. Mettre à jour les templates HTML correspondants ([Templates/ajouter.html](Templates/ajouter.html), [Templates/modifier.html](Templates/modifier.html), [Templates/ecran.html](Templates/ecran.html))
+4. Réinitialiser la base avec `python scripts/init_db.py --force`
+5. Mettre à jour les tests dans `tests/db/` et `tests/web/`
+
+### Ajouter un utilisateur sans interface
+
+```bash
+# Via SQLite en ligne de commande
+sqlite3 instance/armoire.db \
+  "INSERT INTO users (nom, prenom, identifiant, admin) VALUES ('Dupont', 'Jean', 'jdupont', 0);"
+```
+
+### Lire la base de données
+
+- **DB Browser for SQLite** (interface graphique, multiplateforme)
+- **Extension VSCode** : SQLite3 Editor
+- **Ligne de commande** : `sqlite3 instance/armoire.db`
+
+### Sécurité
+
+- La clé `FLASK_SECRET_KEY` doit être définie en variable d'environnement en production (sinon une clé aléatoire est générée à chaque démarrage, invalidant toutes les sessions).
+- Les requêtes SQL utilisent des paramètres liés (`?`) pour prévenir les injections SQL.
+- L'endpoint `/shutdown` est accessible sans authentification : assurez-vous que l'application n'est pas exposée sur Internet (`APP_HOST=127.0.0.1` par défaut).
+- En production, utilisez Gunicorn (Linux) ou Waitress (Windows) et non le serveur de développement Flask.
+
+### Journaux CSV
+
+Les fichiers `JJ-MM-AAAA.csv` dans `instance/logs/` sont des **vues générées** de la table `sortie_logs`. Ils peuvent être supprimés ou archivés sans perte de données : l'application les recrée automatiquement depuis la BDD à la prochaine manipulation.
+
+Pour changer l'emplacement des journaux (partage réseau, clé USB…) :
+```bash
+APP_LOGS_DIR=/mnt/partage/logs python APP.py
+```
+
+---
+
+## Continuité du projet (fork)
+
+Si vous reprenez ce projet sur un nouveau dépôt, modifiez les éléments suivants :
+
+### 1. Scripts de déploiement Linux
+
+- **`Setups Linux/demarrage_release.sh`** : modifier la variable `Documentation=` dans la section `[Unit]` du service systemd (ligne ~235) et toute référence à l'URL du dépôt.
+
+### 2. Scripts de déploiement Windows
+
+- **`Setups Windows/Démarrage.bat`** : modifier la ligne `set "REPO_URL=https://github.com/AmelienLS/RPI_LocalWebServer.git"`
+- **`Setups Windows/DémarrageTest.bat`** : idem
+- Vérifier toutes les références au dossier `RPI_LocalWebServer-Release` si vous souhaitez le renommer.
+
+### 3. Documentation
+
+- Mettre à jour les liens dans ce fichier `README.md`
+- Mettre à jour `CONTRIBUTING.md`
+- Ajouter une entrée dans `CHANGELOG.md`
+
+### 4. Recherche globale
+
+```bash
+grep -r "AmelienLS/RPI_LocalWebServer" .
+```
+
+---
+
+## Contribuer
+
+Consultez [CONTRIBUTING.md](CONTRIBUTING.md) pour les conventions de commit, le processus de PR et les règles de versionnement.
+
+---
 
 ## Licence
 
-Ce projet est distribué sous la licence MIT. Voir le fichier [LICENSE](LICENSE) pour plus d'informations.
+Distribué sous la licence MIT. Voir [LICENSE](LICENSE).
+
+---
 
 ## Historique des versions
 
-Les changements notables de chaque version sont documentés dans le fichier [CHANGELOG.md](CHANGELOG.md).
+Les changements notables de chaque version sont documentés dans [CHANGELOG.md](CHANGELOG.md).
