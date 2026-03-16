@@ -1,4 +1,11 @@
 # Journal des modifications
+## [3.10.1] - 2026-03-16
+> Commit : `refactor(windows): centralize setup scripts config in config.bat`
+### Ajouté
+- `Setups Windows/config.bat` : nouveau fichier de configuration centralisée pour tous les scripts Windows (`PROJECT_DIR`, `REPO_URL`, `VENV_DIR`).
+### Modifié
+- `Setups Windows/Démarrage.bat`, `DémarrageTest.bat`, `Lancer.bat` et `Purge.bat` : les déclarations de variables en dur sont remplacées par `call "%~dp0config.bat"`. Modifier uniquement `config.bat` suffit désormais pour adapter l'installation.
+
 ## [3.10.0] - 2026-03-16
 > Commit : `feat(config): add dotenv environment file support`
 ### Ajouté

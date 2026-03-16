@@ -2,10 +2,8 @@
 chcp 65001 >nul
 setlocal
 
-:: Variables
-set "PROJECT_DIR=%USERPROFILE%\RPI_LocalWebServer-Release"
-set "REPO_URL=https://github.com/AmelienLS/RPI_LocalWebServer.git"
-set "VENV_DIR=%PROJECT_DIR%\venv"
+:: Variables (centralisées dans config.bat)
+call "%~dp0config.bat"
 
 cls
 echo [i] Déploiement de l'application locale...

@@ -28,8 +28,8 @@ if /i not "%CONFIRM%"=="o" (
 echo.
 echo [i] Suppression en cours...
 
-:: Variables
-set "PROJECT_DIR=%USERPROFILE%\RPI_LocalWebServer-Release"
+:: Variables (PROJECT_DIR centralisé dans config.bat)
+call "%~dp0config.bat"
 set "SERVICE_NAME=armoire_server"
 set "EDGE_SHORTCUT_PATH=%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup\Edge Kiosk (Local App).lnk"
 

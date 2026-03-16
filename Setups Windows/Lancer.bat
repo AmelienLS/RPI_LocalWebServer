@@ -2,8 +2,8 @@
 chcp 65001 >nul
 setlocal
 
-set "PROJECT_DIR=%USERPROFILE%\RPI_LocalWebServer-Release"
-set "VENV_DIR=%PROJECT_DIR%\venv"
+:: Variables (centralisées dans config.bat)
+call "%~dp0config.bat"
 
 cls
 echo [i] Lancement de l'application...

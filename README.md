@@ -2,7 +2,7 @@
 
 Application web développée avec Flask pour gérer des **écrans de sérigraphies** dans un atelier. Elle permet de suivre l'état des écrans (sorti / rangé / à laver), d'administrer les utilisateurs, de tracer toutes les manipulations dans des journaux CSV quotidiens, et de se déployer facilement sur une Raspberry Pi ou une machine Windows.
 
-**Version actuelle : 3.10.0**
+**Version actuelle : 3.10.1**
 
 ---
 
@@ -494,9 +494,7 @@ Si vous reprenez ce projet sur un nouveau dépôt, modifiez les éléments suiva
 
 ### 2. Scripts de déploiement Windows
 
-- **`Setups Windows/Démarrage.bat`** : modifier la ligne `set "REPO_URL=https://github.com/AmelienLS/RPI_LocalWebServer.git"`
-- **`Setups Windows/DémarrageTest.bat`** : idem
-- Vérifier toutes les références au dossier `RPI_LocalWebServer-Release` si vous souhaitez le renommer.
+- **`Setups Windows/config.bat`** : modifier `REPO_URL` et `PROJECT_DIR` — **c'est le seul fichier à changer**, tous les autres scripts l'appellent automatiquement.
 
 ### 3. Documentation
 
