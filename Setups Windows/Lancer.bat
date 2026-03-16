@@ -15,6 +15,13 @@ if not exist "%VENV_DIR%\Scripts\activate.bat" (
     pause & exit /b 1
 )
 
+if not exist "%PROJECT_DIR%\.env" (
+    echo [!] Aucun fichier .env ^— configuration par defaut utilisee.
+    echo     Copiez .env.production pour personnaliser :
+    echo     copy "%PROJECT_DIR%\.env.production" "%PROJECT_DIR%\.env"
+    echo.
+)
+
 call "%VENV_DIR%\Scripts\activate.bat"
 
 echo [^>^>^>] Démarrage du serveur...

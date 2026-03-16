@@ -18,6 +18,12 @@ VENV_DIR="$PROJECT_DIR/.venv"
 APP_HOST="${APP_HOST:-0.0.0.0}"
 APP_PORT="${APP_PORT:-5000}"
 
+if [[ ! -f "$PROJECT_DIR/.env" ]]; then
+    printf '\033[33m[!]\033[0m Aucun fichier .env — configuration par défaut utilisée.\n'
+    printf '    Copiez .env.production pour personnaliser : cp "%s/.env.production" "%s/.env"\n' "$PROJECT_DIR" "$PROJECT_DIR"
+    printf '\n'
+fi
+
 if [[ ! -f "$VENV_DIR/bin/gunicorn" ]]; then
     printf '\033[31m[✗]\033[0m Environnement virtuel introuvable : %s\n' "$VENV_DIR" >&2
     printf '    Lancez d'"'"'abord demarrage_release.sh pour installer l'"'"'application.\n' >&2

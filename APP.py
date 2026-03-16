@@ -15,8 +15,12 @@ from io import BytesIO
 
 import openpyxl
 from pathlib import Path
+from dotenv import load_dotenv
 
 from flask import Flask, redirect, render_template, request, send_file, send_from_directory, session
+
+# Chargement des variables d'environnement depuis .env (si présent, sans écraser les vars déjà définies)
+load_dotenv(Path(__file__).resolve().parent / ".env", override=False)
 
 # Répertoires de base
 BASE_DIR = Path(__file__).resolve().parent

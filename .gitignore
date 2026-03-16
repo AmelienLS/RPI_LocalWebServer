@@ -8,9 +8,11 @@ instance/config.ini
 
 # Environments
 venv/
-.env
 .venv/
 .vscode/
+.env
+.env.*
+!.env.example
 
 # OS / tools
 .DS_Store

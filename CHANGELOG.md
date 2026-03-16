@@ -1,4 +1,18 @@
 # Journal des modifications
+## [3.10.0] - 2026-03-16
+> Commit : `feat(config): add dotenv environment file support`
+### Ajouté
+- Support des fichiers `.env` via `python-dotenv` : `APP.py` charge automatiquement `.env` à la racine du projet au démarrage, sans écraser les variables déjà définies dans le shell.
+- `.env.example` (versionné) : template documenté listant toutes les variables d'environnement disponibles (`APP_INSTANCE_DIR`, `DATABASE_PATH`, `APP_LOGS_DIR`, `APP_HOST`, `APP_PORT`, `FLASK_DEBUG`, `FLASK_SECRET_KEY`, `APP_AUTO_OPEN_BROWSER`, `APP_BROWSER_URL`, `APP_BROWSER_CMD`) avec leurs valeurs par défaut.
+- `.env.development` : configuration prête à l'emploi pour le développement local (debug activé, ouverture auto du navigateur).
+- `.env.production` : configuration prête à l'emploi pour le déploiement sur Raspberry Pi / serveur Linux (écoute réseau, debug désactivé).
+- `.gitignore` mis à jour pour ignorer `.env` et `.env.*` tout en versionnant `.env.example`.
+- `python-dotenv` ajouté à `requirements.txt`.
+- `Setups Linux/demarrage_release.sh` et `demarrage_branche.sh` : ajout d'une étape `setup_env()` qui crée automatiquement `.env` depuis `.env.production` lors de la première installation, avec rappel pour définir `FLASK_SECRET_KEY`.
+- `Setups Linux/lancer.sh` : avertissement affiché au démarrage si aucun fichier `.env` n'est présent.
+- `Setups Windows/Démarrage.bat` et `DémarrageTest.bat` : ajout d'une étape de vérification/création du `.env` depuis `.env.production` lors du déploiement.
+- `Setups Windows/Lancer.bat` : avertissement affiché si aucun fichier `.env` n'est présent.
+
 ## [3.9.0] - 2026-02-27
 > Commit : `feat(setup): add new DB and shutdown buttons to setup page`
 ### Ajouté
