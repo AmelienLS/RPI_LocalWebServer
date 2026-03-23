@@ -14,3 +14,4 @@
 set "PROJECT_DIR=%USERPROFILE%\RPI_LocalWebServer-Release"
 set "REPO_URL=https://github.com/AmelienLS/RPI_LocalWebServer.git"
 set "VENV_DIR=%PROJECT_DIR%\venv"
+ 
