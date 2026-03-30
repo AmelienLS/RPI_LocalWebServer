@@ -167,6 +167,48 @@ def test_purge_logs_exports_and_deletes(client, set_user_session):
         assert "02-03-2024.csv" in archive.namelist()
 
 
+def test_prendre_suffix_match_single(client, add_serigraphie, test_db, set_user_session):
+    """Typing the last characters of a ref_ecran should find the screen."""
+    add_serigraphie(ref_ecran=50100, n="070", sorti=0)
+    set_user_session(prenom="Bob")
+
+    # Only type the last 3 digits
+    response = client.post("/prendre", data={"ref_ecran": "100"})
+    assert response.status_code == 200
+    assert b"pris avec" in response.data
+
+    with sqlite3.connect(test_db) as connection:
+        cursor = connection.execute(
+            "SELECT sorti FROM serigraphie WHERE ref_ecran = ?", (50100,)
+        )
+        (sorti,) = cursor.fetchone()
+    assert sorti == 1
+
+
+def test_prendre_suffix_match_multiple(client, add_serigraphie, set_user_session):
+    """When multiple screens match a suffix, show disambiguation message."""
+    add_serigraphie(ref_ecran=10200, n="071", sorti=0)
+    add_serigraphie(ref_ecran=20200, n="072", sorti=0)
+    set_user_session(prenom="Bob")
+
+    response = client.post("/prendre", data={"ref_ecran": "200"})
+    assert response.status_code == 200
+    html = response.data.decode("utf-8")
+    assert "Plusieurs" in html
+    assert "10200" in html
+    assert "20200" in html
+
+
+def test_prendre_suffix_match_none(client, add_serigraphie, set_user_session):
+    """When no screen matches the suffix, show error."""
+    add_serigraphie(ref_ecran=99999, n="073", sorti=0)
+    set_user_session(prenom="Bob")
+
+    response = client.post("/prendre", data={"ref_ecran": "00000"})
+    assert response.status_code == 200
+    assert "non trouv" in response.data.decode("utf-8")
+
+
 def test_ranger_displays_error_for_unknown_reference(client, set_user_session):
     set_user_session(prenom="Bob")
 

@@ -1,4 +1,9 @@
 # Journal des modifications
+## [3.11.0] - 2026-03-30
+> Commit : `feat(prendre): allow partial suffix match on screen reference`
+### Ajouté
+- Recherche par suffixe dans `/prendre` : l'utilisateur peut saisir uniquement les derniers caractères d'une référence écran pour la retrouver. Si plusieurs écrans correspondent, un message de désambiguïsation liste les références trouvées.
+
 ## [3.10.1] - 2026-03-16
 > Commit : `refactor(windows): centralize setup scripts config in config.bat`
 ### Ajouté
