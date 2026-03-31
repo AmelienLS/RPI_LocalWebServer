@@ -244,6 +244,10 @@ until curl -s --max-time 2 "\$APP_URL" > /dev/null 2>&1; do
     sleep 1
 done
 
+# Activer l'accessibilité GTK pour qu'onboard détecte les champs texte
+export GNOME_ACCESSIBILITY=1
+export GTK_MODULES=gail:atk-bridge
+
 # Lancer Firefox en mode kiosque
 exec "\$FIREFOX_CMD" --kiosk "\$APP_URL"
 EOF
