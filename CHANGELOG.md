@@ -1,4 +1,11 @@
 # Journal des modifications
+## [3.13.3] - 2026-03-31
+> Commit : `fix(ui): harmonize screen location style across prendre and ranger`
+### Modifié
+- `Styles/common.css` : ajout de la classe `.n-value` (texte vert `#4CAF50`, sans fond) pour l'affichage de l'emplacement d'un écran.
+- `Styles/prendre.css` : suppression du doublon `.n-value` désormais défini dans `common.css`.
+- `Templates/ranger.html` : classe `success-message` remplacée par `n-value` sur le paragraphe d'emplacement.
+
 ## [3.13.2] - 2026-03-31
 > Commit : `fix(prendre): show screen location when already taken`
 ### Corrigé

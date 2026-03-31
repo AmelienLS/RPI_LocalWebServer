@@ -141,3 +141,12 @@ button:hover {
     background-color: #FFC107;
     color: #191B2A;
 }
+
+/* --- Emplacement d'un écran --- */
+.n-value {
+    color: #4CAF50;
+    background-color: transparent;
+    font-size: 1rem;
+    text-align: center;
+    margin-top: 1rem;
+}
