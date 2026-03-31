@@ -10,10 +10,17 @@
     var target  = null;
     var shifted = false;
     var kb      = null;
+    var display = null;
 
     function buildKeyboard() {
         kb = document.createElement('div');
         kb.id = 'vkeyboard';
+
+        // Barre d'affichage de la saisie en cours
+        display = document.createElement('div');
+        display.id = 'vkb-display';
+        display.setAttribute('aria-live', 'polite');
+        kb.appendChild(display);
 
         ROWS.forEach(function (row) {
             var rowDiv = document.createElement('div');
@@ -21,8 +28,8 @@
 
             row.forEach(function (label) {
                 var btn = document.createElement('button');
-                btn.type      = 'button';
-                btn.className = 'vkb-key';
+                btn.type        = 'button';
+                btn.className   = 'vkb-key';
                 btn.textContent = label;
 
                 if (label === '<--' || label === 'OK' || label === 'MAJ') {
@@ -31,8 +38,8 @@
                     btn.className += ' vkb-space';
                 }
 
-                btn.addEventListener('mousedown',  onKey, false);
-                btn.addEventListener('touchstart',  onKey, { passive: false });
+                btn.addEventListener('mousedown', onKey, false);
+                btn.addEventListener('touchstart', onKey, { passive: false });
                 rowDiv.appendChild(btn);
             });
 
@@ -40,6 +47,13 @@
         });
 
         document.body.appendChild(kb);
+    }
+
+    function updateDisplay() {
+        if (!display) return;
+        var label = target && target.placeholder ? target.placeholder : '';
+        var value = target ? target.value : '';
+        display.textContent = (label ? label + ' : ' : '') + (value || '...');
     }
 
     function onKey(e) {
@@ -53,6 +67,7 @@
             hide();
             var form = target && target.closest('form');
             if (form) form.requestSubmit ? form.requestSubmit() : form.submit();
+            return;
 
         } else if (label === 'MAJ') {
             shifted = !shifted;
@@ -67,12 +82,12 @@
         }
 
         if (target) target.dispatchEvent(new Event('input', { bubbles: true }));
+        updateDisplay();
     }
 
     function updateShift() {
         if (!kb) return;
-        var keys = kb.querySelectorAll('.vkb-key');
-        keys.forEach(function (btn) {
+        kb.querySelectorAll('.vkb-key').forEach(function (btn) {
             var t = btn.textContent;
             if (t.length === 1 && t !== ' ' && t !== '-' && t !== '_') {
                 btn.textContent = shifted ? t.toUpperCase() : t.toLowerCase();
@@ -91,6 +106,7 @@
         target = input;
         if (!kb) buildKeyboard();
         kb.style.display = 'block';
+        updateDisplay();
         input.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
 
@@ -100,19 +116,17 @@
     }
 
     document.addEventListener('focusin', function (e) {
-        var el = e.target;
-        var tag  = el.tagName;
+        var el   = e.target;
         var type = (el.type || '').toLowerCase();
-        if (tag === 'INPUT' && (type === 'text' || type === 'search' || type === '')) {
+        if (el.tagName === 'INPUT' && (type === 'text' || type === 'search' || type === '')) {
             show(el);
         }
     });
 
     document.addEventListener('focusout', function (e) {
-        var el = e.target;
-        var tag  = el.tagName;
+        var el   = e.target;
         var type = (el.type || '').toLowerCase();
-        if (tag === 'INPUT' && (type === 'text' || type === 'search' || type === '')) {
+        if (el.tagName === 'INPUT' && (type === 'text' || type === 'search' || type === '')) {
             setTimeout(function () {
                 if (kb && document.activeElement && kb.contains(document.activeElement)) return;
                 hide();

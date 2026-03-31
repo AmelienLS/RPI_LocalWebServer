@@ -1,3 +1,17 @@
+#vkb-display {
+    background: #1a1a1a;
+    color: #ffffff;
+    font-size: 22px;
+    font-family: monospace;
+    padding: 10px 16px;
+    border-bottom: 1px solid #444;
+    min-height: 44px;
+    letter-spacing: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
 #vkeyboard {
     display: none;
     position: fixed;
