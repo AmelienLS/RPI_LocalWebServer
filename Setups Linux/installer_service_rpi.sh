@@ -136,7 +136,7 @@ setup_env() {
 
     # Générer et fixer la FLASK_SECRET_KEY si absente ou vide
     local current_key
-    current_key="$(grep -E '^FLASK_SECRET_KEY=' "$env_file" | cut -d= -f2-)"
+    current_key="$(grep -E '^FLASK_SECRET_KEY=' "$env_file" 2>/dev/null | cut -d= -f2- || true)"
     if [[ -z "$current_key" ]]; then
         local new_key
         new_key="$(python3 -c 'import secrets; print(secrets.token_hex(32))')"
