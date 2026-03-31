@@ -2,7 +2,7 @@
 # ==============================================================================
 # installer_service_rpi.sh
 # Installe RPI_LocalWebServer comme service systemd sur Raspberry Pi OS,
-# avec mode kiosque : démarrage automatique du navigateur en plein écran.
+# avec mode kiosque : démarrage automatique de Firefox en plein écran.
 #
 # Compatible : Raspberry Pi OS Desktop (Bookworm / Bullseye)
 #
@@ -34,6 +34,7 @@ CURRENT_GROUP="$(id -gn)"
 AUTOSTART_DIR="$HOME/.config/autostart"
 KIOSK_SCRIPT="$PROJECT_DIR/Setups Linux/kiosk_browser.sh"
 KIOSK_DESKTOP="$AUTOSTART_DIR/${SERVICE_NAME}-kiosk.desktop"
+FIREFOX_CMD=""
 
 # ── Couleurs ───────────────────────────────────────────────────────────────────
 info()    { printf '\033[34m[i]\033[0m %s\n'   "$*"; }
@@ -48,29 +49,44 @@ check_systemd() {
         || die "systemd introuvable. Ce script nécessite Raspberry Pi OS ou une distribution Linux avec systemd."
 }
 
+# ── Détecter Firefox ───────────────────────────────────────────────────────────
+detect_firefox() {
+    if command -v firefox-esr >/dev/null 2>&1; then
+        FIREFOX_CMD="firefox-esr"
+    elif command -v firefox >/dev/null 2>&1; then
+        FIREFOX_CMD="firefox"
+    else
+        FIREFOX_CMD=""
+    fi
+}
+
 # ── Prérequis ──────────────────────────────────────────────────────────────────
 ensure_prerequisites() {
+    detect_firefox
     local missing=()
-    command -v python3          >/dev/null 2>&1 || missing+=("python3")
-    command -v git              >/dev/null 2>&1 || missing+=("git")
-    command -v curl             >/dev/null 2>&1 || missing+=("curl")
-    command -v chromium-browser >/dev/null 2>&1 || missing+=("chromium-browser")
-    python3 -m venv --help      >/dev/null 2>&1 || missing+=("python3-venv")
+    command -v python3 >/dev/null 2>&1 || missing+=("python3")
+    command -v git     >/dev/null 2>&1 || missing+=("git")
+    command -v curl    >/dev/null 2>&1 || missing+=("curl")
+    python3 -m venv --help >/dev/null 2>&1 || missing+=("python3-venv")
+    [[ -z "$FIREFOX_CMD" ]] && missing+=("firefox-esr")
 
     if [[ ${#missing[@]} -eq 0 ]]; then
-        ok "Prérequis OK"
+        ok "Prérequis OK (firefox : $FIREFOX_CMD)"
         return
     fi
 
     warn "Prérequis manquants : ${missing[*]}"
     info "Installation des prérequis via apt..."
     sudo apt-get update -qq
-    [[ " ${missing[*]} " == *" python3 "* ]]           && sudo apt-get install -y python3
-    [[ " ${missing[*]} " == *" python3-venv "* ]]      && sudo apt-get install -y python3-venv
-    [[ " ${missing[*]} " == *" git "* ]]               && sudo apt-get install -y git
-    [[ " ${missing[*]} " == *" curl "* ]]              && sudo apt-get install -y curl
-    [[ " ${missing[*]} " == *" chromium-browser "* ]]  && sudo apt-get install -y chromium-browser
+    [[ " ${missing[*]} " == *" python3 "* ]]      && sudo apt-get install -y python3
+    [[ " ${missing[*]} " == *" python3-venv "* ]] && sudo apt-get install -y python3-venv
+    [[ " ${missing[*]} " == *" git "* ]]          && sudo apt-get install -y git
+    [[ " ${missing[*]} " == *" curl "* ]]         && sudo apt-get install -y curl
+    [[ " ${missing[*]} " == *" firefox-esr "* ]]  && sudo apt-get install -y firefox-esr
     ok "Prérequis installés"
+
+    detect_firefox
+    [[ -z "$FIREFOX_CMD" ]] && die "Firefox introuvable après installation. Installez-le manuellement : sudo apt-get install -y firefox-esr"
 }
 
 # ── Synchronisation du dépôt ───────────────────────────────────────────────────
@@ -178,7 +194,6 @@ EOF
 setup_autologin() {
     info "Activation de l'auto-login pour $CURRENT_USER..."
 
-    # Raspberry Pi OS utilise lightdm ou raspi-config
     if command -v raspi-config >/dev/null 2>&1; then
         sudo raspi-config nonint do_boot_behaviour B4
         ok "Auto-login activé via raspi-config (démarrage en bureau sans mot de passe)"
@@ -188,7 +203,7 @@ setup_autologin() {
         ok "Auto-login activé via lightdm.conf"
     else
         warn "Impossible de configurer l'auto-login automatiquement."
-        warn "  → Configurez-le manuellement via : sudo raspi-config → System Options → Boot / Auto Login → Desktop Autologin"
+        warn "  → Configurez-le via : sudo raspi-config → System Options → Boot / Auto Login → Desktop Autologin"
     fi
 }
 
@@ -199,10 +214,11 @@ create_kiosk_script() {
     cat > "$KIOSK_SCRIPT" <<EOF
 #!/usr/bin/env bash
 # kiosk_browser.sh
-# Attend que le serveur Flask soit prêt puis ouvre Chromium en mode kiosque.
+# Attend que le serveur Flask soit prêt puis ouvre Firefox en mode kiosque.
 # Lancé automatiquement au démarrage du bureau via ~/.config/autostart/.
 
 APP_URL="http://127.0.0.1:${APP_PORT}"
+FIREFOX_CMD="${FIREFOX_CMD}"
 
 # Désactiver l'économiseur d'écran et la mise en veille
 xset s off
@@ -220,20 +236,12 @@ until curl -s --max-time 2 "\$APP_URL" > /dev/null 2>&1; do
     sleep 1
 done
 
-# Lancer Chromium en mode kiosque
-exec chromium-browser \
-    --kiosk \
-    --noerrdialogs \
-    --disable-infobars \
-    --no-first-run \
-    --disable-translate \
-    --disable-features=TranslateUI \
-    --check-for-update-interval=31536000 \
-    "\$APP_URL"
+# Lancer Firefox en mode kiosque
+exec "\$FIREFOX_CMD" --kiosk "\$APP_URL"
 EOF
 
     chmod +x "$KIOSK_SCRIPT"
-    ok "Script kiosque créé"
+    ok "Script kiosque créé (navigateur : $FIREFOX_CMD)"
 }
 
 # ── Entrée autostart bureau ────────────────────────────────────────────────────
@@ -264,7 +272,7 @@ print_summary() {
     printf '   Au prochain redémarrage :\n'
     printf '     1. La Raspberry Pi démarre directement sur le bureau (sans mot de passe)\n'
     printf '     2. Le serveur Flask démarre en arrière-plan\n'
-    printf '     3. Chromium s'"'"'ouvre automatiquement en plein écran sur l'"'"'application\n'
+    printf '     3. Firefox s'"'"'ouvre automatiquement en plein écran sur l'"'"'application\n'
     printf '\n'
     printf '   Accès depuis un autre appareil : \033[36mhttp://%s:%s\033[0m\n' "$local_ip" "$APP_PORT"
     printf '\n'
