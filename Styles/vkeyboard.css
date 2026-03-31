@@ -52,10 +52,6 @@
     transition: none;
 }
 
-.vkb-key:active,
-.vkb-key.vkb-pressed {
-    background: #666;
-}
 
 .vkb-wide {
     min-width: 80px;
