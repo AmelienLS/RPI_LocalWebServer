@@ -52,4 +52,4 @@ sudo -u "$TARGET_USER" systemctl --user daemon-reload
 sudo -u "$TARGET_USER" systemctl --user enable "$FIREFOX_SERVICE_NAME"
 sudo -u "$TARGET_USER" systemctl --user restart "$FIREFOX_SERVICE_NAME"
 
-echo "[✓] Firefox sera lancé automatiquement après le démarrage de $APP_SERVICE_NAME"
+echo "[OK] Firefox sera lance automatiquement apres le demarrage de $APP_SERVICE_NAME"

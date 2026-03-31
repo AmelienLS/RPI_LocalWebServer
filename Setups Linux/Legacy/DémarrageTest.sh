@@ -14,7 +14,7 @@ AUTO_OPEN_BROWSER="${AUTO_OPEN_BROWSER:-1}"
 
 info()  { printf '[i] %s\n' "$*"; }
 warn()  { printf '[!] %s\n' "$*" >&2; }
-error() { printf '[✘] %s\n' "$*" >&2; }
+error() { printf '[X] %s\n' "$*" >&2; }
 
 require_cmd() {
     if ! command -v "$1" >/dev/null 2>&1; then

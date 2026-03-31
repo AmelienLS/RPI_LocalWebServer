@@ -22,7 +22,7 @@ FIREFOX_SERVICE_FILE="/home/$USER_NAME/.config/systemd/user/$FIREFOX_SERVICE_NAM
 # --- Début de la purge ---
 
 # 1. Arrêter et désactiver les services
-echo "🛑 Arrêt et désactivation des services..."
+echo "[!] Arret et desactivation des services..."
 
 # Service de l'application (system)
 if systemctl is-active --quiet "$APP_SERVICE_NAME"; then

@@ -188,7 +188,7 @@ def test_confirm_keeps_unselected(client, set_user_session, add_serigraphie, tes
     conflicts_json = json.dumps([
         {"ref_ecran": "804", "libelle": "Nouveau libellé", "pcb": "", "fab": "AB", "n_fab": "", "type": "T1", "n": "001"}
     ])
-    # No "overwrite" field submitted → keep existing
+    # No "overwrite" field submitted -> keep existing
     response = client.post(
         "/import_serigraphie/confirm",
         data={"conflicts_json": conflicts_json},

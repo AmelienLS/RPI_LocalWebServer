@@ -20,7 +20,7 @@
 # ==============================================================================
 set -euo pipefail
 
-# ── Configuration ──────────────────────────────────────────────────────────────
+# -- Configuration --------------------------------------------------------------
 REPO_URL="https://github.com/AmelienLS/RPI_LocalWebServer.git"
 BRANCH="Release"
 PROJECT_DIR="${PROJECT_DIR:-$HOME/RPI_LocalWebServer}"
@@ -36,20 +36,20 @@ KIOSK_SCRIPT="$PROJECT_DIR/Setups Linux/kiosk_browser.sh"
 KIOSK_DESKTOP="$AUTOSTART_DIR/${SERVICE_NAME}-kiosk.desktop"
 FIREFOX_CMD=""
 
-# ── Couleurs ───────────────────────────────────────────────────────────────────
+# -- Couleurs -------------------------------------------------------------------
 info()    { printf '\033[34m[i]\033[0m %s\n'   "$*"; }
-ok()      { printf '\033[32m[✓]\033[0m %s\n'   "$*"; }
+ok()      { printf '\033[32m[OK]\033[0m %s\n'  "$*"; }
 warn()    { printf '\033[33m[!]\033[0m %s\n'   "$*" >&2; }
-die()     { printf '\033[31m[✗]\033[0m %s\n'   "$*" >&2; exit 1; }
+die()     { printf '\033[31m[X]\033[0m %s\n'   "$*" >&2; exit 1; }
 header()  { printf '\n\033[1m%s\033[0m\n\n'    "$*"; }
 
-# ── Vérifier systemd ───────────────────────────────────────────────────────────
+# -- Vérifier systemd -----------------------------------------------------------
 check_systemd() {
     command -v systemctl >/dev/null 2>&1 \
         || die "systemd introuvable. Ce script nécessite Raspberry Pi OS ou une distribution Linux avec systemd."
 }
 
-# ── Détecter Firefox ───────────────────────────────────────────────────────────
+# -- Détecter Firefox -----------------------------------------------------------
 detect_firefox() {
     if command -v firefox-esr >/dev/null 2>&1; then
         FIREFOX_CMD="firefox-esr"
@@ -60,7 +60,7 @@ detect_firefox() {
     fi
 }
 
-# ── Prérequis ──────────────────────────────────────────────────────────────────
+# -- Prérequis ------------------------------------------------------------------
 ensure_prerequisites() {
     detect_firefox
     local missing=()
@@ -89,7 +89,7 @@ ensure_prerequisites() {
     [[ -z "$FIREFOX_CMD" ]] && die "Firefox introuvable après installation. Installez-le manuellement : sudo apt-get install -y firefox-esr"
 }
 
-# ── Synchronisation du dépôt ───────────────────────────────────────────────────
+# -- Synchronisation du dépôt ---------------------------------------------------
 sync_repo() {
     if [[ -d "$PROJECT_DIR/.git" ]]; then
         info "Mise à jour du dépôt (branche $BRANCH)..."
@@ -106,7 +106,7 @@ sync_repo() {
     ok "Dépôt synchronisé sur la branche $BRANCH"
 }
 
-# ── Environnement virtuel ──────────────────────────────────────────────────────
+# -- Environnement virtuel ------------------------------------------------------
 setup_venv() {
     if [[ ! -d "$VENV_DIR" ]]; then
         info "Création de l'environnement virtuel..."
@@ -118,7 +118,7 @@ setup_venv() {
     ok "Dépendances installées"
 }
 
-# ── Configuration .env ─────────────────────────────────────────────────────────
+# -- Configuration .env ---------------------------------------------------------
 setup_env() {
     local env_file="$PROJECT_DIR/.env"
     if [[ -f "$env_file" ]]; then
@@ -128,15 +128,15 @@ setup_env() {
     if [[ -f "$PROJECT_DIR/.env.production" ]]; then
         cp "$PROJECT_DIR/.env.production" "$env_file"
         warn "Fichier .env créé depuis .env.production"
-        warn "  → Éditez FLASK_SECRET_KEY dans : $env_file"
-        warn "  → Générez une clé : python3 -c \"import secrets; print(secrets.token_hex(32))\""
+        warn "  -> Éditez FLASK_SECRET_KEY dans : $env_file"
+        warn "  -> Générez une clé : python3 -c \"import secrets; print(secrets.token_hex(32))\""
     else
         warn "Aucun fichier .env trouvé — valeurs par défaut utilisées"
-        warn "  → Voir .env.example pour la configuration disponible"
+        warn "  -> Voir .env.example pour la configuration disponible"
     fi
 }
 
-# ── Base de données ────────────────────────────────────────────────────────────
+# -- Base de données ------------------------------------------------------------
 init_db_if_needed() {
     local db_path="$PROJECT_DIR/instance/armoire.db"
     if [[ -f "$db_path" ]]; then
@@ -149,7 +149,7 @@ init_db_if_needed() {
     ok "Base de données initialisée (identifiant admin par défaut : admin)"
 }
 
-# ── Service systemd ────────────────────────────────────────────────────────────
+# -- Service systemd ------------------------------------------------------------
 install_service() {
     info "Création du service systemd : ${SERVICE_NAME}..."
 
@@ -190,7 +190,7 @@ EOF
     ok "Service systemd installé, activé et démarré"
 }
 
-# ── Auto-login bureau ──────────────────────────────────────────────────────────
+# -- Auto-login bureau ----------------------------------------------------------
 setup_autologin() {
     info "Activation de l'auto-login pour $CURRENT_USER..."
 
@@ -203,11 +203,11 @@ setup_autologin() {
         ok "Auto-login activé via lightdm.conf"
     else
         warn "Impossible de configurer l'auto-login automatiquement."
-        warn "  → Configurez-le via : sudo raspi-config → System Options → Boot / Auto Login → Desktop Autologin"
+        warn "  -> Configurez-le via : sudo raspi-config -> System Options -> Boot / Auto Login -> Desktop Autologin"
     fi
 }
 
-# ── Script de lancement du navigateur kiosque ─────────────────────────────────
+# -- Script de lancement du navigateur kiosque ---------------------------------
 create_kiosk_script() {
     info "Création du script kiosque : $KIOSK_SCRIPT"
 
@@ -244,7 +244,7 @@ EOF
     ok "Script kiosque créé (navigateur : $FIREFOX_CMD)"
 }
 
-# ── Entrée autostart bureau ────────────────────────────────────────────────────
+# -- Entrée autostart bureau ----------------------------------------------------
 create_autostart_entry() {
     info "Enregistrement dans l'autostart du bureau..."
 
@@ -261,7 +261,7 @@ EOF
     ok "Entrée autostart créée : $KIOSK_DESKTOP"
 }
 
-# ── Résumé final ───────────────────────────────────────────────────────────────
+# -- Résumé final ---------------------------------------------------------------
 print_summary() {
     local local_ip
     local_ip="$(hostname -I 2>/dev/null | awk '{print $1}')" || local_ip="localhost"
@@ -285,7 +285,7 @@ print_summary() {
     warn "Redémarrez la Raspberry Pi pour activer le mode kiosque : sudo reboot"
 }
 
-# ── Point d'entrée ─────────────────────────────────────────────────────────────
+# -- Point d'entrée -------------------------------------------------------------
 main() {
     header "=== RPI_LocalWebServer — Installation kiosque (Raspberry Pi OS) ==="
 

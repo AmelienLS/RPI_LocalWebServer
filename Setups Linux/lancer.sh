@@ -25,13 +25,13 @@ if [[ ! -f "$PROJECT_DIR/.env" ]]; then
 fi
 
 if [[ ! -f "$VENV_DIR/bin/gunicorn" ]]; then
-    printf '\033[31m[✗]\033[0m Environnement virtuel introuvable : %s\n' "$VENV_DIR" >&2
+    printf '\033[31m[X]\033[0m Environnement virtuel introuvable : %s\n' "$VENV_DIR" >&2
     printf '    Lancez d'"'"'abord demarrage_release.sh pour installer l'"'"'application.\n' >&2
     exit 1
 fi
 
 local_ip="$(hostname -I 2>/dev/null | awk '{print $1}')" || local_ip="localhost"
-printf '\033[32m[>>>]\033[0m Démarrage de l'"'"'application...\n'
+printf '\033[32m[>>]\033[0m Demarrage de l'"'"'application...\n'
 printf '    Locale  : \033[36mhttp://127.0.0.1:%s\033[0m\n' "$APP_PORT"
 printf '    Réseau  : \033[36mhttp://%s:%s\033[0m\n' "$local_ip" "$APP_PORT"
 printf '    Arrêt   : Ctrl+C\n\n'

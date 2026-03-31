@@ -20,19 +20,19 @@
 # ==============================================================================
 set -euo pipefail
 
-# ── Configuration ──────────────────────────────────────────────────────────────
+# -- Configuration --------------------------------------------------------------
 PROJECT_DIR="${PROJECT_DIR:-$HOME/RPI_LocalWebServer}"
 PID_FILE="$PROJECT_DIR/.gunicorn.pid"
 STOP_TIMEOUT="${STOP_TIMEOUT:-15}"
 
-# ── Couleurs ───────────────────────────────────────────────────────────────────
+# -- Couleurs -------------------------------------------------------------------
 info()   { printf '\033[34m[i]\033[0m %s\n' "$*"; }
-ok()     { printf '\033[32m[✓]\033[0m %s\n' "$*"; }
+ok()     { printf '\033[32m[OK]\033[0m %s\n' "$*"; }
 warn()   { printf '\033[33m[!]\033[0m %s\n' "$*" >&2; }
-die()    { printf '\033[31m[✗]\033[0m %s\n' "$*" >&2; exit 1; }
+die()    { printf '\033[31m[X]\033[0m %s\n' "$*" >&2; exit 1; }
 header() { printf '\n\033[1m%s\033[0m\n\n'  "$*"; }
 
-# ── Arrêt via fichier PID ──────────────────────────────────────────────────────
+# -- Arrêt via fichier PID ------------------------------------------------------
 stop_via_pid_file() {
     local pid
     pid="$(cat "$PID_FILE")"
@@ -70,7 +70,7 @@ stop_via_pid_file() {
     ok "Serveur arrêté"
 }
 
-# ── Arrêt par recherche de processus (fallback) ───────────────────────────────
+# -- Arrêt par recherche de processus (fallback) -------------------------------
 stop_via_pgrep() {
     local pids
     pids="$(pgrep -f "gunicorn.*wsgi:app" 2>/dev/null || true)"
@@ -101,7 +101,7 @@ stop_via_pgrep() {
     ok "Serveur arrêté"
 }
 
-# ── Point d'entrée ─────────────────────────────────────────────────────────────
+# -- Point d'entrée -------------------------------------------------------------
 main() {
     header "=== RPI_LocalWebServer — Arrêt du serveur ==="
 

@@ -19,7 +19,7 @@
 # ==============================================================================
 set -euo pipefail
 
-# ── Configuration ──────────────────────────────────────────────────────────────
+# -- Configuration --------------------------------------------------------------
 REPO_URL="https://github.com/AmelienLS/RPI_LocalWebServer.git"
 BRANCH="Release"
 PROJECT_DIR="${PROJECT_DIR:-$HOME/RPI_LocalWebServer}"
@@ -28,14 +28,14 @@ PID_FILE="$PROJECT_DIR/.gunicorn.pid"
 APP_HOST="${APP_HOST:-0.0.0.0}"
 APP_PORT="${APP_PORT:-5000}"
 
-# ── Couleurs ───────────────────────────────────────────────────────────────────
+# -- Couleurs -------------------------------------------------------------------
 info()    { printf '\033[34m[i]\033[0m %s\n'    "$*"; }
-ok()      { printf '\033[32m[✓]\033[0m %s\n'    "$*"; }
+ok()      { printf '\033[32m[OK]\033[0m %s\n'    "$*"; }
 warn()    { printf '\033[33m[!]\033[0m %s\n'    "$*" >&2; }
-die()     { printf '\033[31m[✗]\033[0m %s\n'    "$*" >&2; exit 1; }
+die()     { printf '\033[31m[X]\033[0m %s\n'    "$*" >&2; exit 1; }
 header()  { printf '\n\033[1m%s\033[0m\n\n'     "$*"; }
 
-# ── Détection de la distribution ───────────────────────────────────────────────
+# -- Détection de la distribution -----------------------------------------------
 detect_distro() {
     DISTRO_ID="unknown"
     DISTRO_VARIANT=""
@@ -53,7 +53,7 @@ is_immutable_fedora() {
         && [[ ! -f /run/.containerenv ]]   # false si on est dans un toolbox/distrobox
 }
 
-# ── Prérequis ──────────────────────────────────────────────────────────────────
+# -- Prérequis ------------------------------------------------------------------
 ensure_prerequisites() {
     local missing=()
     command -v python3 >/dev/null 2>&1 || missing+=("python3")
@@ -97,7 +97,7 @@ ensure_prerequisites() {
     ok "Prérequis installés"
 }
 
-# ── Synchronisation du dépôt ───────────────────────────────────────────────────
+# -- Synchronisation du dépôt ---------------------------------------------------
 sync_repo() {
     if [[ -d "$PROJECT_DIR/.git" ]]; then
         info "Mise à jour du dépôt (branche $BRANCH)..."
@@ -114,7 +114,7 @@ sync_repo() {
     ok "Dépôt synchronisé sur la branche $BRANCH"
 }
 
-# ── Environnement virtuel ──────────────────────────────────────────────────────
+# -- Environnement virtuel ------------------------------------------------------
 setup_venv() {
     if [[ ! -d "$VENV_DIR" ]]; then
         info "Création de l'environnement virtuel..."
@@ -127,7 +127,7 @@ setup_venv() {
     ok "Dépendances installées"
 }
 
-# ── Configuration .env ─────────────────────────────────────────────────────────
+# -- Configuration .env ---------------------------------------------------------
 setup_env() {
     local env_file="$PROJECT_DIR/.env"
     local env_template="$PROJECT_DIR/.env.production"
@@ -140,15 +140,15 @@ setup_env() {
     if [[ -f "$env_template" ]]; then
         cp "$env_template" "$env_file"
         warn "Fichier .env créé depuis .env.production"
-        warn "  → Éditez FLASK_SECRET_KEY dans : $env_file"
-        warn "  → Générez une clé : python3 -c \"import secrets; print(secrets.token_hex(32))\""
+        warn "  -> Éditez FLASK_SECRET_KEY dans : $env_file"
+        warn "  -> Générez une clé : python3 -c \"import secrets; print(secrets.token_hex(32))\""
     else
         warn "Aucun fichier .env trouvé — valeurs par défaut utilisées"
-        warn "  → Voir .env.example pour la configuration disponible"
+        warn "  -> Voir .env.example pour la configuration disponible"
     fi
 }
 
-# ── Base de données ────────────────────────────────────────────────────────────
+# -- Base de données ------------------------------------------------------------
 init_db_if_needed() {
     local db_path="$PROJECT_DIR/instance/armoire.db"
 
@@ -164,7 +164,7 @@ init_db_if_needed() {
     ok "Base de données initialisée (identifiant admin par défaut : admin)"
 }
 
-# ── Lancement du serveur ───────────────────────────────────────────────────────
+# -- Lancement du serveur -------------------------------------------------------
 start_server() {
     local local_ip
     local_ip="$(hostname -I 2>/dev/null | awk '{print $1}')" || local_ip="localhost"
@@ -187,7 +187,7 @@ start_server() {
         wsgi:app
 }
 
-# ── Point d'entrée ─────────────────────────────────────────────────────────────
+# -- Point d'entrée -------------------------------------------------------------
 main() {
     header "=== RPI_LocalWebServer — Branche Release ==="
 

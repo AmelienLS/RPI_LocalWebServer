@@ -379,7 +379,7 @@ def laver():
     """
     Marque un écran comme lavé.
     - Met à jour serigraphie.lave = 1.
-    - Met à jour la dernière entrée sortie_logs concernée (lavee 0 → 1).
+    - Met a jour la derniere entree sortie_logs concernee (lavee 0 -> 1).
     - Synchronise le CSV journalier correspondant.
     """
     if 'prenom' not in session:

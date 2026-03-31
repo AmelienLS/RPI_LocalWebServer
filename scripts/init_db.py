@@ -102,7 +102,7 @@ def main() -> int:
             print(f"[i] Ajout du compte administrateur par défaut '{args.admin_identifiant}'")
             create_default_admin(connection, args.admin_identifiant, args.admin_prenom, args.admin_nom)
 
-    print("[✓] Base de données initialisée avec succès.")
+    print("[OK] Base de donnees initialisee avec succes.")
     return 0
 
 

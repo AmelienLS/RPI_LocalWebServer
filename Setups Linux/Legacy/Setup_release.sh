@@ -42,7 +42,7 @@ log_error() {
 }
 
 log_warning() {
-    echo "⚠️  $*"
+    echo "[!]  $*"
 }
 
 # Fonction pour vérifier les prérequis
