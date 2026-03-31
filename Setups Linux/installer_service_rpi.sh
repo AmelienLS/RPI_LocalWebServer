@@ -69,6 +69,7 @@ ensure_prerequisites() {
     command -v curl    >/dev/null 2>&1 || missing+=("curl")
     python3 -m venv --help >/dev/null 2>&1 || missing+=("python3-venv")
     [[ -z "$FIREFOX_CMD" ]] && missing+=("firefox-esr")
+    command -v onboard >/dev/null 2>&1 || missing+=("onboard")
 
     if [[ ${#missing[@]} -eq 0 ]]; then
         ok "Prérequis OK (firefox : $FIREFOX_CMD)"
@@ -83,6 +84,7 @@ ensure_prerequisites() {
     [[ " ${missing[*]} " == *" git "* ]]          && sudo apt-get install -y git
     [[ " ${missing[*]} " == *" curl "* ]]         && sudo apt-get install -y curl
     [[ " ${missing[*]} " == *" firefox-esr "* ]]  && sudo apt-get install -y firefox-esr
+    [[ " ${missing[*]} " == *" onboard "* ]]      && sudo apt-get install -y onboard
     ok "Prérequis installés"
 
     detect_firefox
@@ -224,6 +226,13 @@ FIREFOX_CMD="${FIREFOX_CMD}"
 xset s off
 xset -dpms
 xset s noblank
+
+# Activer le clavier virtuel onboard (s'affiche automatiquement sur les champs texte)
+if command -v onboard >/dev/null 2>&1; then
+    gsettings set org.onboard auto-show-enabled true 2>/dev/null || true
+    gsettings set org.onboard schema-id "Compact"    2>/dev/null || true
+    onboard --size=800x250 --xid &
+fi
 
 # Attendre que le serveur réponde (max 60 secondes)
 ATTEMPTS=0

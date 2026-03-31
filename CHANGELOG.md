@@ -2,7 +2,7 @@
 ## [3.12.0] - 2026-03-31
 > Commit : `feat(linux): add kiosk installer for Raspberry Pi OS`
 ### Ajouté
-- `Setups Linux/installer_service_rpi.sh` : script d'installation tout-en-un pour Raspberry Pi OS en mode kiosque. Configure le service systemd `rpi-localwebserver.service` (Gunicorn, démarrage automatique au boot), active l'auto-login au bureau via `raspi-config` ou lightdm, génère `Setups Linux/kiosk_browser.sh` (attend que le serveur réponde puis ouvre Chromium en plein écran, désactive l'économiseur d'écran) et enregistre ce script dans `~/.config/autostart/` pour un lancement automatique à chaque démarrage du bureau.
+- `Setups Linux/installer_service_rpi.sh` : script d'installation tout-en-un pour Raspberry Pi OS en mode kiosque. Configure le service systemd `rpi-localwebserver.service` (Gunicorn, démarrage automatique au boot), active l'auto-login au bureau via `raspi-config` ou lightdm, génère `Setups Linux/kiosk_browser.sh` (attend que le serveur réponde puis ouvre Firefox en plein écran, désactive l'économiseur d'écran, lance `onboard` pour le clavier virtuel sur les champs texte) et enregistre ce script dans `~/.config/autostart/` pour un lancement automatique à chaque démarrage du bureau. Compatible `firefox-esr` et `firefox`. Installe automatiquement `onboard` si absent.
 
 ## [3.11.0] - 2026-03-30
 > Commit : `feat(prendre): allow partial suffix match on screen reference`
