@@ -27,8 +27,9 @@
             rowDiv.className = 'vkb-row';
 
             row.forEach(function (label) {
-                var btn = document.createElement('button');
-                btn.type        = 'button';
+                var btn = document.createElement('div');
+                btn.setAttribute('role', 'button');
+                btn.setAttribute('tabindex', '-1');
                 btn.className   = 'vkb-key';
                 btn.textContent = label;
 

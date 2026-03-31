@@ -50,14 +50,6 @@
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
     transition: none;
-    -webkit-appearance: none;
-    appearance: none;
-}
-
-.vkb-key:active,
-.vkb-key:focus {
-    background: #4a4a4a;
-    outline: none;
 }
 
 
