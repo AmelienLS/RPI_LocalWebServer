@@ -49,6 +49,7 @@
     text-align: center;
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
+    transition: none;
 }
 
 .vkb-key:active,
