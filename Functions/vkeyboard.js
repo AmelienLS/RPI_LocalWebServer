@@ -127,7 +127,10 @@
         var el   = e.target;
         var type = (el.type || '').toLowerCase();
         if (el.tagName === 'INPUT' && (type === 'text' || type === 'search' || type === '')) {
+            var lost = el;
             setTimeout(function () {
+                // Ne pas cacher si on a déjà basculé vers un autre champ
+                if (target !== null && target !== lost) return;
                 if (kb && document.activeElement && kb.contains(document.activeElement)) return;
                 hide();
             }, 200);
