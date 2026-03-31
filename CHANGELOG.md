@@ -1,4 +1,9 @@
 # Journal des modifications
+## [3.13.2] - 2026-03-31
+> Commit : `fix(prendre): show screen location when already taken`
+### Corrigé
+- `/prendre` : affiche désormais l'emplacement (`n`) de l'écran même lorsqu'il est déjà sorti, en plus du message d'erreur existant.
+
 ## [3.13.1] - 2026-03-31
 > Commit : `feat(ui): add in-page virtual keyboard for kiosk touchscreen`
 ### Ajouté

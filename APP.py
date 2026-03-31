@@ -818,7 +818,7 @@ def prendre():
             if ecran:
                 if ecran['sorti'] == 1:
                     message = "Erreur : cet écran a déjà été pris."
-                    n_value = None
+                    n_value = ecran['n']
                 else:
                     cursor.execute('UPDATE serigraphie SET sorti = 1 WHERE ref_ecran = ?', (ecran['ref_ecran'],))
                     sortie_dt = _current_timestamp()
