@@ -1,4 +1,12 @@
 # Journal des modifications
+## [3.13.0] - 2026-03-31
+> Commit : `feat(ui): add in-page virtual keyboard for kiosk touchscreen`
+### Ajouté
+- `Functions/vkeyboard.js` : clavier virtuel AZERTY en JavaScript pur (aucune dépendance externe, fonctionne hors-ligne). S'affiche automatiquement en bas de page au focus d'un champ texte et se cache à la perte du focus. Supporte majuscules (MAJ), backspace (`<--`), espace et validation du formulaire (`OK`).
+- `Styles/vkeyboard.css` : styles du clavier virtuel (thème sombre, touches 48px minimum pour usage tactile).
+### Modifié
+- `Templates/login.html`, `prendre.html`, `ajouter.html`, `ajouterU.html`, `modifier.html`, `supprimer.html`, `setup.html` : ajout des includes `vkeyboard.css` et `vkeyboard.js`.
+
 ## [3.12.0] - 2026-03-31
 > Commit : `feat(linux): add kiosk installer for Raspberry Pi OS`
 ### Ajouté
