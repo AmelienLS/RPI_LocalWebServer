@@ -123,18 +123,32 @@ setup_venv() {
 # -- Configuration .env ---------------------------------------------------------
 setup_env() {
     local env_file="$PROJECT_DIR/.env"
-    if [[ -f "$env_file" ]]; then
-        ok "Fichier .env existant conservé"
-        return
+
+    if [[ ! -f "$env_file" ]]; then
+        if [[ -f "$PROJECT_DIR/.env.production" ]]; then
+            cp "$PROJECT_DIR/.env.production" "$env_file"
+            info "Fichier .env créé depuis .env.production"
+        else
+            touch "$env_file"
+            warn "Aucun fichier .env.production — fichier .env vide créé"
+        fi
     fi
-    if [[ -f "$PROJECT_DIR/.env.production" ]]; then
-        cp "$PROJECT_DIR/.env.production" "$env_file"
-        warn "Fichier .env créé depuis .env.production"
-        warn "  -> Éditez FLASK_SECRET_KEY dans : $env_file"
-        warn "  -> Générez une clé : python3 -c \"import secrets; print(secrets.token_hex(32))\""
+
+    # Générer et fixer la FLASK_SECRET_KEY si absente ou vide
+    local current_key
+    current_key="$(grep -E '^FLASK_SECRET_KEY=' "$env_file" | cut -d= -f2-)"
+    if [[ -z "$current_key" ]]; then
+        local new_key
+        new_key="$(python3 -c 'import secrets; print(secrets.token_hex(32))')"
+        # Remplacer la ligne si elle existe (commentée ou vide), sinon l'ajouter
+        if grep -qE '^#?FLASK_SECRET_KEY=' "$env_file"; then
+            sed -i "s|^#*FLASK_SECRET_KEY=.*|FLASK_SECRET_KEY=${new_key}|" "$env_file"
+        else
+            echo "FLASK_SECRET_KEY=${new_key}" >> "$env_file"
+        fi
+        ok "FLASK_SECRET_KEY générée et fixée dans .env"
     else
-        warn "Aucun fichier .env trouvé — valeurs par défaut utilisées"
-        warn "  -> Voir .env.example pour la configuration disponible"
+        ok "FLASK_SECRET_KEY existante conservée"
     fi
 }
 
@@ -227,10 +241,12 @@ xset s off
 xset -dpms
 xset s noblank
 
-# Activer le clavier virtuel onboard (s'affiche automatiquement sur les champs texte)
+# Lancer le clavier virtuel onboard toujours visible en bas de l'écran
 if command -v onboard >/dev/null 2>&1; then
-    gsettings set org.onboard.auto-show enabled true 2>/dev/null || true
-    onboard --size=800x250 &
+    gsettings set org.onboard auto-show-enabled  false 2>/dev/null || true
+    gsettings set org.onboard start-minimized    false 2>/dev/null || true
+    gsettings set org.onboard.auto-show enabled  false 2>/dev/null || true
+    onboard --size=800x250 --keep-aspect-ratio &
 fi
 
 # Attendre que le serveur réponde (max 60 secondes)
@@ -243,10 +259,6 @@ until curl -s --max-time 2 "\$APP_URL" > /dev/null 2>&1; do
     fi
     sleep 1
 done
-
-# Activer l'accessibilité GTK pour qu'onboard détecte les champs texte
-export GNOME_ACCESSIBILITY=1
-export GTK_MODULES=gail:atk-bridge
 
 # Lancer Firefox en mode kiosque
 exec "\$FIREFOX_CMD" --kiosk "\$APP_URL"
