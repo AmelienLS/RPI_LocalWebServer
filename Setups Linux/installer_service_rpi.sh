@@ -229,9 +229,8 @@ xset s noblank
 
 # Activer le clavier virtuel onboard (s'affiche automatiquement sur les champs texte)
 if command -v onboard >/dev/null 2>&1; then
-    gsettings set org.onboard auto-show-enabled true 2>/dev/null || true
-    gsettings set org.onboard schema-id "Compact"    2>/dev/null || true
-    onboard --size=800x250 --xid &
+    gsettings set org.onboard.auto-show enabled true 2>/dev/null || true
+    onboard --size=800x250 &
 fi
 
 # Attendre que le serveur réponde (max 60 secondes)
