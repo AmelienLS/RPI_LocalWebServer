@@ -1,4 +1,35 @@
 # Journal des modifications
+## [3.12.0] - 2026-03-31
+> Commit : `feat(linux): add kiosk installer for Raspberry Pi OS`
+### Ajouté
+- `Setups Linux/installer_service_rpi.sh` : script d'installation tout-en-un pour Raspberry Pi OS en mode kiosque. Configure le service systemd `rpi-localwebserver.service` (Gunicorn, démarrage automatique au boot), active l'auto-login au bureau via `raspi-config` ou lightdm, génère `Setups Linux/kiosk_browser.sh` (attend que le serveur réponde puis ouvre Chromium en plein écran, désactive l'économiseur d'écran) et enregistre ce script dans `~/.config/autostart/` pour un lancement automatique à chaque démarrage du bureau.
+
+## [3.11.0] - 2026-03-30
+> Commit : `feat(prendre): allow partial suffix match on screen reference`
+### Ajouté
+- Recherche par suffixe dans `/prendre` : l'utilisateur peut saisir uniquement les derniers caractères d'une référence écran pour la retrouver. Si plusieurs écrans correspondent, un message de désambiguïsation liste les références trouvées.
+
+## [3.10.1] - 2026-03-16
+> Commit : `refactor(windows): centralize setup scripts config in config.bat`
+### Ajouté
+- `Setups Windows/config.bat` : nouveau fichier de configuration centralisée pour tous les scripts Windows (`PROJECT_DIR`, `REPO_URL`, `VENV_DIR`).
+### Modifié
+- `Setups Windows/Démarrage.bat`, `DémarrageTest.bat`, `Lancer.bat` et `Purge.bat` : les déclarations de variables en dur sont remplacées par `call "%~dp0config.bat"`. Modifier uniquement `config.bat` suffit désormais pour adapter l'installation.
+
+## [3.10.0] - 2026-03-16
+> Commit : `feat(config): add dotenv environment file support`
+### Ajouté
+- Support des fichiers `.env` via `python-dotenv` : `APP.py` charge automatiquement `.env` à la racine du projet au démarrage, sans écraser les variables déjà définies dans le shell.
+- `.env.example` (versionné) : template documenté listant toutes les variables d'environnement disponibles (`APP_INSTANCE_DIR`, `DATABASE_PATH`, `APP_LOGS_DIR`, `APP_HOST`, `APP_PORT`, `FLASK_DEBUG`, `FLASK_SECRET_KEY`, `APP_AUTO_OPEN_BROWSER`, `APP_BROWSER_URL`, `APP_BROWSER_CMD`) avec leurs valeurs par défaut.
+- `.env.development` : configuration prête à l'emploi pour le développement local (debug activé, ouverture auto du navigateur).
+- `.env.production` : configuration prête à l'emploi pour le déploiement sur Raspberry Pi / serveur Linux (écoute réseau, debug désactivé).
+- `.gitignore` mis à jour pour ignorer `.env` et `.env.*` tout en versionnant `.env.example`.
+- `python-dotenv` ajouté à `requirements.txt`.
+- `Setups Linux/demarrage_release.sh` et `demarrage_branche.sh` : ajout d'une étape `setup_env()` qui crée automatiquement `.env` depuis `.env.production` lors de la première installation, avec rappel pour définir `FLASK_SECRET_KEY`.
+- `Setups Linux/lancer.sh` : avertissement affiché au démarrage si aucun fichier `.env` n'est présent.
+- `Setups Windows/Démarrage.bat` et `DémarrageTest.bat` : ajout d'une étape de vérification/création du `.env` depuis `.env.production` lors du déploiement.
+- `Setups Windows/Lancer.bat` : avertissement affiché si aucun fichier `.env` n'est présent.
+
 ## [3.9.0] - 2026-02-27
 > Commit : `feat(setup): add new DB and shutdown buttons to setup page`
 ### Ajouté

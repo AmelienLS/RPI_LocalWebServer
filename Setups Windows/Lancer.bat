@@ -2,8 +2,8 @@
 chcp 65001 >nul
 setlocal
 
-set "PROJECT_DIR=%USERPROFILE%\RPI_LocalWebServer-Release"
-set "VENV_DIR=%PROJECT_DIR%\venv"
+:: Variables (centralisées dans config.bat)
+call "%~dp0config.bat"
 
 cls
 echo [i] Lancement de l'application...
@@ -13,6 +13,13 @@ if not exist "%VENV_DIR%\Scripts\activate.bat" (
     echo [!] Environnement virtuel introuvable : %VENV_DIR%
     echo     Lancez d'abord "Setups Windows\Démarrage.bat" pour installer l'application.
     pause & exit /b 1
+)
+
+if not exist "%PROJECT_DIR%\.env" (
+    echo [!] Aucun fichier .env ^— configuration par defaut utilisee.
+    echo     Copiez .env.production pour personnaliser :
+    echo     copy "%PROJECT_DIR%\.env.production" "%PROJECT_DIR%\.env"
+    echo.
 )
 
 call "%VENV_DIR%\Scripts\activate.bat"

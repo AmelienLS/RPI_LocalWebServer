@@ -2,10 +2,8 @@
 chcp 65001 >nul
 setlocal
 
-:: Variables
-set "PROJECT_DIR=%USERPROFILE%\RPI_LocalWebServer-Release"
-set "REPO_URL=https://github.com/AmelienLS/RPI_LocalWebServer.git"
-set "VENV_DIR=%PROJECT_DIR%\venv"
+:: Variables (centralisées dans config.bat)
+call "%~dp0config.bat"
 
 cls
 echo [i] Déploiement de l'application locale...
@@ -124,7 +122,23 @@ call "%VENV_DIR%\Scripts\deactivate.bat"
 echo [OK] Environnement virtuel prêt.
 echo.
 
-:: 4) Lancement du serveur
+:: 4) Configuration .env
+echo [~] Vérification du fichier de configuration...
+if not exist "%PROJECT_DIR%\.env" (
+    if exist "%PROJECT_DIR%\.env.production" (
+        copy "%PROJECT_DIR%\.env.production" "%PROJECT_DIR%\.env" >nul
+        echo [OK] Fichier .env créé depuis .env.production.
+        echo [!] Pensez à definir FLASK_SECRET_KEY dans :
+        echo     %PROJECT_DIR%\.env
+    ) else (
+        echo [i] Pas de fichier .env ^— valeurs par defaut utilisees.
+    )
+) else (
+    echo [OK] Fichier .env existant conserve.
+)
+echo.
+
+:: 5) Lancement du serveur
 echo [^>^>^>] Démarrage du serveur WSGI local...
 echo     URL : http://127.0.0.1:5000
 echo [!] CTRL+C pour arrêter.

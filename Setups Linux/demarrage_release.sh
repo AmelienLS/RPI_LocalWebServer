@@ -12,6 +12,10 @@
 #   PROJECT_DIR   Répertoire d'installation  (défaut : ~/RPI_LocalWebServer)
 #   APP_HOST      Interface d'écoute         (défaut : 0.0.0.0)
 #   APP_PORT      Port                       (défaut : 5000)
+#
+# Configuration avancée (DATABASE_PATH, FLASK_SECRET_KEY, APP_LOGS_DIR…) :
+#   Créer un fichier .env à la racine du projet (copier depuis .env.production).
+#   Voir .env.example pour la liste complète des variables disponibles.
 # ==============================================================================
 set -euo pipefail
 
@@ -123,6 +127,27 @@ setup_venv() {
     ok "Dépendances installées"
 }
 
+# ── Configuration .env ─────────────────────────────────────────────────────────
+setup_env() {
+    local env_file="$PROJECT_DIR/.env"
+    local env_template="$PROJECT_DIR/.env.production"
+
+    if [[ -f "$env_file" ]]; then
+        ok "Fichier .env existant conservé"
+        return
+    fi
+
+    if [[ -f "$env_template" ]]; then
+        cp "$env_template" "$env_file"
+        warn "Fichier .env créé depuis .env.production"
+        warn "  → Éditez FLASK_SECRET_KEY dans : $env_file"
+        warn "  → Générez une clé : python3 -c \"import secrets; print(secrets.token_hex(32))\""
+    else
+        warn "Aucun fichier .env trouvé — valeurs par défaut utilisées"
+        warn "  → Voir .env.example pour la configuration disponible"
+    fi
+}
+
 # ── Base de données ────────────────────────────────────────────────────────────
 init_db_if_needed() {
     local db_path="$PROJECT_DIR/instance/armoire.db"
@@ -172,6 +197,7 @@ main() {
     ensure_prerequisites
     sync_repo
     setup_venv
+    setup_env
     init_db_if_needed
     start_server
 }

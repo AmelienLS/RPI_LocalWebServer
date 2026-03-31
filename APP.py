@@ -15,8 +15,12 @@ from io import BytesIO
 
 import openpyxl
 from pathlib import Path
+from dotenv import load_dotenv
 
 from flask import Flask, redirect, render_template, request, send_file, send_from_directory, session
+
+# Chargement des variables d'environnement depuis .env (si présent, sans écraser les vars déjà définies)
+load_dotenv(Path(__file__).resolve().parent / ".env", override=False)
 
 # Répertoires de base
 BASE_DIR = Path(__file__).resolve().parent
@@ -788,26 +792,42 @@ def prendre():
 
     if request.method == 'POST':
         ref_ecran = request.form['ref_ecran']
-        
+
         with get_db_connection() as conn:
             _ensure_log_tables(conn)
             cursor = conn.cursor()
+
+            # Essai exact d'abord, puis recherche par suffixe
             cursor.execute('SELECT * FROM serigraphie WHERE ref_ecran = ?', (ref_ecran,))
             ecran = cursor.fetchone()
+
+            if not ecran:
+                # Recherche par suffixe : l'utilisateur peut taper les derniers caractères
+                cursor.execute(
+                    'SELECT * FROM serigraphie WHERE ref_ecran LIKE ?',
+                    ('%' + ref_ecran,),
+                )
+                resultats = cursor.fetchall()
+                if len(resultats) == 1:
+                    ecran = resultats[0]
+                elif len(resultats) > 1:
+                    refs = ", ".join(str(r['ref_ecran']) for r in resultats)
+                    message = f"Plusieurs écrans correspondent : {refs}. Précisez votre recherche."
+                    return render_template('prendre.html', message=message, n_value=None)
 
             if ecran:
                 if ecran['sorti'] == 1:
                     message = "Erreur : cet écran a déjà été pris."
                     n_value = None
                 else:
-                    cursor.execute('UPDATE serigraphie SET sorti = 1 WHERE ref_ecran = ?', (ref_ecran,))
+                    cursor.execute('UPDATE serigraphie SET sorti = 1 WHERE ref_ecran = ?', (ecran['ref_ecran'],))
                     sortie_dt = _current_timestamp()
                     cursor.execute(
                         """
                         INSERT INTO sortie_logs (ref_ecran, libelle, personne, sortie_ts)
                         VALUES (?, ?, ?, ?)
                         """,
-                        (ref_ecran, ecran['libelle'], session.get('prenom', 'Inconnu'), sortie_dt.isoformat()),
+                        (ecran['ref_ecran'], ecran['libelle'], session.get('prenom', 'Inconnu'), sortie_dt.isoformat()),
                     )
                     conn.commit()
                     _sync_daily_log(conn, sortie_dt.date())

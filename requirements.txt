@@ -3,3 +3,4 @@ gunicorn
 waitress
 pytest
 openpyxl
+python-dotenv

@@ -2,7 +2,7 @@
 
 Application web développée avec Flask pour gérer des **écrans de sérigraphies** dans un atelier. Elle permet de suivre l'état des écrans (sorti / rangé / à laver), d'administrer les utilisateurs, de tracer toutes les manipulations dans des journaux CSV quotidiens, et de se déployer facilement sur une Raspberry Pi ou une machine Windows.
 
-**Version actuelle : 3.9.0**
+**Version actuelle : 3.10.1**
 
 ---
 
@@ -53,6 +53,8 @@ RPI_LocalWebServer/
 ├── wsgi.py                     # Point d'entrée WSGI pour Gunicorn
 ├── requirements.txt            # Dépendances Python
 ├── run.bat                     # Raccourci de lancement rapide (Windows, à la racine)
+│
+├── .env.example                # Template documenté des variables d'environnement (versionné)
 │
 ├── database/
 │   └── schema.sql              # Schéma SQLite (tables users, serigraphie, sortie_logs)
@@ -196,7 +198,7 @@ python scripts/init_db.py --force \
 
 ## Variables d'environnement
 
-Toutes les variables sont optionnelles. Elles peuvent être définies dans le shell ou dans un fichier `.env` (non versionné).
+Toutes les variables sont optionnelles. Elles peuvent être définies dans le shell, dans un fichier `.env` à la racine du projet, ou via `instance/config.ini` (pour `DATABASE_PATH`).
 
 | Variable | Défaut | Description |
 |---|---|---|
@@ -207,10 +209,34 @@ Toutes les variables sont optionnelles. Elles peuvent être définies dans le sh
 | `APP_PORT` | `5000` | Port d'écoute |
 | `APP_AUTO_OPEN_BROWSER` | `0` | Ouvre automatiquement le navigateur au démarrage (`1`) |
 | `APP_BROWSER_CMD` | Navigateur par défaut | Commande personnalisée pour ouvrir le navigateur |
+| `APP_BROWSER_URL` | `http://127.0.0.1:<port>/` | URL ouverte au démarrage si `APP_AUTO_OPEN_BROWSER=1` |
 | `APP_LOGS_DIR` | `instance/logs` | Répertoire des CSV quotidiens (partage réseau, clé USB…) |
 | `APP_INSTANCE_DIR` | `instance/` | Répertoire d'instance (config.ini, base de données) |
 
 > La priorité pour `DATABASE_PATH` est : variable d'environnement > `instance/config.ini` > valeur par défaut.
+
+### Fichiers d'environnement
+
+Le projet fournit trois fichiers pour faciliter la configuration :
+
+| Fichier | Versionné | Usage |
+|---|---|---|
+| [.env.example](.env.example) | Oui | Template documenté — ne pas modifier directement |
+| `.env.development` | Non | Configuration développement local (debug ON, navigateur auto) |
+| `.env.production` | Non | Configuration production Raspberry Pi (réseau LAN, debug OFF) |
+
+**Démarrage rapide :**
+```bash
+# Développement local
+cp .env.development .env
+
+# Production / Raspberry Pi
+cp .env.production .env
+# Puis éditer FLASK_SECRET_KEY dans .env :
+python3 -c "import secrets; print(secrets.token_hex(32))"
+```
+
+> Les scripts de déploiement (`demarrage_release.sh`, `Démarrage.bat`…) créent automatiquement le fichier `.env` depuis `.env.production` lors de la première installation.
 
 ---
 
@@ -232,16 +258,19 @@ source .venv/bin/activate        # Windows : .venv\Scripts\activate
 # 3. Installer les dépendances
 pip install -r requirements.txt
 
-# 4. Créer la base de données
+# 4. Configurer l'environnement
+cp .env.development .env         # active debug, ouvre le navigateur automatiquement
+
+# 5. Créer la base de données
 python scripts/init_db.py --force --admin-identifiant admin
 
-# 5. Lancer l'application
+# 6. Lancer l'application
 python APP.py
 ```
 
 L'application est accessible sur [http://127.0.0.1:5000](http://127.0.0.1:5000).
 
-Pour l'exposer sur le réseau local :
+Pour l'exposer sur le réseau local sans fichier `.env` :
 ```bash
 APP_HOST=0.0.0.0 python APP.py
 ```
@@ -439,7 +468,7 @@ sqlite3 instance/armoire.db \
 
 ### Sécurité
 
-- La clé `FLASK_SECRET_KEY` doit être définie en variable d'environnement en production (sinon une clé aléatoire est générée à chaque démarrage, invalidant toutes les sessions).
+- La clé `FLASK_SECRET_KEY` doit être définie en production dans le fichier `.env` (sinon une clé aléatoire est générée à chaque démarrage, invalidant toutes les sessions). Générer une clé : `python3 -c "import secrets; print(secrets.token_hex(32))"`.
 - Les requêtes SQL utilisent des paramètres liés (`?`) pour prévenir les injections SQL.
 - L'endpoint `/shutdown` est accessible sans authentification : assurez-vous que l'application n'est pas exposée sur Internet (`APP_HOST=127.0.0.1` par défaut).
 - En production, utilisez Gunicorn (Linux) ou Waitress (Windows) et non le serveur de développement Flask.
@@ -461,13 +490,11 @@ Si vous reprenez ce projet sur un nouveau dépôt, modifiez les éléments suiva
 
 ### 1. Scripts de déploiement Linux
 
-- **`Setups Linux/demarrage_release.sh`** : modifier la variable `Documentation=` dans la section `[Unit]` du service systemd (ligne ~235) et toute référence à l'URL du dépôt.
+- **`Setups Linux/demarrage_release.sh`** : modifier la variable `Documentation=` dans la section `[Unit]` du service systemd (ligne ~23) et toute référence à l'URL du dépôt.
 
 ### 2. Scripts de déploiement Windows
 
-- **`Setups Windows/Démarrage.bat`** : modifier la ligne `set "REPO_URL=https://github.com/AmelienLS/RPI_LocalWebServer.git"`
-- **`Setups Windows/DémarrageTest.bat`** : idem
-- Vérifier toutes les références au dossier `RPI_LocalWebServer-Release` si vous souhaitez le renommer.
+- **`Setups Windows/config.bat`** : modifier `REPO_URL` et `PROJECT_DIR` — **c'est le seul fichier à changer**, tous les autres scripts l'appellent automatiquement.
 
 ### 3. Documentation
 
