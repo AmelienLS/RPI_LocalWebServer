@@ -1,4 +1,11 @@
 # Journal des modifications
+## [3.15.0] - 2026-04-01
+> Commit : `feat(ui): add screen rotation button (90° CW per click)`
+### Ajouté
+- `Functions/rotation.js` : script global qui injecte un bouton flottant (bas-gauche) permettant de faire pivoter l'affichage de 90° dans le sens horaire à chaque clic (4 positions : 0°, 90°, 180°, 270°). L'angle est persisté dans `localStorage` et réappliqué immédiatement au chargement de chaque page.
+- `Styles/common.css` : classes `.rot-90`, `.rot-180`, `.rot-270` appliquées sur `<html>` avec compensation des dimensions (`100vh`/`100vw` inversés) et repositionnement pour que le contenu remplisse correctement l'écran après rotation.
+- `rotation.js` inclus dans les 12 templates.
+
 ## [3.14.1] - 2026-04-01
 > Commit : `feat(stats): add reset stats button for admins`
 ### Ajouté
