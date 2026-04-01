@@ -1,4 +1,9 @@
 # Journal des modifications
+## [3.15.4] - 2026-04-01
+> Commit : `feat(index): show alert when more than 4 screens are out`
+### Ajouté
+- Panneau `sortis-alerte` affiché à droite du container principal sur `/index` quand plus de 4 écrans sont marqués comme sortis. Affiche le message "Range tes écrans Boun" avec le même style que le panneau "Écrans à laver" (bordure jaune `#feed00`).
+
 ## [3.15.3] - 2026-04-01
 > Commit : `fix(import): strip spaces from ref_ecran and pcb before insert`
 ### Corrigé

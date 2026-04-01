@@ -113,6 +113,30 @@ body {
     background-color: #357ABD;
 }
 
+/* Panneau "Range tes écrans" : même style que laver-actions, à droite du container */
+.sortis-alerte {
+    width: 400px;
+    max-width: 400px;
+    max-height: calc(100vh - 3rem);
+    background-color: #191B2A;
+    border-radius: 8px;
+    border: 1px solid #feed00;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    padding: 2rem;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.sortis-alerte p {
+    color: #feed00;
+    font-weight: bold;
+    font-size: 1.1rem;
+    text-align: center;
+    margin: 0;
+}
+
 .logout-button {
     display: flex;
     align-items: center;

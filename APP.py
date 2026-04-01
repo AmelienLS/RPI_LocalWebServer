@@ -378,7 +378,10 @@ def index():
             'SELECT ref_ecran, libelle, n FROM serigraphie WHERE sorti = 0 AND lave = 0 ORDER BY n'
         )
         a_laver = cursor.fetchall()
-    return render_template('index.html', prenom=prenom, admin=admin, a_laver=a_laver)
+        cursor.execute('SELECT COUNT(*) FROM serigraphie WHERE sorti = 1')
+        nb_sortis = cursor.fetchone()[0]
+    alerte_sortis = nb_sortis > 4
+    return render_template('index.html', prenom=prenom, admin=admin, a_laver=a_laver, alerte_sortis=alerte_sortis)
 
 
 # Route pour marquer un écran comme lavé depuis l'accueil
