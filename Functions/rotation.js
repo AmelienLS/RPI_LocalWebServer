@@ -13,20 +13,35 @@
         if (angle === 270) html.classList.add('rot-270');
     }
 
+    function rotate(delta) {
+        var next = (getAngle() + delta + 360) % 360;
+        localStorage.setItem(KEY, next);
+        applyAngle(next);
+    }
+
     // Appliqué immédiatement pour éviter un flash avant DOMContentLoaded
     applyAngle(getAngle());
 
     document.addEventListener('DOMContentLoaded', function () {
-        var btn = document.createElement('button');
-        btn.id = 'btn-rotate-screen';
-        btn.title = 'Rotation 90\u00b0 horaire';
-        btn.innerHTML = '&#8635;';
-        btn.addEventListener('click', function (e) {
+        var btnCW = document.createElement('button');
+        btnCW.id = 'btn-rotate-cw';
+        btnCW.title = 'Rotation horaire';
+        btnCW.innerHTML = '&#8635;';
+        btnCW.addEventListener('click', function (e) {
             e.stopPropagation();
-            var next = (getAngle() + 90) % 360;
-            localStorage.setItem(KEY, next);
-            applyAngle(next);
+            rotate(90);
         });
-        document.body.appendChild(btn);
+
+        var btnCCW = document.createElement('button');
+        btnCCW.id = 'btn-rotate-ccw';
+        btnCCW.title = 'Rotation anti-horaire';
+        btnCCW.innerHTML = '&#8634;';
+        btnCCW.addEventListener('click', function (e) {
+            e.stopPropagation();
+            rotate(-90);
+        });
+
+        document.body.appendChild(btnCCW);
+        document.body.appendChild(btnCW);
     });
 })();

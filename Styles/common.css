@@ -169,10 +169,10 @@ html.rot-270 {
     overflow: hidden;
 }
 
-#btn-rotate-screen {
+#btn-rotate-cw,
+#btn-rotate-ccw {
     position: fixed;
     bottom: 1rem;
-    left: 1rem;
     width: 52px;
     height: 52px;
     min-height: unset;
@@ -185,7 +185,11 @@ html.rot-270 {
     box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.45), 0 3px 8px rgba(0, 0, 0, 0.4);
 }
 
-#btn-rotate-screen:hover {
+#btn-rotate-ccw { left: 1rem; }
+#btn-rotate-cw  { left: 4.5rem; }
+
+#btn-rotate-cw:hover,
+#btn-rotate-ccw:hover {
     opacity: 1;
 }
 
