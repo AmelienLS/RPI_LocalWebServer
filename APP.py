@@ -760,6 +760,25 @@ def stats():
     )
 
 
+@app.route("/reset_stats", methods=["POST"])
+def reset_stats():
+    """
+    Remet à zéro les statistiques en vidant la table sortie_logs.
+    - Admin uniquement.
+    """
+    if 'prenom' not in session:
+        return redirect('/')
+    if not session.get('admin'):
+        return redirect('/index')
+
+    with get_db_connection() as conn:
+        _ensure_log_tables(conn)
+        conn.execute('DELETE FROM sortie_logs')
+        conn.commit()
+
+    return redirect('/stats')
+
+
 @app.route("/purge_logs", methods=["POST"])
 def purge_logs():
     """

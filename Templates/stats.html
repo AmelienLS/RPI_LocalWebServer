@@ -62,6 +62,9 @@
                 {% endfor %}
             </tbody>
         </table>
+        <form method="POST" action="/reset_stats" onsubmit="return confirm('Remettre à zéro toutes les statistiques ? Cette action est irréversible.');">
+            <button type="submit" class="btn-reset-stats">Remettre les stats à zéro</button>
+        </form>
     </div>
 </body>
 </html>

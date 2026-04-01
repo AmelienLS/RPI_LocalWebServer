@@ -55,3 +55,18 @@ tbody tr:nth-child(odd) td {
 .stat-count.top {
     color: #4CAF50;
 }
+
+.btn-reset-stats {
+    margin-top: 2rem;
+    background-color: #c0392b;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 0.7rem 1.5rem;
+    font-size: 0.95rem;
+    cursor: pointer;
+}
+
+.btn-reset-stats:hover {
+    background-color: #96281b;
+}

@@ -67,3 +67,30 @@ def test_stats_shows_total_passages(client, set_user_session, add_serigraphie, t
     body = response.data.decode("utf-8")
     # Total passages should appear on the page
     assert "1" in body
+
+
+def test_reset_stats_requires_admin(client, set_user_session):
+    set_user_session(admin=False, prenom="Bob")
+    response = client.post("/reset_stats")
+    assert response.status_code == 302
+    assert response.headers["Location"].endswith("/index")
+
+
+def test_reset_stats_clears_sortie_logs(client, set_user_session, add_serigraphie, test_db):
+    set_user_session(admin=True)
+    add_serigraphie(ref_ecran=510, libelle="Ecran reset", n="055")
+
+    with sqlite3.connect(test_db) as conn:
+        conn.execute(
+            "INSERT INTO sortie_logs (ref_ecran, libelle, personne, sortie_ts) VALUES (?, ?, ?, ?)",
+            (510, "Ecran reset", "Alice", "2026-01-15T10:00:00"),
+        )
+        conn.commit()
+
+    response = client.post("/reset_stats")
+    assert response.status_code == 302
+    assert response.headers["Location"].endswith("/stats")
+
+    with sqlite3.connect(test_db) as conn:
+        count = conn.execute("SELECT COUNT(*) FROM sortie_logs").fetchone()[0]
+    assert count == 0
