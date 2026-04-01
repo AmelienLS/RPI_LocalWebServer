@@ -257,7 +257,9 @@ def _parse_import_file(file_storage):
             rows.append({_SERI_COLUMNS[i]: str(vals[i]).strip() if i < len(vals) else ''
                          for i in range(len(_SERI_COLUMNS))})
     elif filename.endswith('.xlsx'):
-        wb = openpyxl.load_workbook(file_storage.stream, read_only=True, data_only=True)
+        # Lire entièrement en mémoire pour garantir un stream seekable à position 0
+        file_bytes = io.BytesIO(file_storage.read())
+        wb = openpyxl.load_workbook(file_bytes, read_only=True, data_only=True)
         ws = wb.active
         ws.reset_dimensions()  # ignore la métadonnée <dimension> potentiellement tronquée
         rows_iter = ws.iter_rows()

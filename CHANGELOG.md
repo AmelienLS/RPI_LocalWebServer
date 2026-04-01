@@ -1,4 +1,9 @@
 # Journal des modifications
+## [3.15.2] - 2026-04-01
+> Commit : `fix(import): read xlsx into BytesIO to ensure seekable stream`
+### Corrigé
+- `_parse_import_file` : le stream de l'upload Flask n'est pas garanti seekable ni à position 0 lors du passage à openpyxl. Le fichier est maintenant lu entièrement en mémoire via `file_storage.read()` → `BytesIO` avant d'être ouvert par openpyxl, ce qui éliminait la troncature silencieuse à ~45 lignes.
+
 ## [3.15.1] - 2026-04-01
 > Commit : `fix(import): reset xlsx dimensions to bypass truncated metadata`
 ### Corrigé
