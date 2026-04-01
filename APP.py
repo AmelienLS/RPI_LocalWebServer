@@ -259,6 +259,7 @@ def _parse_import_file(file_storage):
     elif filename.endswith('.xlsx'):
         wb = openpyxl.load_workbook(file_storage.stream, read_only=True, data_only=True)
         ws = wb.active
+        ws.reset_dimensions()  # ignore la métadonnée <dimension> potentiellement tronquée
         rows_iter = ws.iter_rows()
         next(rows_iter, None)  # ignorer la ligne d'en-tête
         rows = []

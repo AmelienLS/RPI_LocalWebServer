@@ -1,4 +1,9 @@
 # Journal des modifications
+## [3.15.1] - 2026-04-01
+> Commit : `fix(import): reset xlsx dimensions to bypass truncated metadata`
+### Corrigé
+- `_parse_import_file` : ajout de `ws.reset_dimensions()` après chargement du workbook en mode `read_only`. Sans cela, openpyxl s'arrêtait à la ligne déclarée dans la métadonnée `<dimension>` du fichier (souvent incorrecte), tronquant l'import à ~45 lignes.
+
 ## [3.15.0] - 2026-04-01
 > Commit : `feat(ui): add CW and CCW rotation buttons`
 ### Ajouté
