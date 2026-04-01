@@ -276,6 +276,11 @@ def _parse_import_file(file_storage):
     if not rows:
         raise ValueError("Le fichier est vide.")
 
+    # Nettoyer les colonnes entières : retirer les espaces (formatage Excel fr: '260 023 566' → '260023566')
+    for r in rows:
+        r['ref_ecran'] = r['ref_ecran'].replace(' ', '')
+        r['pcb']       = r['pcb'].replace(' ', '')
+
     return rows
 
 

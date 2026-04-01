@@ -1,4 +1,9 @@
 # Journal des modifications
+## [3.15.3] - 2026-04-01
+> Commit : `fix(import): strip spaces from ref_ecran and pcb before insert`
+### Corrigé
+- `_parse_import_file` : les champs `ref_ecran` et `pcb` (colonnes `INTEGER` en DB) étaient importés avec des espaces de formatage Excel (`'260 023 566'`), provoquant une erreur `datatype mismatch` silencieuse sur 104 lignes sur 149. Les espaces sont désormais retirés après parsing, avant retour des lignes.
+
 ## [3.15.2] - 2026-04-01
 > Commit : `fix(import): read xlsx into BytesIO to ensure seekable stream`
 ### Corrigé
