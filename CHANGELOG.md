@@ -1,4 +1,10 @@
 # Journal des modifications
+## [3.16.1] - 2026-04-07
+> Commit : `feat(ecran): add column sorting to screen table`
+### Ajouté
+- `Functions/Ecran.js` : tri par colonne au clic sur l'en-tête. 1er clic → croissant (▲), 2e → décroissant (▼), 3e → retour à l'ordre d'origine. Tri numérique automatique pour les colonnes de nombres, sinon tri alphabétique (`localeCompare` fr). Compatible avec le filtrage existant.
+- `Styles/ecran.css` : indicateurs `▲`/`▼` via `::after`, curseur `pointer` et survol légèrement plus clair sur les colonnes triables.
+
 ## [3.16.0] - 2026-04-07
 > Commit : `feat(index): alert panel for screens out more than 10h`
 ### Ajouté

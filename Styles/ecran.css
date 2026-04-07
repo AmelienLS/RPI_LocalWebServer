@@ -34,6 +34,17 @@ thead th {
     text-align: center;
 }
 
+thead th.sortable {
+    cursor: pointer;
+}
+
+thead th.sortable:hover {
+    background-color: #363A58;
+}
+
+thead th[data-sort="asc"]::after  { content: ' ▲'; font-size: 0.7rem; }
+thead th[data-sort="desc"]::after { content: ' ▼'; font-size: 0.7rem; }
+
 thead input {
     width: 90%;
     margin-top: 0.5rem;
