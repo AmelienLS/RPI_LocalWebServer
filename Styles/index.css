@@ -58,12 +58,19 @@ body {
     background-color: #2A2D46;
 }
 
+/* Colonne gauche : empile laver-actions et longtemps-actions */
+.panneaux-gauche {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    max-height: calc(100vh - 3rem);
+    overflow-y: auto;
+}
+
 /* Panneau "Écrans à laver" : container autonome à gauche */
 .laver-actions {
     width: 400px;
     max-width: 400px;
-    max-height: calc(100vh - 3rem);
-    overflow-y: auto;
     background-color: #191B2A;
     border-radius: 8px;
     border: 1px solid #FF4C4C;
@@ -111,6 +118,24 @@ body {
 
 .laver-btn:hover {
     background-color: #357ABD;
+}
+
+/* Panneau "Écrans sortis depuis + de 10h" : même style que laver-actions, bordure orange */
+.longtemps-actions {
+    width: 400px;
+    max-width: 400px;
+    background-color: #191B2A;
+    border-radius: 8px;
+    border: 1px solid #FF8C00;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    padding: 2rem;
+    box-sizing: border-box;
+}
+
+.longtemps-actions p {
+    color: #FF8C00;
+    font-weight: bold;
+    margin-bottom: 0.75rem;
 }
 
 /* Panneau "Range tes écrans" : même style que laver-actions, à droite du container */

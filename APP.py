@@ -380,8 +380,22 @@ def index():
         a_laver = cursor.fetchall()
         cursor.execute('SELECT COUNT(*) FROM serigraphie WHERE sorti = 1')
         nb_sortis = cursor.fetchone()[0]
+        cursor.execute(
+            """
+            SELECT s.ref_ecran, s.libelle, s.n,
+                   ROUND((julianday('now', 'localtime') - julianday(sl.sortie_ts)) * 24, 1) AS heures
+            FROM sortie_logs sl
+            JOIN serigraphie s ON s.ref_ecran = sl.ref_ecran
+            WHERE sl.rangement_ts IS NULL
+              AND s.sorti = 1
+              AND (julianday('now', 'localtime') - julianday(sl.sortie_ts)) * 24 > 10
+            ORDER BY heures DESC
+            """
+        )
+        sortis_longtemps = cursor.fetchall()
     alerte_sortis = nb_sortis > 4
-    return render_template('index.html', prenom=prenom, admin=admin, a_laver=a_laver, alerte_sortis=alerte_sortis)
+    return render_template('index.html', prenom=prenom, admin=admin, a_laver=a_laver,
+                           alerte_sortis=alerte_sortis, sortis_longtemps=sortis_longtemps)
 
 
 # Route pour marquer un écran comme lavé depuis l'accueil

@@ -10,21 +10,39 @@
 </head>
 <body>
     <div class="page-wrapper">
-        {% if a_laver %}
-        <div class="laver-actions">
-            <p>Écrans à laver ({{ a_laver | length }})</p>
-            {% for ecran in a_laver %}
-            <div class="laver-item">
-                <span class="laver-info">
-                    <strong>{{ ecran.ref_ecran }}</strong> — {{ ecran.libelle }} — Emp. {{ ecran.n }}
-                </span>
-                <form action="/laver" method="POST">
-                    <input type="hidden" name="ref_ecran" value="{{ ecran.ref_ecran }}">
-                    <button type="submit" class="laver-btn">Laver</button>
-                </form>
+        {% if a_laver or sortis_longtemps %}
+        <div class="panneaux-gauche">
+            {% if a_laver %}
+            <div class="laver-actions">
+                <p>Écrans à laver ({{ a_laver | length }})</p>
+                {% for ecran in a_laver %}
+                <div class="laver-item">
+                    <span class="laver-info">
+                        <strong>{{ ecran.ref_ecran }}</strong> — {{ ecran.libelle }} — Emp. {{ ecran.n }}
+                    </span>
+                    <form action="/laver" method="POST">
+                        <input type="hidden" name="ref_ecran" value="{{ ecran.ref_ecran }}">
+                        <button type="submit" class="laver-btn">Laver</button>
+                    </form>
+                </div>
+                {% if not loop.last %}<div class="laver-sep"></div>{% endif %}
+                {% endfor %}
             </div>
-            {% if not loop.last %}<div class="laver-sep"></div>{% endif %}
-            {% endfor %}
+            {% endif %}
+
+            {% if sortis_longtemps %}
+            <div class="longtemps-actions">
+                <p>Écrans sortis depuis + de 10h ({{ sortis_longtemps | length }})</p>
+                {% for ecran in sortis_longtemps %}
+                <div class="laver-item">
+                    <span class="laver-info">
+                        <strong>{{ ecran.ref_ecran }}</strong> — {{ ecran.libelle }} — {{ ecran.heures }}h
+                    </span>
+                </div>
+                {% if not loop.last %}<div class="laver-sep"></div>{% endif %}
+                {% endfor %}
+            </div>
+            {% endif %}
         </div>
         {% endif %}
 

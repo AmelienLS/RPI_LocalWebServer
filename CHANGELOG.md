@@ -1,4 +1,10 @@
 # Journal des modifications
+## [3.16.0] - 2026-04-07
+> Commit : `feat(index): alert panel for screens out more than 10h`
+### Ajouté
+- Panneau `longtemps-actions` affiché à gauche (empilé sous `laver-actions`) sur `/index` quand un ou plusieurs écrans sont sortis depuis plus de 10 heures. Affiche la référence, le libellé et le nombre d'heures. Bordure orange `#FF8C00`, même structure que `laver-actions`.
+- Wrapper `.panneaux-gauche` (flex colonne) pour empiler proprement les deux panneaux gauches.
+
 ## [3.15.4] - 2026-04-01
 > Commit : `feat(index): show alert when more than 4 screens are out`
 ### Ajouté
