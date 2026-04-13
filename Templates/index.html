@@ -78,6 +78,10 @@
             {% endif %}
         </div>
 
+        {% if branch %}
+        <p class="branch-label">{{ branch }}</p>
+        {% endif %}
+
         {% if alerte_sortis %}
         <div class="sortis-alerte">
             <p>Range tes écrans Boun</p>

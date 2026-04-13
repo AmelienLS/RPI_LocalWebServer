@@ -395,8 +395,17 @@ def index():
         )
         sortis_longtemps = cursor.fetchall()
     alerte_sortis = nb_sortis > 4
+    try:
+        project_dir = str(Path(__file__).resolve().parent)
+        branch = subprocess.run(
+            ['git', '-C', project_dir, 'rev-parse', '--abbrev-ref', 'HEAD'],
+            capture_output=True, text=True
+        ).stdout.strip()
+    except Exception:
+        branch = ''
     return render_template('index.html', prenom=prenom, admin=admin, a_laver=a_laver,
-                           alerte_sortis=alerte_sortis, sortis_longtemps=sortis_longtemps)
+                           alerte_sortis=alerte_sortis, sortis_longtemps=sortis_longtemps,
+                           branch=branch)
 
 
 # Route pour marquer un écran comme lavé depuis l'accueil
