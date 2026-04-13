@@ -8,6 +8,7 @@ import secrets
 import shlex
 import sqlite3
 import subprocess
+import threading
 import webbrowser
 import zipfile
 from datetime import datetime, date
@@ -1083,6 +1084,41 @@ def close_db():
     return render_template('index.html', prenom=session.get('prenom'), admin=session.get('admin')==1,
                            success="La connexion à la base de données a été fermée.")
     
+@app.route("/update", methods=["POST"])
+def update():
+    """
+    Effectue un git pull, récupère la branche courante et redémarre le service systemd.
+    Admin uniquement. Le redémarrage est différé de 2s pour laisser le temps à la réponse d'être envoyée.
+    """
+    if 'prenom' not in session or not session.get('admin'):
+        return jsonify({'error': 'unauthorized'}), 403
+
+    project_dir = str(Path(__file__).resolve().parent)
+
+    pull = subprocess.run(
+        ['git', '-C', project_dir, 'pull'],
+        capture_output=True, text=True
+    )
+    branch_proc = subprocess.run(
+        ['git', '-C', project_dir, 'rev-parse', '--abbrev-ref', 'HEAD'],
+        capture_output=True, text=True
+    )
+    branch = branch_proc.stdout.strip() or 'inconnue'
+    output = (pull.stdout + pull.stderr).strip()
+
+    if platform.system() == 'Linux':
+        def _restart():
+            import time
+            time.sleep(2)
+            subprocess.run(['sudo', 'systemctl', 'restart', 'rpi-localwebserver'])
+        threading.Thread(target=_restart, daemon=True).start()
+        will_restart = True
+    else:
+        will_restart = False
+
+    return jsonify({'branch': branch, 'output': output, 'will_restart': will_restart})
+
+
 @app.route("/shutdown", methods=["POST"])
 def shutdown():
     """

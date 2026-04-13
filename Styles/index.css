@@ -162,6 +162,30 @@ body {
     margin: 0;
 }
 
+.btn-update {
+    margin-top: 1rem;
+    background-color: #2A6496;
+    color: #fff;
+    box-shadow: 0 0 0 2px rgba(0,0,0,0.45), 0 3px 8px rgba(0,0,0,0.4);
+}
+
+.btn-update:hover { background-color: #1e4f78; }
+.btn-update:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.update-result {
+    margin-top: 1rem;
+    background-color: #2A2D46;
+    border: 1px solid #2A6496;
+    border-radius: 6px;
+    padding: 1rem;
+    font-size: 0.85rem;
+    text-align: left;
+}
+
+.update-result p { margin: 0 0 0.4rem; color: #feed00; font-weight: bold; }
+.update-result pre { margin: 0 0 0.5rem; white-space: pre-wrap; word-break: break-word; color: #ccc; }
+#update-countdown { color: #FF8C00 !important; }
+
 .logout-button {
     display: flex;
     align-items: center;

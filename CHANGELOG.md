@@ -1,4 +1,10 @@
 # Journal des modifications
+## [3.17.0] - 2026-04-13
+> Commit : `feat(index): add git pull + service restart button for admins`
+### Ajouté
+- Route `POST /update` (admin uniquement) : exécute `git pull`, récupère la branche courante, redémarre `rpi-localwebserver` via `sudo systemctl restart` après 2s (Linux uniquement).
+- Bouton « Mettre à jour » dans la section admin de `/index` : déclenche la mise à jour via fetch, affiche la branche et le résultat du pull, puis compte à rebours de 8s avant rechargement automatique de la page.
+
 ## [3.16.2] - 2026-04-13
 > Commit : `feat(ajouter): auto-fill next free slot number`
 ### Ajouté
