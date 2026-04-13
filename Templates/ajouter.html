@@ -61,12 +61,16 @@
     <script>
         document.getElementById('btn-auto-n').addEventListener('click', function () {
             fetch('/next_emplacement')
-                .then(function (r) { return r.json(); })
+                .then(function (r) {
+                    if (!r.ok) throw new Error('Erreur ' + r.status);
+                    return r.json();
+                })
                 .then(function (data) {
                     var input = document.getElementById('n');
                     input.value = data.n;
                     input.dispatchEvent(new Event('input', { bubbles: true }));
-                });
+                })
+                .catch(function (err) { console.error('next_emplacement:', err); });
         });
     </script>
 </body>

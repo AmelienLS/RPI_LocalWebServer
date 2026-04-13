@@ -3,7 +3,7 @@
         ['1','2','3','4','5','6','7','8','9','0','<--'],
         ['a','z','e','r','t','y','u','i','o','p'],
         ['q','s','d','f','g','h','j','k','l','m'],
-        ['MAJ','w','x','c','v','b','n','-','_','OK'],
+        ['MAJ','w','x','c','v','b','n','-','_','.','OK'],
         ['ESPACE']
     ];
 
@@ -79,7 +79,6 @@
 
         } else {
             if (target) target.value += shifted ? label.toUpperCase() : label;
-            if (shifted) { shifted = false; updateShift(); }
         }
 
         if (target) target.dispatchEvent(new Event('input', { bubbles: true }));
