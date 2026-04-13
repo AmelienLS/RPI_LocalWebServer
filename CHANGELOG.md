@@ -1,4 +1,10 @@
 # Journal des modifications
+## [3.16.2] - 2026-04-13
+> Commit : `feat(ajouter): auto-fill next free slot number`
+### Ajouté
+- Route `GET /next_emplacement` : retourne en JSON le plus petit numéro d'emplacement libre (`n`) en cherchant d'abord les trous (ex. si 133 est libre mais le max est 145, retourne `"133"`).
+- Bouton « Emplacement libre » à côté du champ `n` dans `ajouter.html` : remplit automatiquement le champ via un appel fetch à `/next_emplacement`.
+
 ## [3.16.1] - 2026-04-07
 > Commit : `feat(ecran): add column sorting to screen table`
 ### Ajouté

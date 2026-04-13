@@ -48,12 +48,26 @@
             <input type="text" id="type" name="type" value="{{ type or '' }}" required>
 
             <label for="n">N° (3 caractères):</label>
-            <input type="text" id="n" name="n" value="{{ n or '' }}" required>
+            <div class="n-row">
+                <input type="text" id="n" name="n" value="{{ n or '' }}" required>
+                <button type="button" id="btn-auto-n">Emplacement libre</button>
+            </div>
 
             <button type="submit">Ajouter</button>
         </form>
     </div>
     <script src="/Functions/vkeyboard.js"></script>
     <script src="/Functions/rotation.js"></script>
+    <script>
+        document.getElementById('btn-auto-n').addEventListener('click', function () {
+            fetch('/next_emplacement')
+                .then(function (r) { return r.json(); })
+                .then(function (data) {
+                    var input = document.getElementById('n');
+                    input.value = data.n;
+                    input.dispatchEvent(new Event('input', { bubbles: true }));
+                });
+        });
+    </script>
 </body>
 </html>

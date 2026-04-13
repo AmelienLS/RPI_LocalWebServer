@@ -39,3 +39,24 @@ label {
     background-color: #e5d200;
     color: #191B2A;
 }
+
+/* Ligne champ + bouton "Emplacement libre" */
+.n-row {
+    display: flex;
+    gap: 0.5rem;
+    align-items: stretch;
+    margin-bottom: 1rem;
+}
+
+.n-row input {
+    flex: 1;
+    margin-bottom: 0;
+}
+
+#btn-auto-n {
+    width: auto;
+    min-width: 140px;
+    white-space: nowrap;
+    font-size: 0.9rem;
+    padding: 0 1rem;
+}

@@ -452,6 +452,25 @@ def logout():
     return redirect('/')
 
 # Route pour ajouter un écran
+@app.route('/next_emplacement')
+def next_emplacement():
+    """Retourne le plus petit numéro d'emplacement libre (en cherchant les trous en premier)."""
+    if 'admin' not in session or not session['admin']:
+        return jsonify({'error': 'unauthorized'}), 403
+    with get_db_connection() as conn:
+        rows = conn.execute('SELECT n FROM serigraphie').fetchall()
+    used = set()
+    for r in rows:
+        try:
+            used.add(int(r['n']))
+        except (ValueError, TypeError):
+            pass
+    n = 1
+    while n in used:
+        n += 1
+    return jsonify({'n': str(n).zfill(3)})
+
+
 @app.route('/ajouter', methods=['GET', 'POST'])
 def ajouter():
     """
