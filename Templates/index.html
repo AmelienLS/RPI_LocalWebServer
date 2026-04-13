@@ -76,11 +76,13 @@
             {% if success %}
                 <div class="confirmation-message" style="color: green;">{{ success }}</div>
             {% endif %}
+            {% if branch %}
+            <p class="branch-label">{{ branch }}</p>
+            {% endif %}
+            {% if commit %}
+            <p class="branch-label">{{ commit }}</p>
+            {% endif %}
         </div>
-
-        {% if branch %}
-        <p class="branch-label">{{ branch }}</p>
-        {% endif %}
 
         {% if alerte_sortis %}
         <div class="sortis-alerte">

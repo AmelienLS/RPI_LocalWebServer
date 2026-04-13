@@ -1,4 +1,12 @@
 # Journal des modifications
+## [3.17.1] - 2026-04-13
+> Commit : `feat(index): display active branch and commit name below main container`
+### Ajouté
+- Affichage de la branche git active et du nom du dernier commit (message complet, sans hash) en bas du container principal sur la page d'accueil.
+### Modifié
+- `APP.py` : `commit` récupéré via `git log -1 --pretty=format:%s` (message seul) et passé au template.
+- `Templates/index.html` : labels branche et commit déplacés à l'intérieur de `.form-container` pour apparaître sous le container et non à sa droite.
+
 ## [3.17.0] - 2026-04-13
 > Commit : `feat(index): add git pull + service restart button for admins`
 ### Ajouté

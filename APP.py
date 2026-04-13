@@ -401,11 +401,16 @@ def index():
             ['git', '-C', project_dir, 'rev-parse', '--abbrev-ref', 'HEAD'],
             capture_output=True, text=True
         ).stdout.strip()
+        commit = subprocess.run(
+            ['git', '-C', project_dir, 'log', '-1', '--pretty=format:%s'],
+            capture_output=True, text=True
+        ).stdout.strip()
     except Exception:
         branch = ''
+        commit = ''
     return render_template('index.html', prenom=prenom, admin=admin, a_laver=a_laver,
                            alerte_sortis=alerte_sortis, sortis_longtemps=sortis_longtemps,
-                           branch=branch)
+                           branch=branch, commit=commit)
 
 
 # Route pour marquer un écran comme lavé depuis l'accueil
