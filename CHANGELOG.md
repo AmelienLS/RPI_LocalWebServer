@@ -1,4 +1,13 @@
 # Journal des modifications
+## [3.17.2] - 2026-04-13
+> Commit : `chore(linux): centralize repo URL in shared config.env`
+### Ajouté
+- `Setups Linux/config.env` : fichier de configuration centralisé pour les scripts Linux. Contient `REPO_URL` et `REPO_DOC_URL`. En cas de changement de propriétaire GitHub, **seul ce fichier est à modifier**.
+- `CHANGER_REPO.md` : procédure complète décrivant tous les fichiers à mettre à jour en cas de changement de propriétaire ou de nom du dépôt GitHub.
+### Modifié
+- `Setups Linux/demarrage_release.sh`, `demarrage_branche.sh`, `installer_service_rpi.sh` : suppression de `REPO_URL` hardcodé, source `config.env` au démarrage. Le `Documentation=` du service systemd utilise désormais `${REPO_DOC_URL}`.
+- `Setups Linux/Legacy/DémarrageTest.sh`, `Setup_release.sh` : idem, source `../config.env` (chemin relatif depuis Legacy).
+
 ## [3.17.1] - 2026-04-13
 > Commit : `feat(index): display active branch and commit name below main container`
 ### Ajouté

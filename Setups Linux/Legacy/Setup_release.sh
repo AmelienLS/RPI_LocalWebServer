@@ -5,8 +5,12 @@
 
 set -euo pipefail  # Mode strict : arrêt sur erreur, variables non définies, erreurs de pipeline
 
-# === CONFIGURATION ===
+# -- Config partagée ------------------------------------------------------------
 readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=../config.env
+source "$SCRIPT_DIR/../config.env"
+
+# === CONFIGURATION ===
 readonly PROJECT_SRC_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 readonly USER_NAME="$(whoami)"
 readonly USER_HOME="$(eval echo ~$USER_NAME)"
@@ -220,7 +224,7 @@ echo "⚙️ Création du service systemd : $SERVICE_NAME"
 sudo bash -c "cat > $SERVICE_FILE" <<EOF
 [Unit]
 Description=RPI LocalWebServer - Flask App via Gunicorn ($USER_NAME)
-Documentation=https://github.com/AmelienLS/RPI_LocalWebServer
+Documentation=${REPO_DOC_URL}
 After=network-online.target
 Wants=network-online.target
 

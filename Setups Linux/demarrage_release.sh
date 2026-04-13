@@ -19,8 +19,12 @@
 # ==============================================================================
 set -euo pipefail
 
+# -- Config partagée ------------------------------------------------------------
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=config.env
+source "$SCRIPT_DIR/config.env"
+
 # -- Configuration --------------------------------------------------------------
-REPO_URL="https://github.com/AmelienLS/RPI_LocalWebServer.git"
 BRANCH="Release"
 PROJECT_DIR="${PROJECT_DIR:-$HOME/RPI_LocalWebServer}"
 VENV_DIR="$PROJECT_DIR/.venv"
