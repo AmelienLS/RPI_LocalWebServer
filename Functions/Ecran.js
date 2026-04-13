@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', function () {
     const table  = document.getElementById('serigraphie-table');
     const tbody  = table.querySelector('tbody');
-    const filters = table.querySelectorAll('.filter-input');
+    const filters = document.querySelectorAll('.filter-input');
 
     // Ordre original des lignes pour le retour à défaut
     const originalOrder = Array.from(tbody.querySelectorAll('tr'));
