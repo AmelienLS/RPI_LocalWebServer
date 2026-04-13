@@ -16,7 +16,6 @@ venv/
 !.env.example
 !.env.development
 .claude
-CLAUDE.md
 
 # OS / tools
 .DS_Store
