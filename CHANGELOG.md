@@ -1,4 +1,11 @@
 # Journal des modifications
+## [3.17.7] - 2026-04-14
+> Commit : `refactor(index): extract inline update JS into Functions/update.js`
+### Ajouté
+- `Functions/update.js` : logique du bouton "Mettre à jour" (fetch `/update`, affichage résultat, compte à rebours de redémarrage). Encapsulée dans une IIFE.
+### Modifié
+- `Templates/index.html` : bloc `<script>` inline remplacé par `<script src="/Functions/update.js"></script>`.
+
 ## [3.17.6] - 2026-04-14
 > Commit : `refactor(templates): replace hardcoded paths with url_for()`
 ### Modifié
