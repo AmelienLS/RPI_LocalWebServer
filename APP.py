@@ -534,7 +534,9 @@ def ajouter():
                     field_name = "Emplacement"
                     n = ""
                 error_message = f'Erreur: {field_name} déjà utilisée.'
-            return render_template('ajouter.html', error=error_message, # type: ignore
+            else:
+                error_message = f"Erreur lors de l'ajout : {error_str}"
+            return render_template('ajouter.html', error=error_message,
                                    ref_ecran=ref_ecran, libelle=libelle, pcb=pcb, fab=fab, n_fab=n_fab, type=type_serigraphie, n=n)
 
     return render_template('ajouter.html')
@@ -605,7 +607,7 @@ def ecran():
     
     with get_db_connection() as conn:
         cursor = conn.cursor()
-        cursor.execute('SELECT ref_ecran, libelle, pcb, fab, n_fab, type, n, sorti, lave FROM serigraphie')
+        cursor.execute('SELECT ref_ecran, libelle, pcb, fab, n_fab, type, n, sorti, lave FROM serigraphie ORDER BY n')
         ecrans = cursor.fetchall()
 
     admin = session.get('admin', 0) == 1
@@ -1092,11 +1094,9 @@ def ranger():
 @app.route('/close_db')
 def close_db():
     """
-    Ferme la connexion à la base de données.
-    - Affiche un message de confirmation sur la page d'accueil.
+    Redirige vers la page d'accueil (route vestigiale conservée pour compatibilité).
     """
-    return render_template('index.html', prenom=session.get('prenom'), admin=session.get('admin')==1,
-                           success="La connexion à la base de données a été fermée.")
+    return redirect('/index')
     
 @app.route("/update", methods=["POST"])
 def update():

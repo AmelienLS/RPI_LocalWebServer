@@ -19,7 +19,7 @@
             <select name="ref_ecran" id="ref_ecran" required>
                 {% for ecran in serigraphies %}
                 <option value="{{ ecran['ref_ecran'] }}">
-                    {{ ecran['libelle'] }} {{ecran['ref_ecran']}}
+                    [{{ ecran['n'] }}] {{ ecran['libelle'] }} — {{ ecran['ref_ecran'] }}
                 </option>
                 {% endfor %}
             </select>

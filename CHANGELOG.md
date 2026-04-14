@@ -1,4 +1,15 @@
 # Journal des modifications
+## [3.17.3] - 2026-04-14
+> Commit : `fix: correct four bugs identified during code audit`
+### Corrigé
+- `APP.py` (`ajouter`) : variable `error_message` pouvait être non liée si une `IntegrityError` générée par SQLite ne correspondait pas au pattern `UNIQUE constraint failed`. Ajout d'un `else` qui affiche le message brut.
+- `APP.py` (`close_db`) : la route rendait `index.html` sans les variables requises par le template (`a_laver`, `alerte_sortis`, etc.), provoquant une erreur Jinja. La route redirige désormais vers `/index`.
+- `APP.py` (`ecran`) : la requête SQL n'avait pas de clause `ORDER BY`. Les écrans sont maintenant triés par emplacement `n` par défaut.
+- `Templates/ranger.html` : le dropdown des écrans sortis n'affichait pas l'emplacement physique `n`. Chaque option affiche maintenant `[n] Libellé — ref_ecran`.
+### Modifié
+- `tests/web/test_close_db.py` : mis à jour pour valider la redirection 302 vers `/index` au lieu de l'ancien comportement 200.
+- `tests/system/test_shutdown.py` : ajout d'un test documentant que `/shutdown` est intentionnellement accessible sans authentification (bouton kiosque sur la page de login).
+
 ## [3.17.2] - 2026-04-13
 > Commit : `chore(linux): centralize repo URL in shared config.env`
 ### Ajouté
