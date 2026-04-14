@@ -1,4 +1,12 @@
 # Journal des modifications
+## [3.19.0] - 2026-04-14
+> Commit : `feat(stats): add date range filter`
+### Ajouté
+- `APP.py` (`/stats`) : paramètres GET `date_debut` et `date_fin` pour filtrer les stats par plage de dates. Les deux requêtes SQL (écrans et personnes) appliquent le filtre via `DATE(sortie_ts)`. Fonctionne aussi avec un seul des deux paramètres.
+- `Templates/stats.html` : formulaire de filtrage par dates avec label de plage active et lien "Réinitialiser".
+- `Styles/stats.css` : styles pour le formulaire de filtre (`.stats-filter`, `.stats-filter-reset`, `.stats-filter-label`).
+- `tests/web/test_stats.py` : 3 nouveaux tests couvrant filtre avec plage complète, exclusion hors plage, et filtre `date_debut` seul.
+
 ## [3.18.5] - 2026-04-14
 > Commit : `feat(prendre): show screen details after taking`
 ### Modifié

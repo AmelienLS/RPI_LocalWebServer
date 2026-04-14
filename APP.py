@@ -803,25 +803,48 @@ def stats():
     Affiche les statistiques d'utilisation des écrans.
     - Admin uniquement.
     - Nombre de passages par écran (tri décroissant) et par personne.
+    - Filtrage optionnel par plage de dates (date_debut / date_fin en GET).
     """
+
+    date_debut = request.args.get('date_debut', '').strip()
+    date_fin = request.args.get('date_fin', '').strip()
+
+    # Construire le filtre de date pour les requêtes SQL
+    date_filter = ''
+    params_ecrans: list = []
+    params_personnes: list = []
+    if date_debut and date_fin:
+        date_filter = 'WHERE DATE(sl.sortie_ts) BETWEEN ? AND ?'
+        params_ecrans = [date_debut, date_fin]
+        params_personnes = [date_debut, date_fin]
+    elif date_debut:
+        date_filter = 'WHERE DATE(sl.sortie_ts) >= ?'
+        params_ecrans = [date_debut]
+        params_personnes = [date_debut]
+    elif date_fin:
+        date_filter = 'WHERE DATE(sl.sortie_ts) <= ?'
+        params_ecrans = [date_fin]
+        params_personnes = [date_fin]
 
     with get_db_connection() as conn:
         cursor = conn.cursor()
-        cursor.execute('''
+        cursor.execute(f'''
             SELECT s.ref_ecran, s.libelle, s.fab, s.type, COUNT(sl.id) AS total_passages
             FROM serigraphie s
             INNER JOIN sortie_logs sl ON s.ref_ecran = sl.ref_ecran
+            {date_filter}
             GROUP BY s.ref_ecran, s.libelle, s.fab, s.type
             ORDER BY total_passages DESC
-        ''')
+        ''', params_ecrans)
         ecrans_stats = cursor.fetchall()
 
-        cursor.execute('''
+        cursor.execute(f'''
             SELECT personne, COUNT(*) AS total_passages
-            FROM sortie_logs
+            FROM sortie_logs sl
+            {date_filter}
             GROUP BY personne
             ORDER BY total_passages DESC
-        ''')
+        ''', params_personnes)
         personnes_stats = cursor.fetchall()
 
         total_passages = sum(row['total_passages'] for row in ecrans_stats)
@@ -831,6 +854,8 @@ def stats():
         ecrans_stats=ecrans_stats,
         personnes_stats=personnes_stats,
         total_passages=total_passages,
+        date_debut=date_debut,
+        date_fin=date_fin,
     )
 
 
