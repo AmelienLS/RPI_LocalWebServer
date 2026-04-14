@@ -27,8 +27,12 @@ def test_shutdown_windows_exits_process(monkeypatch, client):
     assert "Serveur Windows arrêté" in response.data.decode("utf-8")
 
 
-def test_shutdown_accessible_without_auth(client):
+def test_shutdown_accessible_without_auth(monkeypatch, client):
     """Le bouton Éteindre est sur la page de login — intentionnellement sans auth (kiosque)."""
+    # Prevent actual shutdown or process exit on the GitHub Actions VM
+    monkeypatch.setattr(APP.subprocess, "run", lambda *args, **kwargs: None)
+    monkeypatch.setattr(APP.os, "_exit", lambda code: None)
+
     response = client.post("/shutdown")
     # Ne doit pas retourner 401/403
     assert response.status_code == 200
