@@ -1,4 +1,9 @@
 # Journal des modifications
+## [3.17.9] - 2026-04-14
+> Commit : `refactor(ajouterU): remove redundant SELECT before INSERT`
+### Modifié
+- `APP.py` (`ajouterU`) : suppression du `SELECT` manuel avant `INSERT`. La contrainte `UNIQUE` de la base suffit — on attrape directement l'`IntegrityError` et on en extrait le message, comme dans la route `ajouter`.
+
 ## [3.17.8] - 2026-04-14
 > Commit : `refactor(routes): replace os.path with pathlib in send_functions and send_images`
 ### Modifié

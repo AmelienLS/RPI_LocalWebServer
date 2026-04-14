@@ -591,35 +591,22 @@ def ajouterU():
         nom = request.form['nom']
         admin = 1 if 'admin' in request.form else 0
 
-        with get_db_connection() as conn:
-            cursor = conn.cursor()
-            cursor.execute('SELECT identifiant FROM users WHERE identifiant = ?', (identifiant,))
-            existing_user = cursor.fetchone()
-
-            if existing_user:
-                error = "L'identifiant existe déjà. Veuillez en choisir un autre."
-                return render_template('ajouterU.html', error=error,
-                                       identifiant=identifiant, prenom=prenom, nom=nom)
-
-            try:
-                cursor.execute('INSERT INTO users (identifiant, prenom, nom, admin) VALUES (?, ?, ?, ?)',
-                               (identifiant, prenom, nom, admin))
+        try:
+            with get_db_connection() as conn:
+                conn.execute(
+                    'INSERT INTO users (identifiant, prenom, nom, admin) VALUES (?, ?, ?, ?)',
+                    (identifiant, prenom, nom, admin),
+                )
                 conn.commit()
-            except sqlite3.IntegrityError as e:
-                error_str = str(e)
-                if "UNIQUE constraint failed:" in error_str:
-                    constraint = error_str.split("UNIQUE constraint failed: ")[1]
-                    if "identifiant" in constraint:
-                        field_name = "Identifiant"
-                        identifiant = ""
-                    else:
-                        field_name = constraint
-                    error = f'Erreur: {field_name} déjà utilisé.'
-                else:
-                    # Cas générique si le message d'erreur n'est pas celui attendu
-                    error = f"Erreur lors de l'ajout de l'utilisateur : {error_str}"
-                return render_template('ajouterU.html', error=error,
-                                       identifiant=identifiant, prenom=prenom, nom=nom)
+        except sqlite3.IntegrityError as e:
+            error_str = str(e)
+            if "UNIQUE constraint failed:" in error_str and "identifiant" in error_str:
+                identifiant = ""
+                error = "L'identifiant existe déjà. Veuillez en choisir un autre."
+            else:
+                error = f"Erreur lors de l'ajout de l'utilisateur : {error_str}"
+            return render_template('ajouterU.html', error=error,
+                                   identifiant=identifiant, prenom=prenom, nom=nom)
 
         return render_template('ajouterU.html', success="Utilisateur ajouté avec succès !")
 
