@@ -607,7 +607,7 @@ def ecran():
     
     with get_db_connection() as conn:
         cursor = conn.cursor()
-        cursor.execute('SELECT ref_ecran, libelle, pcb, fab, n_fab, type, n, sorti, lave FROM serigraphie ORDER BY n')
+        cursor.execute('SELECT ref_ecran, libelle, pcb, fab, n_fab, type, n, sorti, lave FROM serigraphie ORDER BY CAST(n AS INTEGER)')
         ecrans = cursor.fetchall()
 
     admin = session.get('admin', 0) == 1
