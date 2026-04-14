@@ -1,4 +1,10 @@
 # Journal des modifications
+## [3.18.5] - 2026-04-14
+> Commit : `feat(prendre): show screen details after taking`
+### Modifié
+- `APP.py` (`/prendre`) : passe désormais `apercu` (données de l'écran) au template après chaque opération — prise réussie ou écran déjà sorti.
+- `Templates/prendre.html` : affiche un bloc d'infos (emplacement en premier et en vert, puis réf., libellé, état) après la soumission du formulaire. Workflow inchangé : 1 étape.
+
 ## [3.18.4] - 2026-04-14
 > Commit : `feat(ranger): add live filter input above screen dropdown`
 ### Ajouté

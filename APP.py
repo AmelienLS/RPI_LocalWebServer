@@ -897,34 +897,29 @@ def prendre():
                 elif len(resultats) > 1:
                     refs = ", ".join(str(r['ref_ecran']) for r in resultats)
                     message = f"Plusieurs écrans correspondent : {refs}. Précisez votre recherche."
-                    return render_template('prendre.html', message=message, n_value=None)
+                    return render_template('prendre.html', message=message, apercu=None)
 
-            if ecran:
-                if ecran['sorti'] == 1:
-                    message = "Erreur : cet écran a déjà été pris."
-                    n_value = ecran['n']
-                else:
-                    cursor.execute('UPDATE serigraphie SET sorti = 1 WHERE ref_ecran = ?', (ecran['ref_ecran'],))
-                    sortie_dt = _current_timestamp()
-                    cursor.execute(
-                        """
-                        INSERT INTO sortie_logs (ref_ecran, libelle, personne, sortie_ts)
-                        VALUES (?, ?, ?, ?)
-                        """,
-                        (ecran['ref_ecran'], ecran['libelle'], session.get('prenom', 'Inconnu'), sortie_dt.isoformat()),
-                    )
-                    conn.commit()
-                    _sync_daily_log(conn, sortie_dt.date())
-                    libelle = ecran['libelle']
-                    message = f"écran {libelle} pris avec succès."
-                    n_value = ecran['n']
-            else:
-                message = "Erreur : écran non trouvée."
-                n_value = None
+            if not ecran:
+                return render_template('prendre.html', message="Erreur : écran non trouvée.", apercu=None)
 
-        return render_template('prendre.html', message=message, n_value=n_value)
+            if ecran['sorti'] == 1:
+                return render_template('prendre.html', message="Erreur : cet écran a déjà été pris.", apercu=ecran)
 
-    return render_template('prendre.html', message=None, n_value=None)
+            cursor.execute('UPDATE serigraphie SET sorti = 1 WHERE ref_ecran = ?', (ecran['ref_ecran'],))
+            sortie_dt = _current_timestamp()
+            cursor.execute(
+                """
+                INSERT INTO sortie_logs (ref_ecran, libelle, personne, sortie_ts)
+                VALUES (?, ?, ?, ?)
+                """,
+                (ecran['ref_ecran'], ecran['libelle'], session.get('prenom', 'Inconnu'), sortie_dt.isoformat()),
+            )
+            conn.commit()
+            _sync_daily_log(conn, sortie_dt.date())
+            message = f"écran {ecran['libelle']} pris avec succès."
+            return render_template('prendre.html', message=message, apercu=ecran)
+
+    return render_template('prendre.html', message=None, apercu=None)
 
 # Route pour modifier un écran
 @app.route('/modifier', methods=['GET', 'POST'])
