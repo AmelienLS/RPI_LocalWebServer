@@ -3,8 +3,9 @@ import sqlite3
 
 def test_ajouterU_requires_admin(client):
     response = client.get("/ajouterU")
+    # Sans session : redirige vers / (login)
     assert response.status_code == 302
-    assert response.headers["Location"].endswith("/index")
+    assert response.headers["Location"] == "/"
 
 
 def test_ajouterU_duplicate_identifiant(client, add_user, set_user_session):

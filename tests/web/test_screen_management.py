@@ -122,8 +122,9 @@ def test_modifier_returns_error_when_reference_missing(client, set_user_session)
 
 def test_supprimer_requires_admin(client):
     response = client.get("/supprimer")
+    # Sans session : redirige vers / (login)
     assert response.status_code == 302
-    assert response.headers["Location"].endswith("/index")
+    assert response.headers["Location"] == "/"
 
 
 def test_supprimer_check_and_delete(client, add_serigraphie, test_db, set_user_session):

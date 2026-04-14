@@ -1,4 +1,12 @@
 # Journal des modifications
+## [3.17.4] - 2026-04-14
+> Commit : `refactor(auth): introduce login_required and admin_required decorators`
+### Ajouté
+- `APP.py` : décorateurs `login_required` et `admin_required` (via `functools.wraps`). `login_required` redirige vers `/` si non connecté ; `admin_required` redirige vers `/` si non connecté, vers `/index` si non admin.
+### Modifié
+- `APP.py` : 14 routes mises à jour pour utiliser les décorateurs à la place du boilerplate inline (`if 'prenom' not in session` / `if 'admin' not in session`). Les 2 routes JSON (`/next_emplacement`, `/update`) conservent leur vérification inline car elles retournent un 403 JSON.
+- `tests/web/test_ajouter.py`, `test_screen_management.py`, `test_user_management.py` : 3 tests mis à jour pour refléter le nouveau comportement (sans session → redirection vers `/` et non `/index`).
+
 ## [3.17.3] - 2026-04-14
 > Commit : `fix: correct four bugs identified during code audit`
 ### Corrigé

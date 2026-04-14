@@ -3,9 +3,9 @@ import sqlite3
 
 def test_ajouter_requires_admin(client):
     response = client.get("/ajouter")
-    # Non admin users are redirected to /index
+    # Sans session : redirige vers / (login)
     assert response.status_code == 302
-    assert response.headers["Location"].endswith("/index")
+    assert response.headers["Location"] == "/"
 
 
 def test_ajouter_validation_error(client, set_user_session):

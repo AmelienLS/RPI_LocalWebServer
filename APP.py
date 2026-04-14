@@ -11,6 +11,7 @@ import subprocess
 import threading
 import webbrowser
 import zipfile
+from functools import wraps
 from datetime import datetime, date
 from io import BytesIO
 
@@ -237,6 +238,28 @@ def _build_logs_archive(delete_files: bool = False) -> BytesIO:
     return archive_stream
 
 
+def login_required(f):
+    """Redirige vers la page de connexion si l'utilisateur n'est pas connecté."""
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        if 'prenom' not in session:
+            return redirect('/')
+        return f(*args, **kwargs)
+    return decorated
+
+
+def admin_required(f):
+    """Redirige vers l'accueil si l'utilisateur n'est pas admin (implique aussi login_required)."""
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        if 'prenom' not in session:
+            return redirect('/')
+        if not session.get('admin'):
+            return redirect('/index')
+        return f(*args, **kwargs)
+    return decorated
+
+
 _SERI_COLUMNS = ['ref_ecran', 'libelle', 'pcb', 'fab', 'n_fab', 'type', 'n']
 
 
@@ -361,15 +384,13 @@ def login():
 
 # Route de la page d'accueil
 @app.route('/index')
+@login_required
 def index():
     """
     Affiche la page d'accueil.
-    - Vérifie que l'utilisateur est connecté (présence du prénom dans la session).
     - Passe à la vue le prénom et le statut admin pour l'affichage conditionnel.
     - Récupère la liste des écrans rentrés mais non lavés (sorti=0, lave=0).
     """
-    if 'prenom' not in session:
-        return redirect('/')
 
     prenom = session['prenom']
     admin = session['admin'] == 1
@@ -415,6 +436,7 @@ def index():
 
 # Route pour marquer un écran comme lavé depuis l'accueil
 @app.route('/laver', methods=['POST'])
+@login_required
 def laver():
     """
     Marque un écran comme lavé.
@@ -422,8 +444,6 @@ def laver():
     - Met a jour la derniere entree sortie_logs concernee (lavee 0 -> 1).
     - Synchronise le CSV journalier correspondant.
     """
-    if 'prenom' not in session:
-        return redirect('/')
 
     ref_ecran = request.form.get('ref_ecran')
     with get_db_connection() as conn:
@@ -487,15 +507,13 @@ def next_emplacement():
 
 
 @app.route('/ajouter', methods=['GET', 'POST'])
+@admin_required
 def ajouter():
     """
     Permet l'ajout d'un nouvel écran.
-    - Vérifie que l'utilisateur est un administrateur.
     - Valide les contraintes sur les champs et insère la donnée dans la BD.
     - Gère les erreurs d'unicité au niveau de la base de données.
-    """
-    if 'admin' not in session or not session['admin']:
-        return redirect('/index') 
+    """ 
     if request.method == 'POST':
         data = request.form
         ref_ecran = data['ref_ecran']
@@ -543,14 +561,13 @@ def ajouter():
 
 # Route pour ajouter un utilisateur
 @app.route('/ajouterU', methods=['GET', 'POST'])
+@admin_required
 def ajouterU():
     """
     Permet à un administrateur d'ajouter un nouvel utilisateur.
     - Vérifie l'unicité de l'identifiant.
     - Insère dans la base en gérant les potentielles erreurs d'intégrité.
     """
-    if 'admin' not in session or not session['admin']:
-        return redirect('/index')   
 
     # Définit une valeur par défaut pour éviter la variable possiblement non liée
     error = None
@@ -597,13 +614,12 @@ def ajouterU():
 
 # Route affichant le tableau des écrans
 @app.route('/ecran')
+@login_required
 def ecran():
     """
     Affiche la liste complète des écrans.
     Récupère les données depuis la base et transmet le statut admin pour un affichage conditionnel.
     """
-    if 'prenom' not in session:
-        return redirect('/')
     
     with get_db_connection() as conn:
         cursor = conn.cursor()
@@ -615,15 +631,12 @@ def ecran():
 
 
 @app.route("/export_logs", methods=["GET"])
+@admin_required
 def export_logs():
     """
     Permet à un administrateur d'exporter tous les journaux quotidiens sous forme d'archive ZIP.
     Le navigateur invite ensuite à choisir l'emplacement d'enregistrement.
     """
-    if 'prenom' not in session:
-        return redirect('/')
-    if not session.get('admin'):
-        return redirect('/index')
 
     archive_stream = _build_logs_archive(delete_files=False)
     filename = f"screen_logs_{datetime.now().strftime('%Y%m%d_%H%M%S')}.zip"
@@ -636,12 +649,9 @@ def export_logs():
 
 
 @app.route('/export_serigraphie')
+@admin_required
 def export_serigraphie():
     """Exporte la table serigraphie au format XLSX. Admin uniquement."""
-    if 'prenom' not in session:
-        return redirect('/')
-    if not session.get('admin'):
-        return redirect('/index')
 
     with get_db_connection() as conn:
         cursor = conn.cursor()
@@ -667,16 +677,13 @@ def export_serigraphie():
 
 
 @app.route('/import_serigraphie', methods=['POST'])
+@admin_required
 def import_serigraphie():
     """Importe des écrans depuis un fichier CSV ou XLSX. Admin uniquement.
 
     - Insère les nouvelles lignes directement.
     - Si des conflits (ref_ecran déjà existant) sont détectés, rend la page de résolution.
     """
-    if 'prenom' not in session:
-        return redirect('/')
-    if not session.get('admin'):
-        return redirect('/index')
 
     file = request.files.get('import_file')
     if not file or file.filename == '':
@@ -736,12 +743,9 @@ def import_serigraphie():
 
 
 @app.route('/import_serigraphie/confirm', methods=['POST'])
+@admin_required
 def import_serigraphie_confirm():
     """Applique les choix de résolution des conflits d'import. Admin uniquement."""
-    if 'prenom' not in session:
-        return redirect('/')
-    if not session.get('admin'):
-        return redirect('/index')
 
     conflicts_json = request.form.get('conflicts_json', '[]')
     overwrite_all = request.form.get('overwrite_all') == '1'
@@ -780,16 +784,13 @@ def import_serigraphie_confirm():
 
 
 @app.route('/stats')
+@admin_required
 def stats():
     """
     Affiche les statistiques d'utilisation des écrans.
     - Admin uniquement.
     - Nombre de passages par écran (tri décroissant) et par personne.
     """
-    if 'prenom' not in session:
-        return redirect('/')
-    if not session.get('admin'):
-        return redirect('/index')
 
     with get_db_connection() as conn:
         _ensure_log_tables(conn)
@@ -822,15 +823,12 @@ def stats():
 
 
 @app.route("/reset_stats", methods=["POST"])
+@admin_required
 def reset_stats():
     """
     Remet à zéro les statistiques en vidant la table sortie_logs.
     - Admin uniquement.
     """
-    if 'prenom' not in session:
-        return redirect('/')
-    if not session.get('admin'):
-        return redirect('/index')
 
     with get_db_connection() as conn:
         _ensure_log_tables(conn)
@@ -841,14 +839,11 @@ def reset_stats():
 
 
 @app.route("/purge_logs", methods=["POST"])
+@admin_required
 def purge_logs():
     """
     Exporte tous les journaux puis supprime les fichiers CSV pour repartir sur un dossier vide.
     """
-    if 'prenom' not in  session:
-        return redirect('/')
-    if not session.get('admin'):
-        return redirect('/index')
 
     archive_stream = _build_logs_archive(delete_files=True)
     filename = f"screen_logs_cleared_{datetime.now().strftime('%Y%m%d_%H%M%S')}.zip"
@@ -861,14 +856,13 @@ def purge_logs():
 
 # Route pour prendre un écran (marquer comme sorti)
 @app.route('/prendre', methods=['GET', 'POST'])
+@login_required
 def prendre():
     """
     Permet de prendre (emprunter) un écran.
     - Vérifie que l'écran n'est pas déjà marqué comme sortie.
     - Met à jour l'état de l'écran et renvoie un message de confirmation.
     """
-    if 'prenom' not in session:
-        return redirect('/')
 
     if request.method == 'POST':
         ref_ecran = request.form['ref_ecran']
@@ -924,6 +918,7 @@ def prendre():
 
 # Route pour modifier un écran
 @app.route('/modifier', methods=['GET', 'POST'])
+@admin_required
 def modifier():
     """
     Permet la modification d'un écran existante.
@@ -931,8 +926,6 @@ def modifier():
     - Mode modification : les données peuvent être mises à jour, avec ou sans changement de référence.
     - Vérifie l'unicité de la nouvelle référence en cas de modification.
     """
-    if 'admin' not in session or not session['admin']:
-        return redirect('/index') 
 
     message = None
     error = False
@@ -1005,14 +998,13 @@ def modifier():
     
 # Route pour supprimer un écran
 @app.route('/supprimer', methods=['GET', 'POST'])
+@admin_required
 def supprimer():
     """
     Permet la suppression d'un écran.
     - Mode "check" : demande de confirmation en affichant les détails de la écran.
     - Mode "delete" : suppression effective de l'écran dans la BD.
     """
-    if 'admin' not in session or not session['admin']:
-        return redirect('/index') 
     if request.method == 'POST':
         ref_ecran = request.form.get('ref_ecran', '').strip()
         action = request.form.get('action')
@@ -1037,13 +1029,12 @@ def supprimer():
 
 # Route pour ranger un écran
 @app.route('/ranger', methods=['GET', 'POST'])
+@login_required
 def ranger():
     """
     Permet de ranger un écran.
     - Met à jour l'attribut 'sorti' et enregistre l'état de lavage.
     """
-    if 'prenom' not in session:
-        return redirect('/')
 
     error = None
     emplacement = None
