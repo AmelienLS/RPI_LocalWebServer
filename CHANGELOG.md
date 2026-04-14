@@ -1,4 +1,10 @@
 # Journal des modifications
+## [3.18.0] - 2026-04-14
+> Commit : `test(update, modifier): add missing route tests`
+### Ajouté
+- `tests/web/test_update.py` : 5 tests pour la route `/update` — accès non-admin (403 JSON), OS non-Linux (`will_restart: false`), Linux (`will_restart: true`, thread mocké), et vérification du champ `branch`.
+- `tests/web/test_screen_management.py` : test `test_modifier_requires_admin` — vérifie la redirection vers `/` sans session.
+
 ## [3.17.9] - 2026-04-14
 > Commit : `refactor(ajouterU): remove redundant SELECT before INSERT`
 ### Modifié

@@ -120,6 +120,13 @@ def test_modifier_returns_error_when_reference_missing(client, set_user_session)
     assert "non trouvée" in response.data.decode("utf-8")
 
 
+def test_modifier_requires_admin(client):
+    response = client.get("/modifier")
+    # Sans session : redirige vers / (login)
+    assert response.status_code == 302
+    assert response.headers["Location"] == "/"
+
+
 def test_supprimer_requires_admin(client):
     response = client.get("/supprimer")
     # Sans session : redirige vers / (login)
