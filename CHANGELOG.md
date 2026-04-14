@@ -1,4 +1,9 @@
 # Journal des modifications
+## [3.18.3] - 2026-04-14
+> Commit : `feat(ecran): add confirmation dialog before taking a screen`
+### Ajouté
+- `Templates/ecran.html` : `onsubmit="return confirm(...)"` sur le formulaire "Prendre" du tableau — affiche la référence et le libellé de l'écran avant validation.
+
 ## [3.18.2] - 2026-04-14
 > Commit : `feat(index): add ranger link on overdue screens panel`
 ### Ajouté
