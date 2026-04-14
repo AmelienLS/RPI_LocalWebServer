@@ -1,0 +1,47 @@
+/* --- Styles spécifiques à la page "gérer utilisateurs" --- */
+
+.container {
+    max-width: 800px;
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1.5rem;
+}
+
+thead th {
+    background-color: #2A2D46;
+    padding: 0.6rem 0.75rem;
+    font-size: 0.95rem;
+    text-align: left;
+}
+
+tbody td {
+    padding: 0.6rem 0.75rem;
+    font-size: 0.9rem;
+    border: 1px solid #2A2D46;
+}
+
+tbody tr:nth-child(odd) td {
+    background-color: #1F2233;
+}
+
+.actions-cell {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.actions-cell form {
+    margin: 0;
+}
+
+.supprimer-btn {
+    background-color: #c0392b;
+}
+
+.supprimer-btn:hover {
+    background-color: #96281b;
+}

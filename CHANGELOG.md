@@ -1,4 +1,14 @@
 # Journal des modifications
+## [3.20.0] - 2026-04-14
+> Commit : `feat(users): add user management page with edit and delete`
+### Ajouté
+- `APP.py` : 3 nouvelles routes admin — `GET /gerer_utilisateurs` (liste), `GET+POST /modifierU` (édition), `POST /supprimerU` (suppression avec protection anti-auto-suppression). Import `url_for` ajouté.
+- `Templates/gererU.html` : tableau de tous les utilisateurs avec boutons Modifier et Supprimer (confirmation JS).
+- `Templates/modifierU.html` : formulaire pré-rempli de modification, réutilise `ajouterU.css`.
+- `Styles/gererU.css` : styles du tableau utilisateurs.
+- `Templates/index.html` : lien "Ajouter un utilisateur" remplacé par "Gérer les utilisateurs" (`/gerer_utilisateurs`).
+- `tests/web/test_user_management.py` : 7 nouveaux tests couvrant accès, liste, modification, doublon identifiant, suppression et protection auto-suppression.
+
 ## [3.19.0] - 2026-04-14
 > Commit : `feat(stats): add date range filter`
 ### Ajouté

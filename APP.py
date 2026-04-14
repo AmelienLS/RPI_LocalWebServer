@@ -19,7 +19,7 @@ import openpyxl
 from pathlib import Path
 from dotenv import load_dotenv
 
-from flask import Flask, jsonify, redirect, render_template, request, send_file, send_from_directory, session
+from flask import Flask, jsonify, redirect, render_template, request, send_file, send_from_directory, session, url_for
 
 # Chargement des variables d'environnement depuis .env (si présent, sans écraser les vars déjà définies)
 load_dotenv(Path(__file__).resolve().parent / ".env", override=False)
@@ -611,6 +611,80 @@ def ajouterU():
         return render_template('ajouterU.html', success="Utilisateur ajouté avec succès !")
 
     return render_template('ajouterU.html')
+
+# Route pour gérer les utilisateurs (liste + modification + suppression)
+@app.route('/gerer_utilisateurs')
+@admin_required
+def gerer_utilisateurs():
+    """Affiche la liste de tous les utilisateurs avec options de modification et suppression."""
+    with get_db_connection() as conn:
+        users = conn.execute(
+            'SELECT id, nom, prenom, identifiant, admin FROM users ORDER BY nom, prenom'
+        ).fetchall()
+    return render_template('gererU.html', users=users)
+
+
+@app.route('/modifierU', methods=['GET', 'POST'])
+@admin_required
+def modifierU():
+    """Permet à un administrateur de modifier un utilisateur existant."""
+    error = None
+
+    if request.method == 'POST':
+        user_id = request.form['id']
+        identifiant = request.form['identifiant']
+        prenom = request.form['prenom']
+        nom = request.form['nom']
+        admin = 1 if 'admin' in request.form else 0
+
+        try:
+            with get_db_connection() as conn:
+                conn.execute(
+                    'UPDATE users SET identifiant = ?, prenom = ?, nom = ?, admin = ? WHERE id = ?',
+                    (identifiant, prenom, nom, admin, user_id),
+                )
+                conn.commit()
+        except sqlite3.IntegrityError as e:
+            error_str = str(e)
+            if "UNIQUE constraint failed:" in error_str and "identifiant" in error_str:
+                error = "L'identifiant existe déjà. Veuillez en choisir un autre."
+            else:
+                error = f"Erreur lors de la modification : {error_str}"
+            return render_template('modifierU.html', error=error,
+                                   user={'id': user_id, 'identifiant': identifiant,
+                                         'prenom': prenom, 'nom': nom, 'admin': admin})
+
+        return redirect(url_for('gerer_utilisateurs'))
+
+    user_id = request.args.get('id')
+    with get_db_connection() as conn:
+        user = conn.execute(
+            'SELECT id, nom, prenom, identifiant, admin FROM users WHERE id = ?', (user_id,)
+        ).fetchone()
+
+    if not user:
+        return redirect(url_for('gerer_utilisateurs'))
+
+    return render_template('modifierU.html', user=user, error=None)
+
+
+@app.route('/supprimerU', methods=['POST'])
+@admin_required
+def supprimerU():
+    """Supprime un utilisateur. Un admin ne peut pas se supprimer lui-même."""
+    user_id = request.form['id']
+
+    with get_db_connection() as conn:
+        target = conn.execute(
+            'SELECT prenom FROM users WHERE id = ?', (user_id,)
+        ).fetchone()
+        if not target or target['prenom'] == session.get('prenom'):
+            return redirect(url_for('gerer_utilisateurs'))
+        conn.execute('DELETE FROM users WHERE id = ?', (user_id,))
+        conn.commit()
+
+    return redirect(url_for('gerer_utilisateurs'))
+
 
 # Route affichant le tableau des écrans
 @app.route('/ecran')

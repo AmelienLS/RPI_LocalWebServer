@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modifier un utilisateur</title>
+    <link rel="stylesheet" href="/Styles/common.css">
+    <link rel="stylesheet" href="/Styles/ajouterU.css">
+    <link rel="stylesheet" href="/Styles/vkeyboard.css">
+    <link rel="icon" href="/Images/Logo.png" type="image/png">
+</head>
+<body>
+    <a href="{{ url_for('gerer_utilisateurs') }}" class="admin-link">Retour à la liste</a>
+
+    <div class="form-container">
+        <h2>Modifier un utilisateur</h2>
+
+        {% if error %}
+        <div style="color: red; font-weight: bold;">{{ error }}</div>
+        {% endif %}
+
+        <form method="POST">
+            <input type="hidden" name="id" value="{{ user['id'] }}">
+
+            <label for="identifiant">Identifiant :</label>
+            <input type="text" id="identifiant" name="identifiant" value="{{ user['identifiant'] }}" required>
+
+            <label for="prenom">Prénom :</label>
+            <input type="text" id="prenom" name="prenom" value="{{ user['prenom'] }}" required>
+
+            <label for="nom">Nom :</label>
+            <input type="text" id="nom" name="nom" value="{{ user['nom'] }}" required>
+
+            <label for="admin">Admin :</label>
+            <input type="checkbox" id="admin" name="admin" {% if user['admin'] == 1 %}checked{% endif %}>
+
+            <button type="submit">Enregistrer</button>
+        </form>
+    </div>
+    <script src="/Functions/vkeyboard.js"></script>
+    <script src="/Functions/rotation.js"></script>
+</body>
+</html>
