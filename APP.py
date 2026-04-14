@@ -1157,25 +1157,14 @@ def shutdown():
     except Exception as e:
         return f"<h1>Erreur :</h1><p>{e}</p>"
     
-# Cette route permet de servir les fichiers JavaScript présents dans le dossier "Functions".
-# Lorsqu'une requête est faite à /Functions/nom_du_fichier, le fichier correspondant est envoyé.
 @app.route('/Functions/<path:filename>')
 def send_functions(filename):
-    # Récupère le chemin absolu du répertoire actuel (où se trouve APP.py)
-    base_dir = os.path.abspath(os.path.dirname(__file__))
-    # Construit le chemin vers le dossier "Functions" en se basant sur le répertoire racine du projet
-    functions_dir = os.path.join(base_dir, 'Functions')
-    # Envoie le fichier demandé depuis le dossier "Functions"
-    return send_from_directory(functions_dir, filename)
+    return send_from_directory(BASE_DIR / 'Functions', filename)
 
-# Cette route permet de servir les fichiers images présents dans le dossier "Images".
-# Elle est nécessaire pour que les icônes utilisées dans les templates soient
-# correctement récupérées par le navigateur.
+
 @app.route('/Images/<path:filename>')
 def send_images(filename):
-    base_dir = os.path.abspath(os.path.dirname(__file__))
-    images_dir = os.path.join(base_dir, 'Images')
-    return send_from_directory(images_dir, filename)
+    return send_from_directory(BASE_DIR / 'Images', filename)
 
 # Lancement du serveur Flask (production avec debug désactivé par défaut)
 if __name__ == '__main__':

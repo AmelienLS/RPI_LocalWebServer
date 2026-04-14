@@ -1,4 +1,9 @@
 # Journal des modifications
+## [3.17.8] - 2026-04-14
+> Commit : `refactor(routes): replace os.path with pathlib in send_functions and send_images`
+### Modifié
+- `APP.py` : `send_functions` et `send_images` utilisent désormais `BASE_DIR / 'Functions'` et `BASE_DIR / 'Images'` (pathlib) au lieu de `os.path.abspath` + `os.path.join`. Les commentaires redondants ont été supprimés.
+
 ## [3.17.7] - 2026-04-14
 > Commit : `refactor(index): extract inline update JS into Functions/update.js`
 ### Ajouté
