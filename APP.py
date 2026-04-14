@@ -623,7 +623,20 @@ def ecran():
     
     with get_db_connection() as conn:
         cursor = conn.cursor()
-        cursor.execute('SELECT ref_ecran, libelle, pcb, fab, n_fab, type, n, sorti, lave FROM serigraphie ORDER BY CAST(n AS INTEGER)')
+        cursor.execute(
+            """
+            SELECT s.ref_ecran, s.libelle, s.pcb, s.fab, s.n_fab, s.type, s.n, s.sorti, s.lave,
+                   sl.personne AS pris_par, sl.sortie_ts
+            FROM serigraphie s
+            LEFT JOIN sortie_logs sl ON sl.id = (
+                SELECT id FROM sortie_logs
+                WHERE ref_ecran = s.ref_ecran AND rangement_ts IS NULL
+                ORDER BY sortie_ts DESC
+                LIMIT 1
+            )
+            ORDER BY CAST(s.n AS INTEGER)
+            """
+        )
         ecrans = cursor.fetchall()
 
     admin = session.get('admin', 0) == 1

@@ -1,4 +1,10 @@
 # Journal des modifications
+## [3.18.1] - 2026-04-14
+> Commit : `feat(ecran): display who took a screen and at what time`
+### Ajouté
+- `APP.py` (`/ecran`) : la requête inclut désormais `sl.personne AS pris_par` et `sl.sortie_ts` via `LEFT JOIN sortie_logs` (sous-requête corrélée sur le dernier log ouvert par écran).
+- `Templates/ecran.html` : nouvelle colonne "Pris par" (index 9) affichant `prénom à HH:MM` pour les écrans sortis, vide sinon. Filtre texte inclus.
+
 ## [3.18.0] - 2026-04-14
 > Commit : `test(update, modifier): add missing route tests`
 ### Ajouté
