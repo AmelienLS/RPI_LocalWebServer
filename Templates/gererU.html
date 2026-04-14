@@ -9,10 +9,11 @@
     <link rel="icon" href="/Images/Logo.png" type="image/png">
 </head>
 <body>
+    <a href="{{ url_for('index') }}" class="admin-link">Retour au menu</a>
+
     <div class="container">
         <h1>Gérer les utilisateurs</h1>
-        <a href="{{ url_for('index') }}" class="admin-link">Retour au menu</a>
-        <a href="{{ url_for('ajouterU') }}" class="button admin-link">Ajouter un utilisateur</a>
+        <a href="{{ url_for('ajouterU') }}" class="ajouter-link">Ajouter un utilisateur</a>
 
         <table>
             <thead>
@@ -32,7 +33,10 @@
                     <td>{{ user['identifiant'] }}</td>
                     <td>{{ 'Oui' if user['admin'] == 1 else 'Non' }}</td>
                     <td class="actions-cell">
-                        <a href="{{ url_for('modifierU', id=user['id']) }}" class="button modifier-btn">Modifier</a>
+                        <form method="GET" action="{{ url_for('modifierU') }}">
+                            <input type="hidden" name="id" value="{{ user['id'] }}">
+                            <button type="submit" class="modifier-btn">Modifier</button>
+                        </form>
                         <form method="POST" action="{{ url_for('supprimerU') }}" onsubmit="return confirm('Supprimer {{ user.prenom | e }} {{ user.nom | e }} ?');">
                             <input type="hidden" name="id" value="{{ user['id'] }}">
                             <button type="submit" class="button supprimer-btn">Supprimer</button>

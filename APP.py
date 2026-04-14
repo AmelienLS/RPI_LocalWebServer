@@ -612,6 +612,54 @@ def ajouterU():
 
     return render_template('ajouterU.html')
 
+# Route pour gérer les écrans (recherche, modification, suppression)
+@app.route('/gerer_ecrans', methods=['GET', 'POST'])
+@admin_required
+def gerer_ecrans():
+    """
+    Sous-menu admin : recherche un écran par référence (exact ou suffixe),
+    affiche ses infos, permet de le modifier ou supprimer.
+    """
+    ecran = None
+    message = None
+    error = False
+
+    if request.method == 'POST':
+        action = request.form.get('action', 'search')
+        ref_ecran = request.form.get('ref_ecran', '').strip()
+
+        if action == 'delete':
+            with get_db_connection() as conn:
+                conn.execute('DELETE FROM serigraphie WHERE ref_ecran = ?', (ref_ecran,))
+                conn.commit()
+            message = f"L'écran {ref_ecran} a été supprimé."
+            return render_template('gererE.html', ecran=None, message=message, error=False)
+
+        # action == 'search'
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute('SELECT * FROM serigraphie WHERE ref_ecran = ?', (ref_ecran,))
+            ecran = cursor.fetchone()
+
+            if not ecran:
+                cursor.execute(
+                    'SELECT * FROM serigraphie WHERE ref_ecran LIKE ?', ('%' + ref_ecran,)
+                )
+                resultats = cursor.fetchall()
+                if len(resultats) == 1:
+                    ecran = resultats[0]
+                elif len(resultats) > 1:
+                    refs = ', '.join(str(r['ref_ecran']) for r in resultats)
+                    message = f"Plusieurs écrans correspondent : {refs}. Précisez votre recherche."
+                    error = True
+
+        if not ecran and not error:
+            message = f"Aucun écran trouvé pour la référence « {ref_ecran} »."
+            error = True
+
+    return render_template('gererE.html', ecran=ecran, message=message, error=error)
+
+
 # Route pour gérer les utilisateurs (liste + modification + suppression)
 @app.route('/gerer_utilisateurs')
 @admin_required

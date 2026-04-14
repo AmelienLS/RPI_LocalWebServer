@@ -1,4 +1,21 @@
 # Journal des modifications
+## [3.22.0] - 2026-04-14
+> Commit : `feat(gerer_ecrans): add full screen management page with search, edit, delete`
+### Ajouté
+- `APP.py` (`/gerer_ecrans`) : route GET+POST — recherche par référence exacte ou suffixe, affichage de toutes les infos de l'écran, suppression directe avec confirmation JS. Redirige vers `/modifier` pour l'édition.
+- `Templates/gererE.html` : page complète de gestion — bouton "Ajouter un écran" en haut, formulaire de recherche, tableau d'infos (emplacement en vert), bouton "Modifier" (jaune) et "Supprimer" (rouge). Notation pointée utilisée dans `onsubmit` pour éviter les conflits de quotes avec Jinja2.
+- `Styles/gererE.css` : styles de la page (tableau, boutons, lien ajouter).
+### Modifié
+- `Templates/index.html` : les 3 liens "Ajouter / Modifier / Supprimer un écran" remplacés par un seul "Gérer les écrans".
+
+## [3.21.0] - 2026-04-14
+> Commit : `feat(index): group screen management actions into submenu`
+### Ajouté
+- `APP.py` : route `GET /gerer_ecrans` (@admin_required) — sous-menu regroupant Ajouter / Modifier / Supprimer un écran.
+- `Templates/gererE.html` : page du sous-menu avec 3 boutons et retour au menu.
+### Modifié
+- `Templates/index.html` : les 3 liens "Ajouter / Modifier / Supprimer un écran" remplacés par un seul "Gérer les écrans".
+
 ## [3.20.0] - 2026-04-14
 > Commit : `feat(users): add user management page with edit and delete`
 ### Ajouté
