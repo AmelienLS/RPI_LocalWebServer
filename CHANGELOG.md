@@ -1,4 +1,9 @@
 # Journal des modifications
+## [3.17.5] - 2026-04-14
+> Commit : `refactor(db): run _ensure_log_tables once at startup instead of per-request`
+### Modifié
+- `APP.py` : `_ensure_log_tables()` déplacée dans un `before_request` (`_ensure_log_tables_once`) qui s'exécute au plus une fois par cycle de vie de l'application, dès que la base est disponible. Les routes exemptées (`/setup`, `/setup/init_db`, `/shutdown`, statiques) ne déclenchent pas la vérification. Les 5 appels inline dans `laver`, `prendre`, `ranger`, `stats` et `reset_stats` ont été supprimés.
+
 ## [3.17.4] - 2026-04-14
 > Commit : `refactor(auth): introduce login_required and admin_required decorators`
 ### Ajouté

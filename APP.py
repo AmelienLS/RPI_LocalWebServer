@@ -88,6 +88,20 @@ def _check_db_configured():
         return redirect("/setup")
 
 
+@app.before_request
+def _ensure_log_tables_once():
+    """Garantit la présence de la table de logs une seule fois par cycle de vie de l'app."""
+    if request.path in {"/setup", "/shutdown", "/setup/init_db"}:
+        return
+    if request.path.startswith(("/Styles/", "/Images/", "/Functions/")):
+        return
+    if not getattr(app, '_log_tables_ensured', False) and DATABASE_PATH.exists():
+        with get_db_connection() as conn:
+            _ensure_log_tables(conn)
+            conn.commit()
+        app._log_tables_ensured = True
+
+
 def maybe_open_browser(url: str) -> None:
     """Ouvre le navigateur local si l'option est activée."""
     if not AUTO_OPEN_BROWSER:
@@ -447,7 +461,6 @@ def laver():
 
     ref_ecran = request.form.get('ref_ecran')
     with get_db_connection() as conn:
-        _ensure_log_tables(conn)
         cursor = conn.cursor()
         cursor.execute(
             'SELECT 1 FROM serigraphie WHERE ref_ecran = ? AND sorti = 0 AND lave = 0',
@@ -793,7 +806,6 @@ def stats():
     """
 
     with get_db_connection() as conn:
-        _ensure_log_tables(conn)
         cursor = conn.cursor()
         cursor.execute('''
             SELECT s.ref_ecran, s.libelle, s.fab, s.type, COUNT(sl.id) AS total_passages
@@ -831,7 +843,6 @@ def reset_stats():
     """
 
     with get_db_connection() as conn:
-        _ensure_log_tables(conn)
         conn.execute('DELETE FROM sortie_logs')
         conn.commit()
 
@@ -868,7 +879,6 @@ def prendre():
         ref_ecran = request.form['ref_ecran']
 
         with get_db_connection() as conn:
-            _ensure_log_tables(conn)
             cursor = conn.cursor()
 
             # Essai exact d'abord, puis recherche par suffixe
@@ -1040,7 +1050,6 @@ def ranger():
     emplacement = None
 
     with get_db_connection() as conn:
-        _ensure_log_tables(conn)
         cursor = conn.cursor()
 
         if request.method == 'POST':
