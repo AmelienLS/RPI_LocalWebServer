@@ -1,4 +1,9 @@
 # Journal des modifications
+## [3.18.4] - 2026-04-14
+> Commit : `feat(ranger): add live filter input above screen dropdown`
+### Ajouté
+- `Templates/ranger.html` : champ texte "Filtrer…" au-dessus du `<select>` — filtre les options en temps réel (JS vanilla) et sélectionne automatiquement le premier résultat visible.
+
 ## [3.18.3] - 2026-04-14
 > Commit : `feat(ecran): add confirmation dialog before taking a screen`
 ### Ajouté

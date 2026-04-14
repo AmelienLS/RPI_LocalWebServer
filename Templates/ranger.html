@@ -16,6 +16,7 @@
         
         <form method="POST">
             <label for="ref_ecran">Choisissez un écran à ranger :</label>
+            <input type="text" id="ranger-filtre" placeholder="Filtrer…" autocomplete="off">
             <select name="ref_ecran" id="ref_ecran" required>
                 {% for ecran in serigraphies %}
                 <option value="{{ ecran['ref_ecran'] }}">
@@ -43,5 +44,21 @@
         {% endif %}
     </div>
     <script src="/Functions/rotation.js"></script>
+    <script>
+    (function () {
+        var filtre = document.getElementById('ranger-filtre');
+        var select = document.getElementById('ref_ecran');
+        var options = Array.from(select.options);
+
+        filtre.addEventListener('input', function () {
+            var val = filtre.value.toLowerCase().trim();
+            options.forEach(function (opt) {
+                opt.hidden = val !== '' && !opt.textContent.toLowerCase().includes(val);
+            });
+            var first = options.find(function (o) { return !o.hidden; });
+            if (first) select.value = first.value;
+        });
+    })();
+    </script>
 </body>
 </html>
