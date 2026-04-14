@@ -1,4 +1,9 @@
 # Journal des modifications
+## [3.18.2] - 2026-04-14
+> Commit : `feat(index): add ranger link on overdue screens panel`
+### Ajouté
+- `Templates/index.html` : bouton "Ranger" sur chaque ligne du panneau "Écrans sortis depuis +10h", redirige vers `/ranger`.
+
 ## [3.18.1] - 2026-04-14
 > Commit : `feat(ecran): display who took a screen and at what time`
 ### Ajouté

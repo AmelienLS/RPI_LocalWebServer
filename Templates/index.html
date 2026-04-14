@@ -38,6 +38,7 @@
                     <span class="laver-info">
                         <strong>{{ ecran.ref_ecran }}</strong> — {{ ecran.libelle }} — {{ ecran.heures }}h
                     </span>
+                    <a href="{{ url_for('ranger') }}" class="laver-btn">Ranger</a>
                 </div>
                 {% if not loop.last %}<div class="laver-sep"></div>{% endif %}
                 {% endfor %}
