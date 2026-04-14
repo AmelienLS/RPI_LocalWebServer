@@ -11,9 +11,9 @@
 </head>
 <body>
     <!--Page pour ajouter un nouvel écran dans la base de données -->
-    <a href="/close_db" class="retour">Fermer connexion DB et retour au menu</a>
+    <a href="{{ url_for('close_db') }}" class="retour">Fermer connexion DB et retour au menu</a>
     <div class="ie-bar">
-        <a href="/export_serigraphie" class="ie-btn">Exporter</a>
+        <a href="{{ url_for('export_serigraphie') }}" class="ie-btn">Exporter</a>
         <button type="button" class="ie-btn" onclick="document.getElementById('import-input').click()">Importer</button>
         <form id="import-form" action="/import_serigraphie" method="POST" enctype="multipart/form-data" style="display:none">
             <input id="import-input" type="file" name="import_file" accept=".csv,.xlsx"

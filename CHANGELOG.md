@@ -1,4 +1,9 @@
 # Journal des modifications
+## [3.17.6] - 2026-04-14
+> Commit : `refactor(templates): replace hardcoded paths with url_for()`
+### Modifié
+- `Templates/ajouterU.html`, `prendre.html`, `import_conflicts.html`, `modifier.html`, `ajouter.html`, `index.html`, `login.html` : tous les chemins hardcodés (`href="/..."`, `action="/..."`, `formaction="/..."`) remplacés par `url_for()`. Les chemins statiques (`/Styles/`, `/Images/`, `/Functions/`) sont conservés tels quels.
+
 ## [3.17.5] - 2026-04-14
 > Commit : `refactor(db): run _ensure_log_tables once at startup instead of per-request`
 ### Modifié
