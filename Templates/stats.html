@@ -13,8 +13,24 @@
     <div class="container">
         <h1>Statistiques</h1>
 
+        <form method="GET" action="{{ url_for('stats') }}" class="stats-filter">
+            <label for="date_debut">Du</label>
+            <input type="date" id="date_debut" name="date_debut" value="{{ date_debut }}">
+            <label for="date_fin">au</label>
+            <input type="date" id="date_fin" name="date_fin" value="{{ date_fin }}">
+            <button type="submit">Filtrer</button>
+            {% if date_debut or date_fin %}
+            <a href="{{ url_for('stats') }}" class="stats-filter-reset">Réinitialiser</a>
+            {% endif %}
+        </form>
+
         <div class="stat-total">
             Total des passages : <span class="stat-count">{{ total_passages }}</span>
+            {% if date_debut or date_fin %}
+            <span class="stats-filter-label">
+                ({{ date_debut if date_debut else '…' }} → {{ date_fin if date_fin else '…' }})
+            </span>
+            {% endif %}
         </div>
 
         <h2>Écrans les plus utilisés</h2>

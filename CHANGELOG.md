@@ -1,4 +1,118 @@
 # Journal des modifications
+## [3.22.0] - 2026-04-14
+> Commit : `feat(gerer_ecrans): add full screen management page with search, edit, delete`
+### Ajouté
+- `APP.py` (`/gerer_ecrans`) : route GET+POST — recherche par référence exacte ou suffixe, affichage de toutes les infos de l'écran, suppression directe avec confirmation JS. Redirige vers `/modifier` pour l'édition.
+- `Templates/gererE.html` : page complète de gestion — bouton "Ajouter un écran" en haut, formulaire de recherche, tableau d'infos (emplacement en vert), bouton "Modifier" (jaune) et "Supprimer" (rouge). Notation pointée utilisée dans `onsubmit` pour éviter les conflits de quotes avec Jinja2.
+- `Styles/gererE.css` : styles de la page (tableau, boutons, lien ajouter).
+### Modifié
+- `Templates/index.html` : les 3 liens "Ajouter / Modifier / Supprimer un écran" remplacés par un seul "Gérer les écrans".
+
+## [3.21.0] - 2026-04-14
+> Commit : `feat(index): group screen management actions into submenu`
+### Ajouté
+- `APP.py` : route `GET /gerer_ecrans` (@admin_required) — sous-menu regroupant Ajouter / Modifier / Supprimer un écran.
+- `Templates/gererE.html` : page du sous-menu avec 3 boutons et retour au menu.
+### Modifié
+- `Templates/index.html` : les 3 liens "Ajouter / Modifier / Supprimer un écran" remplacés par un seul "Gérer les écrans".
+
+## [3.20.0] - 2026-04-14
+> Commit : `feat(users): add user management page with edit and delete`
+### Ajouté
+- `APP.py` : 3 nouvelles routes admin — `GET /gerer_utilisateurs` (liste), `GET+POST /modifierU` (édition), `POST /supprimerU` (suppression avec protection anti-auto-suppression). Import `url_for` ajouté.
+- `Templates/gererU.html` : tableau de tous les utilisateurs avec boutons Modifier et Supprimer (confirmation JS).
+- `Templates/modifierU.html` : formulaire pré-rempli de modification, réutilise `ajouterU.css`.
+- `Styles/gererU.css` : styles du tableau utilisateurs.
+- `Templates/index.html` : lien "Ajouter un utilisateur" remplacé par "Gérer les utilisateurs" (`/gerer_utilisateurs`).
+- `tests/web/test_user_management.py` : 7 nouveaux tests couvrant accès, liste, modification, doublon identifiant, suppression et protection auto-suppression.
+
+## [3.19.0] - 2026-04-14
+> Commit : `feat(stats): add date range filter`
+### Ajouté
+- `APP.py` (`/stats`) : paramètres GET `date_debut` et `date_fin` pour filtrer les stats par plage de dates. Les deux requêtes SQL (écrans et personnes) appliquent le filtre via `DATE(sortie_ts)`. Fonctionne aussi avec un seul des deux paramètres.
+- `Templates/stats.html` : formulaire de filtrage par dates avec label de plage active et lien "Réinitialiser".
+- `Styles/stats.css` : styles pour le formulaire de filtre (`.stats-filter`, `.stats-filter-reset`, `.stats-filter-label`).
+- `tests/web/test_stats.py` : 3 nouveaux tests couvrant filtre avec plage complète, exclusion hors plage, et filtre `date_debut` seul.
+
+## [3.18.5] - 2026-04-14
+> Commit : `feat(prendre): show screen details after taking`
+### Modifié
+- `APP.py` (`/prendre`) : passe désormais `apercu` (données de l'écran) au template après chaque opération — prise réussie ou écran déjà sorti.
+- `Templates/prendre.html` : affiche un bloc d'infos (emplacement en premier et en vert, puis réf., libellé, état) après la soumission du formulaire. Workflow inchangé : 1 étape.
+
+## [3.18.4] - 2026-04-14
+> Commit : `feat(ranger): add live filter input above screen dropdown`
+### Ajouté
+- `Templates/ranger.html` : champ texte "Filtrer…" au-dessus du `<select>` — filtre les options en temps réel (JS vanilla) et sélectionne automatiquement le premier résultat visible.
+
+## [3.18.3] - 2026-04-14
+> Commit : `feat(ecran): add confirmation dialog before taking a screen`
+### Ajouté
+- `Templates/ecran.html` : `onsubmit="return confirm(...)"` sur le formulaire "Prendre" du tableau — affiche la référence et le libellé de l'écran avant validation.
+
+## [3.18.2] - 2026-04-14
+> Commit : `feat(index): add ranger link on overdue screens panel`
+### Ajouté
+- `Templates/index.html` : bouton "Ranger" sur chaque ligne du panneau "Écrans sortis depuis +10h", redirige vers `/ranger`.
+
+## [3.18.1] - 2026-04-14
+> Commit : `feat(ecran): display who took a screen and at what time`
+### Ajouté
+- `APP.py` (`/ecran`) : la requête inclut désormais `sl.personne AS pris_par` et `sl.sortie_ts` via `LEFT JOIN sortie_logs` (sous-requête corrélée sur le dernier log ouvert par écran).
+- `Templates/ecran.html` : nouvelle colonne "Pris par" (index 9) affichant `prénom à HH:MM` pour les écrans sortis, vide sinon. Filtre texte inclus.
+
+## [3.18.0] - 2026-04-14
+> Commit : `test(update, modifier): add missing route tests`
+### Ajouté
+- `tests/web/test_update.py` : 5 tests pour la route `/update` — accès non-admin (403 JSON), OS non-Linux (`will_restart: false`), Linux (`will_restart: true`, thread mocké), et vérification du champ `branch`.
+- `tests/web/test_screen_management.py` : test `test_modifier_requires_admin` — vérifie la redirection vers `/` sans session.
+
+## [3.17.9] - 2026-04-14
+> Commit : `refactor(ajouterU): remove redundant SELECT before INSERT`
+### Modifié
+- `APP.py` (`ajouterU`) : suppression du `SELECT` manuel avant `INSERT`. La contrainte `UNIQUE` de la base suffit — on attrape directement l'`IntegrityError` et on en extrait le message, comme dans la route `ajouter`.
+
+## [3.17.8] - 2026-04-14
+> Commit : `refactor(routes): replace os.path with pathlib in send_functions and send_images`
+### Modifié
+- `APP.py` : `send_functions` et `send_images` utilisent désormais `BASE_DIR / 'Functions'` et `BASE_DIR / 'Images'` (pathlib) au lieu de `os.path.abspath` + `os.path.join`. Les commentaires redondants ont été supprimés.
+
+## [3.17.7] - 2026-04-14
+> Commit : `refactor(index): extract inline update JS into Functions/update.js`
+### Ajouté
+- `Functions/update.js` : logique du bouton "Mettre à jour" (fetch `/update`, affichage résultat, compte à rebours de redémarrage). Encapsulée dans une IIFE.
+### Modifié
+- `Templates/index.html` : bloc `<script>` inline remplacé par `<script src="/Functions/update.js"></script>`.
+
+## [3.17.6] - 2026-04-14
+> Commit : `refactor(templates): replace hardcoded paths with url_for()`
+### Modifié
+- `Templates/ajouterU.html`, `prendre.html`, `import_conflicts.html`, `modifier.html`, `ajouter.html`, `index.html`, `login.html` : tous les chemins hardcodés (`href="/..."`, `action="/..."`, `formaction="/..."`) remplacés par `url_for()`. Les chemins statiques (`/Styles/`, `/Images/`, `/Functions/`) sont conservés tels quels.
+
+## [3.17.5] - 2026-04-14
+> Commit : `refactor(db): run _ensure_log_tables once at startup instead of per-request`
+### Modifié
+- `APP.py` : `_ensure_log_tables()` déplacée dans un `before_request` (`_ensure_log_tables_once`) qui s'exécute au plus une fois par cycle de vie de l'application, dès que la base est disponible. Les routes exemptées (`/setup`, `/setup/init_db`, `/shutdown`, statiques) ne déclenchent pas la vérification. Les 5 appels inline dans `laver`, `prendre`, `ranger`, `stats` et `reset_stats` ont été supprimés.
+
+## [3.17.4] - 2026-04-14
+> Commit : `refactor(auth): introduce login_required and admin_required decorators`
+### Ajouté
+- `APP.py` : décorateurs `login_required` et `admin_required` (via `functools.wraps`). `login_required` redirige vers `/` si non connecté ; `admin_required` redirige vers `/` si non connecté, vers `/index` si non admin.
+### Modifié
+- `APP.py` : 14 routes mises à jour pour utiliser les décorateurs à la place du boilerplate inline (`if 'prenom' not in session` / `if 'admin' not in session`). Les 2 routes JSON (`/next_emplacement`, `/update`) conservent leur vérification inline car elles retournent un 403 JSON.
+- `tests/web/test_ajouter.py`, `test_screen_management.py`, `test_user_management.py` : 3 tests mis à jour pour refléter le nouveau comportement (sans session → redirection vers `/` et non `/index`).
+
+## [3.17.3] - 2026-04-14
+> Commit : `fix: correct four bugs identified during code audit`
+### Corrigé
+- `APP.py` (`ajouter`) : variable `error_message` pouvait être non liée si une `IntegrityError` générée par SQLite ne correspondait pas au pattern `UNIQUE constraint failed`. Ajout d'un `else` qui affiche le message brut.
+- `APP.py` (`close_db`) : la route rendait `index.html` sans les variables requises par le template (`a_laver`, `alerte_sortis`, etc.), provoquant une erreur Jinja. La route redirige désormais vers `/index`.
+- `APP.py` (`ecran`) : la requête SQL n'avait pas de clause `ORDER BY`. Les écrans sont maintenant triés par emplacement `n` par défaut.
+- `Templates/ranger.html` : le dropdown des écrans sortis n'affichait pas l'emplacement physique `n`. Chaque option affiche maintenant `[n] Libellé — ref_ecran`.
+### Modifié
+- `tests/web/test_close_db.py` : mis à jour pour valider la redirection 302 vers `/index` au lieu de l'ancien comportement 200.
+- `tests/system/test_shutdown.py` : ajout d'un test documentant que `/shutdown` est intentionnellement accessible sans authentification (bouton kiosque sur la page de login).
+
 ## [3.17.2] - 2026-04-13
 > Commit : `chore(linux): centralize repo URL in shared config.env`
 ### Ajouté

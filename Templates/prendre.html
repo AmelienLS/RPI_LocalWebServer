@@ -12,10 +12,10 @@
 <body>
     <!--Page pour prendre un écran -->
     <div class="container">
-        <a href="/index" class="admin-link">Retour au menu</a>
+        <a href="{{ url_for('index') }}" class="admin-link">Retour au menu</a>
         
         <h1>Prendre un écran</h1>
-        
+
         <form method="POST">
             <div class="form-container">
                 <input type="text" name="ref_ecran" placeholder="Ref écran" required>
@@ -27,8 +27,13 @@
             <p class="message">{{ message }}</p>
         {% endif %}
 
-        {% if n_value %}
-            <p class="n-value">l'écran est a l'emplacement : {{ n_value }}</p>
+        {% if apercu %}
+        <div class="apercu-container">
+            <p class="n-value"><strong>Emplacement</strong> {{ apercu['n'] }}</p>
+            <p><strong>Réf.</strong> {{ apercu['ref_ecran'] }}</p>
+            <p><strong>Libellé</strong> {{ apercu['libelle'] }}</p>
+            <p><strong>État</strong> {{ 'Déjà sorti' if apercu['sorti'] == 1 else 'En armoire' }}</p>
+        </div>
         {% endif %}
     </div>
     <script src="/Functions/vkeyboard.js"></script>

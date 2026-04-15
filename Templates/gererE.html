@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gérer les écrans</title>
+    <link rel="stylesheet" href="/Styles/common.css">
+    <link rel="stylesheet" href="/Styles/gererE.css">
+    <link rel="stylesheet" href="/Styles/vkeyboard.css">
+    <link rel="icon" href="/Images/Logo.png" type="image/png">
+</head>
+<body>
+    <a href="{{ url_for('index') }}" class="admin-link">Retour au menu</a>
+
+    <div class="form-container">
+        <h1>Gérer les écrans</h1>
+
+        <a href="{{ url_for('ajouter') }}" class="ajouter-link">Ajouter un écran</a>
+
+        <form method="POST">
+            <input type="hidden" name="action" value="search">
+            <label for="ref_ecran">Référence écran :</label>
+            <input type="text" id="ref_ecran" name="ref_ecran" placeholder="Ref écran" required>
+            <button type="submit">Rechercher</button>
+        </form>
+
+        {% if message %}
+        <p class="{% if error %}error-message{% else %}success-message{% endif %}">{{ message }}</p>
+        {% endif %}
+
+        {% if ecran %}
+        <div class="ecran-info">
+            <table class="info-table">
+                <tr><th>Réf. Écran</th><td>{{ ecran['ref_ecran'] }}</td></tr>
+                <tr><th>Libellé</th><td>{{ ecran['libelle'] }}</td></tr>
+                <tr><th>PCB</th><td>{{ ecran['pcb'] or '—' }}</td></tr>
+                <tr><th>FAB</th><td>{{ ecran['fab'] }}</td></tr>
+                <tr><th>N° FAB</th><td>{{ ecran['n_fab'] or '—' }}</td></tr>
+                <tr><th>Type</th><td>{{ ecran['type'] }}</td></tr>
+                <tr><th>Emplacement</th><td class="n-value-inline">{{ ecran['n'] }}</td></tr>
+                <tr><th>Sorti</th><td>{{ 'Oui' if ecran['sorti'] == 1 else 'Non' }}</td></tr>
+                <tr><th>Lavé</th><td>{{ 'Oui' if ecran['lave'] == 1 else 'Non' }}</td></tr>
+            </table>
+
+            <form method="POST" action="{{ url_for('modifier') }}">
+                <input type="hidden" name="ref_ecran" value="{{ ecran['ref_ecran'] }}">
+                <button type="submit" class="modifier-btn">Modifier cet écran</button>
+            </form>
+
+            <form method="POST" action="{{ url_for('gerer_ecrans') }}"
+                  onsubmit="return confirm('Supprimer définitivement l\'écran {{ ecran.ref_ecran }} — {{ ecran.libelle | e }} ?');">
+                <input type="hidden" name="action" value="delete">
+                <input type="hidden" name="ref_ecran" value="{{ ecran.ref_ecran }}">
+                <button type="submit" class="supprimer-btn">Supprimer cet écran</button>
+            </form>
+        </div>
+        {% endif %}
+    </div>
+    <script src="/Functions/vkeyboard.js"></script>
+    <script src="/Functions/rotation.js"></script>
+</body>
+</html>

@@ -1,10 +1,11 @@
 # Runtime artifacts
 __pycache__/
 *.py[cod]
-#*.db
+*.db
 #instance/
 !instance/.gitkeep
 instance/config.ini
+instance/logs
 CLAUDE.md
 
 # Environments
@@ -16,6 +17,7 @@ venv/
 !.env.example
 !.env.development
 .claude
+MEMORY.md
 
 # OS / tools
 .DS_Store

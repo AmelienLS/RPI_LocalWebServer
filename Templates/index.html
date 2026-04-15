@@ -38,6 +38,7 @@
                     <span class="laver-info">
                         <strong>{{ ecran.ref_ecran }}</strong> — {{ ecran.libelle }} — {{ ecran.heures }}h
                     </span>
+                    <a href="{{ url_for('ranger') }}" class="laver-btn">Ranger</a>
                 </div>
                 {% if not loop.last %}<div class="laver-sep"></div>{% endif %}
                 {% endfor %}
@@ -53,11 +54,9 @@
             {% if admin %}
                 <div class="admin-actions">
                     <p>Administration</p>
-                    <a href="/ajouter" class="button admin-link">Ajouter un écran</a>
-                    <a href="/modifier" class="button admin-link">Modifier un écran</a>
-                    <a href="/supprimer" class="button admin-link">Supprimer un écran</a>
-                    <a href="/ajouterU" class="button admin-link">Ajouter un utilisateur</a>
-                    <a href="/stats" class="button admin-link">Statistiques</a>
+                    <a href="{{ url_for('gerer_ecrans') }}" class="button admin-link">Gérer les écrans</a>
+                    <a href="{{ url_for('gerer_utilisateurs') }}" class="button admin-link">Gérer les utilisateurs</a>
+                    <a href="{{ url_for('stats') }}" class="button admin-link">Statistiques</a>
                     <button type="button" id="btn-update" class="btn-update">Mettre à jour</button>
                 </div>
                 <div id="update-result" class="update-result" style="display:none">
@@ -68,10 +67,10 @@
             {% endif %}
 
             <div class="user-actions">
-                <a href="/ecran" class="button user-link">Voir les écrans</a>
-                <a href="/prendre" class="button user-link">Prendre un écran</a>
-                <a href="/ranger" class="button user-link">Ranger un écran</a>
-                <a href="/logout" class="button logout-button">Se déconnecter</a>
+                <a href="{{ url_for('ecran') }}" class="button user-link">Voir les écrans</a>
+                <a href="{{ url_for('prendre') }}" class="button user-link">Prendre un écran</a>
+                <a href="{{ url_for('ranger') }}" class="button user-link">Ranger un écran</a>
+                <a href="{{ url_for('logout') }}" class="button logout-button">Se déconnecter</a>
             </div>
             {% if success %}
                 <div class="confirmation-message" style="color: green;">{{ success }}</div>
@@ -86,51 +85,11 @@
 
         {% if alerte_sortis %}
         <div class="sortis-alerte">
-            <p>Range tes écrans Boun</p>
+            <p>Beaucoup d'écrans sortis</p>
         </div>
         {% endif %}
     </div>
     <script src="/Functions/rotation.js"></script>
-    <script>
-        var btnUpdate = document.getElementById('btn-update');
-        if (btnUpdate) {
-            btnUpdate.addEventListener('click', function () {
-                btnUpdate.disabled = true;
-                btnUpdate.textContent = 'Mise à jour…';
-
-                fetch('/update', { method: 'POST' })
-                    .then(function (r) { return r.json(); })
-                    .then(function (data) {
-                        var result = document.getElementById('update-result');
-                        document.getElementById('update-branch').textContent = 'Branche : ' + data.branch;
-                        document.getElementById('update-output').textContent = data.output || '(aucun changement)';
-                        result.style.display = 'block';
-
-                        if (data.will_restart) {
-                            var sec = 8;
-                            var cd = document.getElementById('update-countdown');
-                            cd.textContent = 'Redémarrage du service dans ' + sec + 's…';
-                            var iv = setInterval(function () {
-                                sec--;
-                                if (sec <= 0) {
-                                    clearInterval(iv);
-                                    cd.textContent = 'Rechargement…';
-                                    location.reload();
-                                } else {
-                                    cd.textContent = 'Redémarrage du service dans ' + sec + 's…';
-                                }
-                            }, 1000);
-                        } else {
-                            btnUpdate.disabled = false;
-                            btnUpdate.textContent = 'Mettre à jour';
-                        }
-                    })
-                    .catch(function () {
-                        btnUpdate.disabled = false;
-                        btnUpdate.textContent = 'Mettre à jour';
-                    });
-            });
-        }
-    </script>
+    <script src="/Functions/update.js"></script>
 </body>
 </html>

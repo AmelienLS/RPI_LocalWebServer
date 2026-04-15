@@ -36,6 +36,7 @@
                     <th>Emplacement<br><input type="text" class="filter-input" data-column="6" placeholder="Filtrer"></th>
                     <th>Lavé<br><input type="text" class="filter-input" data-column="7" placeholder="Oui / Non"></th>
                     <th>Sorti<br><input type="text" class="filter-input" data-column="8" placeholder="Oui / Non"></th>
+                    <th>Pris par<br><input type="text" class="filter-input" data-column="9" placeholder="Filtrer"></th>
                     <th>Sortir</th>
                     {% if admin %}
                         <th>Modifier</th>
@@ -54,8 +55,9 @@
                     <td>{{ ecran.n }}</td>
                     <td>{{ 'Oui' if ecran.lave == 1 else 'Non' }}</td>
                     <td>{{ 'Oui' if ecran.sorti == 1 else 'Non' }}</td>
+                    <td>{{ ecran.pris_par + ' à ' + ecran.sortie_ts[11:16] if ecran.pris_par else '' }}</td>
                     <td>
-                        <form action="{{ url_for('prendre') }}" method="POST">
+                        <form action="{{ url_for('prendre') }}" method="POST" onsubmit="return confirm('Prendre l\'écran {{ ecran.ref_ecran }} — {{ ecran.libelle }} ?');">
                             <input type="hidden" name="ref_ecran" value="{{ ecran.ref_ecran }}">
                             <button type="submit" class="button sortir-btn">Prendre</button>
                         </form>

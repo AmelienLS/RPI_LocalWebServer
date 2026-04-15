@@ -11,6 +11,7 @@ import subprocess
 import threading
 import webbrowser
 import zipfile
+from functools import wraps
 from datetime import datetime, date
 from io import BytesIO
 
@@ -18,7 +19,7 @@ import openpyxl
 from pathlib import Path
 from dotenv import load_dotenv
 
-from flask import Flask, jsonify, redirect, render_template, request, send_file, send_from_directory, session
+from flask import Flask, jsonify, redirect, render_template, request, send_file, send_from_directory, session, url_for
 
 # Chargement des variables d'environnement depuis .env (si présent, sans écraser les vars déjà définies)
 load_dotenv(Path(__file__).resolve().parent / ".env", override=False)
@@ -85,6 +86,20 @@ def _check_db_configured():
         return
     if not DATABASE_PATH.exists():
         return redirect("/setup")
+
+
+@app.before_request
+def _ensure_log_tables_once():
+    """Garantit la présence de la table de logs une seule fois par cycle de vie de l'app."""
+    if request.path in {"/setup", "/shutdown", "/setup/init_db"}:
+        return
+    if request.path.startswith(("/Styles/", "/Images/", "/Functions/")):
+        return
+    if not getattr(app, '_log_tables_ensured', False) and DATABASE_PATH.exists():
+        with get_db_connection() as conn:
+            _ensure_log_tables(conn)
+            conn.commit()
+        app._log_tables_ensured = True
 
 
 def maybe_open_browser(url: str) -> None:
@@ -237,6 +252,28 @@ def _build_logs_archive(delete_files: bool = False) -> BytesIO:
     return archive_stream
 
 
+def login_required(f):
+    """Redirige vers la page de connexion si l'utilisateur n'est pas connecté."""
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        if 'prenom' not in session:
+            return redirect('/')
+        return f(*args, **kwargs)
+    return decorated
+
+
+def admin_required(f):
+    """Redirige vers l'accueil si l'utilisateur n'est pas admin (implique aussi login_required)."""
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        if 'prenom' not in session:
+            return redirect('/')
+        if not session.get('admin'):
+            return redirect('/index')
+        return f(*args, **kwargs)
+    return decorated
+
+
 _SERI_COLUMNS = ['ref_ecran', 'libelle', 'pcb', 'fab', 'n_fab', 'type', 'n']
 
 
@@ -361,15 +398,13 @@ def login():
 
 # Route de la page d'accueil
 @app.route('/index')
+@login_required
 def index():
     """
     Affiche la page d'accueil.
-    - Vérifie que l'utilisateur est connecté (présence du prénom dans la session).
     - Passe à la vue le prénom et le statut admin pour l'affichage conditionnel.
     - Récupère la liste des écrans rentrés mais non lavés (sorti=0, lave=0).
     """
-    if 'prenom' not in session:
-        return redirect('/')
 
     prenom = session['prenom']
     admin = session['admin'] == 1
@@ -415,6 +450,7 @@ def index():
 
 # Route pour marquer un écran comme lavé depuis l'accueil
 @app.route('/laver', methods=['POST'])
+@login_required
 def laver():
     """
     Marque un écran comme lavé.
@@ -422,12 +458,9 @@ def laver():
     - Met a jour la derniere entree sortie_logs concernee (lavee 0 -> 1).
     - Synchronise le CSV journalier correspondant.
     """
-    if 'prenom' not in session:
-        return redirect('/')
 
     ref_ecran = request.form.get('ref_ecran')
     with get_db_connection() as conn:
-        _ensure_log_tables(conn)
         cursor = conn.cursor()
         cursor.execute(
             'SELECT 1 FROM serigraphie WHERE ref_ecran = ? AND sorti = 0 AND lave = 0',
@@ -487,15 +520,13 @@ def next_emplacement():
 
 
 @app.route('/ajouter', methods=['GET', 'POST'])
+@admin_required
 def ajouter():
     """
     Permet l'ajout d'un nouvel écran.
-    - Vérifie que l'utilisateur est un administrateur.
     - Valide les contraintes sur les champs et insère la donnée dans la BD.
     - Gère les erreurs d'unicité au niveau de la base de données.
-    """
-    if 'admin' not in session or not session['admin']:
-        return redirect('/index') 
+    """ 
     if request.method == 'POST':
         data = request.form
         ref_ecran = data['ref_ecran']
@@ -534,21 +565,22 @@ def ajouter():
                     field_name = "Emplacement"
                     n = ""
                 error_message = f'Erreur: {field_name} déjà utilisée.'
-            return render_template('ajouter.html', error=error_message, # type: ignore
+            else:
+                error_message = f"Erreur lors de l'ajout : {error_str}"
+            return render_template('ajouter.html', error=error_message,
                                    ref_ecran=ref_ecran, libelle=libelle, pcb=pcb, fab=fab, n_fab=n_fab, type=type_serigraphie, n=n)
 
     return render_template('ajouter.html')
 
 # Route pour ajouter un utilisateur
 @app.route('/ajouterU', methods=['GET', 'POST'])
+@admin_required
 def ajouterU():
     """
     Permet à un administrateur d'ajouter un nouvel utilisateur.
     - Vérifie l'unicité de l'identifiant.
     - Insère dans la base en gérant les potentielles erreurs d'intégrité.
     """
-    if 'admin' not in session or not session['admin']:
-        return redirect('/index')   
 
     # Définit une valeur par défaut pour éviter la variable possiblement non liée
     error = None
@@ -559,53 +591,174 @@ def ajouterU():
         nom = request.form['nom']
         admin = 1 if 'admin' in request.form else 0
 
-        with get_db_connection() as conn:
-            cursor = conn.cursor()
-            cursor.execute('SELECT identifiant FROM users WHERE identifiant = ?', (identifiant,))
-            existing_user = cursor.fetchone()
-
-            if existing_user:
-                error = "L'identifiant existe déjà. Veuillez en choisir un autre."
-                return render_template('ajouterU.html', error=error,
-                                       identifiant=identifiant, prenom=prenom, nom=nom)
-
-            try:
-                cursor.execute('INSERT INTO users (identifiant, prenom, nom, admin) VALUES (?, ?, ?, ?)',
-                               (identifiant, prenom, nom, admin))
+        try:
+            with get_db_connection() as conn:
+                conn.execute(
+                    'INSERT INTO users (identifiant, prenom, nom, admin) VALUES (?, ?, ?, ?)',
+                    (identifiant, prenom, nom, admin),
+                )
                 conn.commit()
-            except sqlite3.IntegrityError as e:
-                error_str = str(e)
-                if "UNIQUE constraint failed:" in error_str:
-                    constraint = error_str.split("UNIQUE constraint failed: ")[1]
-                    if "identifiant" in constraint:
-                        field_name = "Identifiant"
-                        identifiant = ""
-                    else:
-                        field_name = constraint
-                    error = f'Erreur: {field_name} déjà utilisé.'
-                else:
-                    # Cas générique si le message d'erreur n'est pas celui attendu
-                    error = f"Erreur lors de l'ajout de l'utilisateur : {error_str}"
-                return render_template('ajouterU.html', error=error,
-                                       identifiant=identifiant, prenom=prenom, nom=nom)
+        except sqlite3.IntegrityError as e:
+            error_str = str(e)
+            if "UNIQUE constraint failed:" in error_str and "identifiant" in error_str:
+                identifiant = ""
+                error = "L'identifiant existe déjà. Veuillez en choisir un autre."
+            else:
+                error = f"Erreur lors de l'ajout de l'utilisateur : {error_str}"
+            return render_template('ajouterU.html', error=error,
+                                   identifiant=identifiant, prenom=prenom, nom=nom)
 
         return render_template('ajouterU.html', success="Utilisateur ajouté avec succès !")
 
     return render_template('ajouterU.html')
 
+# Route pour gérer les écrans (recherche, modification, suppression)
+@app.route('/gerer_ecrans', methods=['GET', 'POST'])
+@admin_required
+def gerer_ecrans():
+    """
+    Sous-menu admin : recherche un écran par référence (exact ou suffixe),
+    affiche ses infos, permet de le modifier ou supprimer.
+    """
+    ecran = None
+    message = None
+    error = False
+
+    if request.method == 'POST':
+        action = request.form.get('action', 'search')
+        ref_ecran = request.form.get('ref_ecran', '').strip()
+
+        if action == 'delete':
+            with get_db_connection() as conn:
+                conn.execute('DELETE FROM serigraphie WHERE ref_ecran = ?', (ref_ecran,))
+                conn.commit()
+            message = f"L'écran {ref_ecran} a été supprimé."
+            return render_template('gererE.html', ecran=None, message=message, error=False)
+
+        # action == 'search'
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute('SELECT * FROM serigraphie WHERE ref_ecran = ?', (ref_ecran,))
+            ecran = cursor.fetchone()
+
+            if not ecran:
+                cursor.execute(
+                    'SELECT * FROM serigraphie WHERE ref_ecran LIKE ?', ('%' + ref_ecran,)
+                )
+                resultats = cursor.fetchall()
+                if len(resultats) == 1:
+                    ecran = resultats[0]
+                elif len(resultats) > 1:
+                    refs = ', '.join(str(r['ref_ecran']) for r in resultats)
+                    message = f"Plusieurs écrans correspondent : {refs}. Précisez votre recherche."
+                    error = True
+
+        if not ecran and not error:
+            message = f"Aucun écran trouvé pour la référence « {ref_ecran} »."
+            error = True
+
+    return render_template('gererE.html', ecran=ecran, message=message, error=error)
+
+
+# Route pour gérer les utilisateurs (liste + modification + suppression)
+@app.route('/gerer_utilisateurs')
+@admin_required
+def gerer_utilisateurs():
+    """Affiche la liste de tous les utilisateurs avec options de modification et suppression."""
+    with get_db_connection() as conn:
+        users = conn.execute(
+            'SELECT id, nom, prenom, identifiant, admin FROM users ORDER BY nom, prenom'
+        ).fetchall()
+    return render_template('gererU.html', users=users)
+
+
+@app.route('/modifierU', methods=['GET', 'POST'])
+@admin_required
+def modifierU():
+    """Permet à un administrateur de modifier un utilisateur existant."""
+    error = None
+
+    if request.method == 'POST':
+        user_id = request.form['id']
+        identifiant = request.form['identifiant']
+        prenom = request.form['prenom']
+        nom = request.form['nom']
+        admin = 1 if 'admin' in request.form else 0
+
+        try:
+            with get_db_connection() as conn:
+                conn.execute(
+                    'UPDATE users SET identifiant = ?, prenom = ?, nom = ?, admin = ? WHERE id = ?',
+                    (identifiant, prenom, nom, admin, user_id),
+                )
+                conn.commit()
+        except sqlite3.IntegrityError as e:
+            error_str = str(e)
+            if "UNIQUE constraint failed:" in error_str and "identifiant" in error_str:
+                error = "L'identifiant existe déjà. Veuillez en choisir un autre."
+            else:
+                error = f"Erreur lors de la modification : {error_str}"
+            return render_template('modifierU.html', error=error,
+                                   user={'id': user_id, 'identifiant': identifiant,
+                                         'prenom': prenom, 'nom': nom, 'admin': admin})
+
+        return redirect(url_for('gerer_utilisateurs'))
+
+    user_id = request.args.get('id')
+    with get_db_connection() as conn:
+        user = conn.execute(
+            'SELECT id, nom, prenom, identifiant, admin FROM users WHERE id = ?', (user_id,)
+        ).fetchone()
+
+    if not user:
+        return redirect(url_for('gerer_utilisateurs'))
+
+    return render_template('modifierU.html', user=user, error=None)
+
+
+@app.route('/supprimerU', methods=['POST'])
+@admin_required
+def supprimerU():
+    """Supprime un utilisateur. Un admin ne peut pas se supprimer lui-même."""
+    user_id = request.form['id']
+
+    with get_db_connection() as conn:
+        target = conn.execute(
+            'SELECT prenom FROM users WHERE id = ?', (user_id,)
+        ).fetchone()
+        if not target or target['prenom'] == session.get('prenom'):
+            return redirect(url_for('gerer_utilisateurs'))
+        conn.execute('DELETE FROM users WHERE id = ?', (user_id,))
+        conn.commit()
+
+    return redirect(url_for('gerer_utilisateurs'))
+
+
 # Route affichant le tableau des écrans
 @app.route('/ecran')
+@login_required
 def ecran():
     """
     Affiche la liste complète des écrans.
     Récupère les données depuis la base et transmet le statut admin pour un affichage conditionnel.
     """
-    if 'prenom' not in session:
-        return redirect('/')
     
     with get_db_connection() as conn:
         cursor = conn.cursor()
-        cursor.execute('SELECT ref_ecran, libelle, pcb, fab, n_fab, type, n, sorti, lave FROM serigraphie')
+        cursor.execute(
+            """
+            SELECT s.ref_ecran, s.libelle, s.pcb, s.fab, s.n_fab, s.type, s.n, s.sorti, s.lave,
+                   sl.personne AS pris_par, sl.sortie_ts
+            FROM serigraphie s
+            LEFT JOIN sortie_logs sl ON sl.id = (
+                SELECT id FROM sortie_logs
+                WHERE ref_ecran = s.ref_ecran AND rangement_ts IS NULL
+                ORDER BY sortie_ts DESC
+                LIMIT 1
+            )
+            ORDER BY CAST(s.n AS INTEGER)
+            """
+        )
         ecrans = cursor.fetchall()
 
     admin = session.get('admin', 0) == 1
@@ -613,15 +766,12 @@ def ecran():
 
 
 @app.route("/export_logs", methods=["GET"])
+@admin_required
 def export_logs():
     """
     Permet à un administrateur d'exporter tous les journaux quotidiens sous forme d'archive ZIP.
     Le navigateur invite ensuite à choisir l'emplacement d'enregistrement.
     """
-    if 'prenom' not in session:
-        return redirect('/')
-    if not session.get('admin'):
-        return redirect('/index')
 
     archive_stream = _build_logs_archive(delete_files=False)
     filename = f"screen_logs_{datetime.now().strftime('%Y%m%d_%H%M%S')}.zip"
@@ -634,12 +784,9 @@ def export_logs():
 
 
 @app.route('/export_serigraphie')
+@admin_required
 def export_serigraphie():
     """Exporte la table serigraphie au format XLSX. Admin uniquement."""
-    if 'prenom' not in session:
-        return redirect('/')
-    if not session.get('admin'):
-        return redirect('/index')
 
     with get_db_connection() as conn:
         cursor = conn.cursor()
@@ -665,16 +812,13 @@ def export_serigraphie():
 
 
 @app.route('/import_serigraphie', methods=['POST'])
+@admin_required
 def import_serigraphie():
     """Importe des écrans depuis un fichier CSV ou XLSX. Admin uniquement.
 
     - Insère les nouvelles lignes directement.
     - Si des conflits (ref_ecran déjà existant) sont détectés, rend la page de résolution.
     """
-    if 'prenom' not in session:
-        return redirect('/')
-    if not session.get('admin'):
-        return redirect('/index')
 
     file = request.files.get('import_file')
     if not file or file.filename == '':
@@ -734,12 +878,9 @@ def import_serigraphie():
 
 
 @app.route('/import_serigraphie/confirm', methods=['POST'])
+@admin_required
 def import_serigraphie_confirm():
     """Applique les choix de résolution des conflits d'import. Admin uniquement."""
-    if 'prenom' not in session:
-        return redirect('/')
-    if not session.get('admin'):
-        return redirect('/index')
 
     conflicts_json = request.form.get('conflicts_json', '[]')
     overwrite_all = request.form.get('overwrite_all') == '1'
@@ -778,35 +919,54 @@ def import_serigraphie_confirm():
 
 
 @app.route('/stats')
+@admin_required
 def stats():
     """
     Affiche les statistiques d'utilisation des écrans.
     - Admin uniquement.
     - Nombre de passages par écran (tri décroissant) et par personne.
+    - Filtrage optionnel par plage de dates (date_debut / date_fin en GET).
     """
-    if 'prenom' not in session:
-        return redirect('/')
-    if not session.get('admin'):
-        return redirect('/index')
+
+    date_debut = request.args.get('date_debut', '').strip()
+    date_fin = request.args.get('date_fin', '').strip()
+
+    # Construire le filtre de date pour les requêtes SQL
+    date_filter = ''
+    params_ecrans: list = []
+    params_personnes: list = []
+    if date_debut and date_fin:
+        date_filter = 'WHERE DATE(sl.sortie_ts) BETWEEN ? AND ?'
+        params_ecrans = [date_debut, date_fin]
+        params_personnes = [date_debut, date_fin]
+    elif date_debut:
+        date_filter = 'WHERE DATE(sl.sortie_ts) >= ?'
+        params_ecrans = [date_debut]
+        params_personnes = [date_debut]
+    elif date_fin:
+        date_filter = 'WHERE DATE(sl.sortie_ts) <= ?'
+        params_ecrans = [date_fin]
+        params_personnes = [date_fin]
 
     with get_db_connection() as conn:
-        _ensure_log_tables(conn)
         cursor = conn.cursor()
-        cursor.execute('''
+        cursor.execute(f'''
             SELECT s.ref_ecran, s.libelle, s.fab, s.type, COUNT(sl.id) AS total_passages
             FROM serigraphie s
             INNER JOIN sortie_logs sl ON s.ref_ecran = sl.ref_ecran
+            {date_filter}
             GROUP BY s.ref_ecran, s.libelle, s.fab, s.type
             ORDER BY total_passages DESC
-        ''')
+        ''', params_ecrans)
         ecrans_stats = cursor.fetchall()
 
-        cursor.execute('''
+        cursor.execute(f'''
             SELECT personne, COUNT(*) AS total_passages
-            FROM sortie_logs
+            FROM sortie_logs sl
+            {date_filter}
             GROUP BY personne
             ORDER BY total_passages DESC
-        ''')
+        ''', params_personnes)
         personnes_stats = cursor.fetchall()
 
         total_passages = sum(row['total_passages'] for row in ecrans_stats)
@@ -816,22 +976,20 @@ def stats():
         ecrans_stats=ecrans_stats,
         personnes_stats=personnes_stats,
         total_passages=total_passages,
+        date_debut=date_debut,
+        date_fin=date_fin,
     )
 
 
 @app.route("/reset_stats", methods=["POST"])
+@admin_required
 def reset_stats():
     """
     Remet à zéro les statistiques en vidant la table sortie_logs.
     - Admin uniquement.
     """
-    if 'prenom' not in session:
-        return redirect('/')
-    if not session.get('admin'):
-        return redirect('/index')
 
     with get_db_connection() as conn:
-        _ensure_log_tables(conn)
         conn.execute('DELETE FROM sortie_logs')
         conn.commit()
 
@@ -839,14 +997,11 @@ def reset_stats():
 
 
 @app.route("/purge_logs", methods=["POST"])
+@admin_required
 def purge_logs():
     """
     Exporte tous les journaux puis supprime les fichiers CSV pour repartir sur un dossier vide.
     """
-    if 'prenom' not in  session:
-        return redirect('/')
-    if not session.get('admin'):
-        return redirect('/index')
 
     archive_stream = _build_logs_archive(delete_files=True)
     filename = f"screen_logs_cleared_{datetime.now().strftime('%Y%m%d_%H%M%S')}.zip"
@@ -859,20 +1014,18 @@ def purge_logs():
 
 # Route pour prendre un écran (marquer comme sorti)
 @app.route('/prendre', methods=['GET', 'POST'])
+@login_required
 def prendre():
     """
     Permet de prendre (emprunter) un écran.
     - Vérifie que l'écran n'est pas déjà marqué comme sortie.
     - Met à jour l'état de l'écran et renvoie un message de confirmation.
     """
-    if 'prenom' not in session:
-        return redirect('/')
 
     if request.method == 'POST':
         ref_ecran = request.form['ref_ecran']
 
         with get_db_connection() as conn:
-            _ensure_log_tables(conn)
             cursor = conn.cursor()
 
             # Essai exact d'abord, puis recherche par suffixe
@@ -891,37 +1044,33 @@ def prendre():
                 elif len(resultats) > 1:
                     refs = ", ".join(str(r['ref_ecran']) for r in resultats)
                     message = f"Plusieurs écrans correspondent : {refs}. Précisez votre recherche."
-                    return render_template('prendre.html', message=message, n_value=None)
+                    return render_template('prendre.html', message=message, apercu=None)
 
-            if ecran:
-                if ecran['sorti'] == 1:
-                    message = "Erreur : cet écran a déjà été pris."
-                    n_value = ecran['n']
-                else:
-                    cursor.execute('UPDATE serigraphie SET sorti = 1 WHERE ref_ecran = ?', (ecran['ref_ecran'],))
-                    sortie_dt = _current_timestamp()
-                    cursor.execute(
-                        """
-                        INSERT INTO sortie_logs (ref_ecran, libelle, personne, sortie_ts)
-                        VALUES (?, ?, ?, ?)
-                        """,
-                        (ecran['ref_ecran'], ecran['libelle'], session.get('prenom', 'Inconnu'), sortie_dt.isoformat()),
-                    )
-                    conn.commit()
-                    _sync_daily_log(conn, sortie_dt.date())
-                    libelle = ecran['libelle']
-                    message = f"écran {libelle} pris avec succès."
-                    n_value = ecran['n']
-            else:
-                message = "Erreur : écran non trouvée."
-                n_value = None
+            if not ecran:
+                return render_template('prendre.html', message="Erreur : écran non trouvée.", apercu=None)
 
-        return render_template('prendre.html', message=message, n_value=n_value)
+            if ecran['sorti'] == 1:
+                return render_template('prendre.html', message="Erreur : cet écran a déjà été pris.", apercu=ecran)
 
-    return render_template('prendre.html', message=None, n_value=None)
+            cursor.execute('UPDATE serigraphie SET sorti = 1 WHERE ref_ecran = ?', (ecran['ref_ecran'],))
+            sortie_dt = _current_timestamp()
+            cursor.execute(
+                """
+                INSERT INTO sortie_logs (ref_ecran, libelle, personne, sortie_ts)
+                VALUES (?, ?, ?, ?)
+                """,
+                (ecran['ref_ecran'], ecran['libelle'], session.get('prenom', 'Inconnu'), sortie_dt.isoformat()),
+            )
+            conn.commit()
+            _sync_daily_log(conn, sortie_dt.date())
+            message = f"écran {ecran['libelle']} pris avec succès."
+            return render_template('prendre.html', message=message, apercu=ecran)
+
+    return render_template('prendre.html', message=None, apercu=None)
 
 # Route pour modifier un écran
 @app.route('/modifier', methods=['GET', 'POST'])
+@admin_required
 def modifier():
     """
     Permet la modification d'un écran existante.
@@ -929,8 +1078,6 @@ def modifier():
     - Mode modification : les données peuvent être mises à jour, avec ou sans changement de référence.
     - Vérifie l'unicité de la nouvelle référence en cas de modification.
     """
-    if 'admin' not in session or not session['admin']:
-        return redirect('/index') 
 
     message = None
     error = False
@@ -1003,14 +1150,13 @@ def modifier():
     
 # Route pour supprimer un écran
 @app.route('/supprimer', methods=['GET', 'POST'])
+@admin_required
 def supprimer():
     """
     Permet la suppression d'un écran.
     - Mode "check" : demande de confirmation en affichant les détails de la écran.
     - Mode "delete" : suppression effective de l'écran dans la BD.
     """
-    if 'admin' not in session or not session['admin']:
-        return redirect('/index') 
     if request.method == 'POST':
         ref_ecran = request.form.get('ref_ecran', '').strip()
         action = request.form.get('action')
@@ -1035,19 +1181,17 @@ def supprimer():
 
 # Route pour ranger un écran
 @app.route('/ranger', methods=['GET', 'POST'])
+@login_required
 def ranger():
     """
     Permet de ranger un écran.
     - Met à jour l'attribut 'sorti' et enregistre l'état de lavage.
     """
-    if 'prenom' not in session:
-        return redirect('/')
 
     error = None
     emplacement = None
 
     with get_db_connection() as conn:
-        _ensure_log_tables(conn)
         cursor = conn.cursor()
 
         if request.method == 'POST':
@@ -1092,11 +1236,9 @@ def ranger():
 @app.route('/close_db')
 def close_db():
     """
-    Ferme la connexion à la base de données.
-    - Affiche un message de confirmation sur la page d'accueil.
+    Redirige vers la page d'accueil (route vestigiale conservée pour compatibilité).
     """
-    return render_template('index.html', prenom=session.get('prenom'), admin=session.get('admin')==1,
-                           success="La connexion à la base de données a été fermée.")
+    return redirect('/index')
     
 @app.route("/update", methods=["POST"])
 def update():
@@ -1157,25 +1299,14 @@ def shutdown():
     except Exception as e:
         return f"<h1>Erreur :</h1><p>{e}</p>"
     
-# Cette route permet de servir les fichiers JavaScript présents dans le dossier "Functions".
-# Lorsqu'une requête est faite à /Functions/nom_du_fichier, le fichier correspondant est envoyé.
 @app.route('/Functions/<path:filename>')
 def send_functions(filename):
-    # Récupère le chemin absolu du répertoire actuel (où se trouve APP.py)
-    base_dir = os.path.abspath(os.path.dirname(__file__))
-    # Construit le chemin vers le dossier "Functions" en se basant sur le répertoire racine du projet
-    functions_dir = os.path.join(base_dir, 'Functions')
-    # Envoie le fichier demandé depuis le dossier "Functions"
-    return send_from_directory(functions_dir, filename)
+    return send_from_directory(BASE_DIR / 'Functions', filename)
 
-# Cette route permet de servir les fichiers images présents dans le dossier "Images".
-# Elle est nécessaire pour que les icônes utilisées dans les templates soient
-# correctement récupérées par le navigateur.
+
 @app.route('/Images/<path:filename>')
 def send_images(filename):
-    base_dir = os.path.abspath(os.path.dirname(__file__))
-    images_dir = os.path.join(base_dir, 'Images')
-    return send_from_directory(images_dir, filename)
+    return send_from_directory(BASE_DIR / 'Images', filename)
 
 # Lancement du serveur Flask (production avec debug désactivé par défaut)
 if __name__ == '__main__':

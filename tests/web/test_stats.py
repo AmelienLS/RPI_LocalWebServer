@@ -69,6 +69,60 @@ def test_stats_shows_total_passages(client, set_user_session, add_serigraphie, t
     assert "1" in body
 
 
+def test_stats_date_filter_includes_matching_logs(client, set_user_session, add_serigraphie, test_db):
+    set_user_session(admin=True)
+    add_serigraphie(ref_ecran=520, libelle="Ecran filtre", n="056")
+
+    with sqlite3.connect(test_db) as conn:
+        conn.execute(
+            "INSERT INTO sortie_logs (ref_ecran, libelle, personne, sortie_ts) VALUES (?, ?, ?, ?)",
+            (520, "Ecran filtre", "Alice", "2025-06-15T10:00:00"),
+        )
+        conn.execute(
+            "INSERT INTO sortie_logs (ref_ecran, libelle, personne, sortie_ts) VALUES (?, ?, ?, ?)",
+            (520, "Ecran filtre", "Alice", "2025-08-20T11:00:00"),
+        )
+        conn.commit()
+
+    response = client.get("/stats?date_debut=2025-06-01&date_fin=2025-06-30")
+    body = response.data.decode("utf-8")
+    assert "Ecran filtre" in body
+    # Only 1 passage in June
+    assert "Alice" in body
+
+
+def test_stats_date_filter_excludes_out_of_range_logs(client, set_user_session, add_serigraphie, test_db):
+    set_user_session(admin=True)
+    add_serigraphie(ref_ecran=521, libelle="Ecran hors plage", n="057")
+
+    with sqlite3.connect(test_db) as conn:
+        conn.execute(
+            "INSERT INTO sortie_logs (ref_ecran, libelle, personne, sortie_ts) VALUES (?, ?, ?, ?)",
+            (521, "Ecran hors plage", "Bob", "2024-01-10T09:00:00"),
+        )
+        conn.commit()
+
+    response = client.get("/stats?date_debut=2025-01-01&date_fin=2025-12-31")
+    body = response.data.decode("utf-8")
+    assert "Ecran hors plage" not in body
+
+
+def test_stats_date_filter_only_debut(client, set_user_session, add_serigraphie, test_db):
+    set_user_session(admin=True)
+    add_serigraphie(ref_ecran=522, libelle="Ecran debut", n="058")
+
+    with sqlite3.connect(test_db) as conn:
+        conn.execute(
+            "INSERT INTO sortie_logs (ref_ecran, libelle, personne, sortie_ts) VALUES (?, ?, ?, ?)",
+            (522, "Ecran debut", "Carol", "2025-03-01T08:00:00"),
+        )
+        conn.commit()
+
+    response = client.get("/stats?date_debut=2025-01-01")
+    body = response.data.decode("utf-8")
+    assert "Ecran debut" in body
+
+
 def test_reset_stats_requires_admin(client, set_user_session):
     set_user_session(admin=False, prenom="Bob")
     response = client.post("/reset_stats")

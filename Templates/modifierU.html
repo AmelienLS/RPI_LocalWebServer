@@ -3,44 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ajouter un Utilisateur</title>
+    <title>Modifier un utilisateur</title>
     <link rel="stylesheet" href="/Styles/common.css">
     <link rel="stylesheet" href="/Styles/ajouterU.css">
     <link rel="stylesheet" href="/Styles/vkeyboard.css">
     <link rel="icon" href="/Images/Logo.png" type="image/png">
 </head>
 <body>
-    <!--Page pour ajouter un nouvel utilisateur avec option admin -->
-    <!-- Bouton pour revenir à /index -->
-    <a href="{{ url_for('index') }}" class="admin-link">Retour au menu</a>
+    <a href="{{ url_for('gerer_utilisateurs') }}" class="admin-link">Retour à la liste</a>
 
     <div class="form-container">
-        <h2>Ajouter un Utilisateur</h2>
+        <h2>Modifier un utilisateur</h2>
 
         {% if error %}
-        <div style="color: red; font-weight: bold;">
-            {{ error }}
-        </div>
+        <div style="color: red; font-weight: bold;">{{ error }}</div>
         {% endif %}
 
         <form method="POST">
+            <input type="hidden" name="id" value="{{ user['id'] }}">
+
             <label for="identifiant">Identifiant :</label>
-            <input type="text" id="identifiant" name="identifiant" required>
+            <input type="text" id="identifiant" name="identifiant" value="{{ user['identifiant'] }}" required>
 
             <label for="prenom">Prénom :</label>
-            <input type="text" id="prenom" name="prenom" required>
+            <input type="text" id="prenom" name="prenom" value="{{ user['prenom'] }}" required>
 
             <label for="nom">Nom :</label>
-            <input type="text" id="nom" name="nom" required>
+            <input type="text" id="nom" name="nom" value="{{ user['nom'] }}" required>
 
             <label for="admin">Admin :</label>
-            <input type="checkbox" id="admin" name="admin">
+            <input type="checkbox" id="admin" name="admin" {% if user['admin'] == 1 %}checked{% endif %}>
 
-            <button type="submit">Ajouter</button>
+            <button type="submit">Enregistrer</button>
         </form>
-        {% if success %}
-            <div class="confirmation-message" style="color: green; margin-top: 1rem;">{{ success }}</div>
-        {% endif %}
     </div>
     <script src="/Functions/vkeyboard.js"></script>
     <script src="/Functions/rotation.js"></script>

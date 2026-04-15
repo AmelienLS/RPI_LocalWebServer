@@ -56,6 +56,50 @@ tbody tr:nth-child(odd) td {
     color: #4CAF50;
 }
 
+.stats-filter {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.25rem;
+}
+
+.stats-filter input[type="date"] {
+    background-color: #2A2D46;
+    color: #fff;
+    border: 1px solid #4A90D9;
+    border-radius: 6px;
+    padding: 0.4rem 0.6rem;
+    font-size: 0.9rem;
+}
+
+.stats-filter button {
+    background-color: #4A90D9;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 0.4rem 1rem;
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+
+.stats-filter button:hover {
+    background-color: #357abd;
+}
+
+.stats-filter-reset {
+    color: #aaa;
+    font-size: 0.85rem;
+    text-decoration: underline;
+}
+
+.stats-filter-label {
+    color: #aaa;
+    font-size: 0.85rem;
+    font-weight: normal;
+    margin-left: 0.5rem;
+}
+
 .btn-reset-stats {
     margin-top: 2rem;
     background-color: #c0392b;

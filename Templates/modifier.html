@@ -73,12 +73,12 @@
         {% if error %}
             <div class="error">
                 <p>Écran non trouvé. Veuillez vérifier la référence et réessayer.</p>
-                <a href="/modifier" style="color: white; text-decoration: underline;">Réessayer</a>
+                <a href="{{ url_for('modifier') }}" style="color: white; text-decoration: underline;">Réessayer</a>
             </div>
         {% endif %}
 
         <!-- Bouton de retour -->
-        <a href="/index" class="admin-link">Retour au menu</a>
+        <a href="{{ url_for('index') }}" class="admin-link">Retour au menu</a>
     </div>
     <script src="/Functions/vkeyboard.js"></script>
     <script src="/Functions/rotation.js"></script>
