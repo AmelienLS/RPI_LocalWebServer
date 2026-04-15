@@ -99,7 +99,7 @@ def _ensure_log_tables_once():
         with get_db_connection() as conn:
             _ensure_log_tables(conn)
             conn.commit()
-        app._log_tables_ensured = True
+        app._log_tables_ensured = True # type: ignore
 
 
 def maybe_open_browser(url: str) -> None:
@@ -299,8 +299,8 @@ def _parse_import_file(file_storage):
         file_bytes = io.BytesIO(file_storage.read())
         wb = openpyxl.load_workbook(file_bytes, read_only=True, data_only=True)
         ws = wb.active
-        ws.reset_dimensions()  # ignore la métadonnée <dimension> potentiellement tronquée
-        rows_iter = ws.iter_rows()
+        ws.reset_dimensions() # type: ignore la métadonnée <dimension> potentiellement tronquée #type : ignore
+        rows_iter = ws.iter_rows() # type: ignore
         next(rows_iter, None)  # ignorer la ligne d'en-tête
         rows = []
         for row in rows_iter:
@@ -795,9 +795,9 @@ def export_serigraphie():
 
     wb = openpyxl.Workbook()
     ws = wb.active
-    ws.append(_SERI_COLUMNS)
+    ws.append(_SERI_COLUMNS) # type: ignore
     for row in rows:
-        ws.append([row[c] for c in _SERI_COLUMNS])
+        ws.append([row[c] for c in _SERI_COLUMNS]) # type: ignore
 
     buf = BytesIO()
     wb.save(buf)
