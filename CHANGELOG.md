@@ -2,7 +2,7 @@
 ## [3.22.1] - 2026-04-15
 > Commit : 'refactor(ecran) change the modifier button to send the user to gerer_ecrans'
 ### Modifié
-- 'Ecran.html' : Le bouton modifier envoie mainternant vers gerer_ecran.html au lieu de modifier.html.
+- `Ecran.html` : Le bouton modifier envoie mainternant vers gerer_ecran.html au lieu de modifier.html.
 
 ## [3.22.0] - 2026-04-14
 > Commit : `feat(gerer_ecrans): add full screen management page with search, edit, delete`
