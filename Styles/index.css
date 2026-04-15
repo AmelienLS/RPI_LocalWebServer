@@ -107,13 +107,10 @@ body {
 }
 
 .laver-btn {
-    width: auto;
-    min-width: 80px;
-    padding: 0.5rem 1rem;
-    min-height: 44px;
-    background-color: #4A90D9;
-    color: #FFFFFF;
-    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.45), 0 3px 8px rgba(0, 0, 0, 0.4);
+    margin-top: 1rem;
+    background-color: #2A6496;
+    color: #fff;
+    box-shadow: 0 0 0 2px rgba(0,0,0,0.45), 0 3px 8px rgba(0,0,0,0.4);
 }
 
 .laver-btn:hover {
@@ -171,7 +168,7 @@ body {
 
 .btn-update {
     margin-top: 1rem;
-    background-color: #2A6496;
+    background-color: #4a90d9;
     color: #fff;
     box-shadow: 0 0 0 2px rgba(0,0,0,0.45), 0 3px 8px rgba(0,0,0,0.4);
 }
