@@ -55,7 +55,7 @@
                     <td>{{ ecran.n }}</td>
                     <td>{{ 'Oui' if ecran.lave == 1 else 'Non' }}</td>
                     <td>{{ 'Oui' if ecran.sorti == 1 else 'Non' }}</td>
-                    <td>{{ ecran.pris_par + ' à ' + ecran.sortie_ts[11:16] if ecran.pris_par else '' }}</td>
+                    <td>{{ ecran.pris_par + ' à ' + ecran.sortie_ts[11:16] if ecran.pris_par else 'En armoire' }}</td>
                     <td>
                         <form action="{{ url_for('prendre') }}" method="POST" onsubmit="return confirm('Prendre l\'écran {{ ecran.ref_ecran }} — {{ ecran.libelle }} ?');">
                             <input type="hidden" name="ref_ecran" value="{{ ecran.ref_ecran }}">
@@ -64,7 +64,7 @@
                     </td>
                     {% if admin %}
                     <td>
-                        <form action="{{ url_for('modifier') }}" method="POST">
+                        <form action="{{ url_for('gerer_ecrans') }}" method="POST">
                             <input type="hidden" name="ref_ecran" value="{{ ecran.ref_ecran }}">
                             <button type="submit" class="button modifier-btn">Modifier</button>
                         </form>
