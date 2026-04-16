@@ -2,7 +2,7 @@
 
 Application web développée avec Flask pour gérer des **écrans de sérigraphies** dans un atelier. Elle permet de suivre l'état des écrans (sorti / rangé / à laver), d'administrer les utilisateurs, de tracer toutes les manipulations dans des journaux CSV quotidiens, et de se déployer facilement sur une Raspberry Pi ou une machine Windows.
 
-**Version actuelle : 3.10.1**
+**Version actuelle : 3.22.2**
 
 ---
 
@@ -35,8 +35,8 @@ Application web développée avec Flask pour gérer des **écrans de sérigraphi
 | **Suivi d'état** | Marquer un écran comme sorti (`prendre`) ou rangé (`ranger`), avec indication du lavage |
 | **Traçabilité** | Chaque emprunt/rangement est logué dans `sortie_logs` (SQLite) **et** dans un fichier CSV quotidien horodaté |
 | **Authentification** | Connexion par identifiant, sessions Flask ; rôle utilisateur ou administrateur |
-| **Gestion des utilisateurs** | Ajout d'utilisateurs (admin seulement) |
-| **Statistiques** | Tableau de bord d'utilisation par écran et par personne (admin seulement) |
+| **Gestion des utilisateurs** | Ajout, modification et suppression d'utilisateurs (admin seulement) |
+| **Statistiques** | Tableau de bord d'utilisation par écran et par personne, filtrable par plage de dates (admin seulement) |
 | **Import / Export** | Import CSV/XLSX d'un catalogue d'écrans avec détection de conflits, export XLSX ; export ZIP des journaux CSV |
 | **Configuration web** | Page `/setup` pour choisir le chemin de la base de données et créer une nouvelle base sans toucher au code |
 | **Arrêt système** | Bouton d'arrêt de la machine (Linux) ou du serveur (Windows) directement depuis l'interface |
@@ -68,18 +68,24 @@ RPI_LocalWebServer/
 │   ├── ecran.html              # Tableau des sérigraphies avec filtres
 │   ├── ajouter.html            # Formulaire ajout écran + import/export
 │   ├── ajouterU.html           # Formulaire ajout utilisateur
-│   ├── prendre.html            # Emprunter un écran
-│   ├── ranger.html             # Ranger un écran
+│   ├── gererE.html             # Gestion des écrans (recherche, modification, suppression)
+│   ├── gererU.html             # Gestion des utilisateurs (liste, modification, suppression)
+│   ├── modifierU.html          # Formulaire modification utilisateur
+│   ├── prendre.html            # Emprunter un écran (affiche l'emplacement après prise)
+│   ├── ranger.html             # Ranger un écran (dropdown avec filtre texte)
 │   ├── modifier.html           # Modifier un écran
 │   ├── supprimer.html          # Supprimer un écran
-│   ├── stats.html              # Statistiques d'utilisation
+│   ├── stats.html              # Statistiques d'utilisation avec filtre par date
 │   ├── setup.html              # Configuration du chemin de la BDD
 │   └── import_conflicts.html   # Résolution de conflits lors d'un import
 │
 ├── Styles/                     # CSS dédié par page + common.css
 ├── Functions/
-│   ├── Ecran.js                # Filtrage dynamique du tableau des écrans
-│   └── ecranDrag.js            # Défilement tactile (drag horizontal)
+│   ├── Ecran.js                # Filtrage dynamique et tri du tableau des écrans
+│   ├── ecranDrag.js            # Défilement tactile (drag horizontal)
+│   ├── update.js               # Logique du bouton "Mettre à jour" (fetch + compte à rebours)
+│   ├── rotation.js             # Rotation de l'écran 0°/90° via localStorage
+│   └── vkeyboard.js            # Clavier virtuel tactile
 ├── Images/
 │   ├── Logo.png
 │   └── database.ico
@@ -378,22 +384,28 @@ Ou depuis le dossier `Setups Windows` :
 | `/setup` | GET / POST | Public | Configuration du chemin de la BDD |
 | `/setup/init_db` | POST | Public | Créer/réinitialiser la BDD depuis `schema.sql` |
 | `/logout` | GET | Connecté | Déconnexion |
-| `/index` | GET | Connecté | Page d'accueil avec menu d'actions |
-| `/ecran` | GET | Connecté | Tableau de toutes les sérigraphies (filtres temps réel) |
-| `/prendre` | GET / POST | Connecté | Marquer un écran comme sorti |
-| `/ranger` | GET / POST | Connecté | Marquer un écran comme rangé |
+| `/index` | GET | Connecté | Page d'accueil avec menu d'actions et panneaux d'alerte |
+| `/ecran` | GET | Connecté | Tableau de toutes les sérigraphies (filtres, tri, colonne "Pris par") |
+| `/prendre` | GET / POST | Connecté | Marquer un écran comme sorti — affiche l'emplacement après prise |
+| `/ranger` | GET / POST | Connecté | Marquer un écran comme rangé (dropdown avec filtre texte) |
 | `/laver` | POST | Connecté | Marquer un écran comme lavé |
-| `/close_db` | GET | Connecté | Fermer la session (rotation d'écran tactile) |
+| `/close_db` | GET | Connecté | Redirige vers l'accueil |
+| `/gerer_ecrans` | GET / POST | Admin | Rechercher un écran, consulter ses infos, le modifier ou supprimer |
 | `/ajouter` | GET / POST | Admin | Ajouter un écran |
-| `/ajouterU` | GET / POST | Admin | Ajouter un utilisateur |
 | `/modifier` | GET / POST | Admin | Modifier un écran |
 | `/supprimer` | GET / POST | Admin | Supprimer un écran |
-| `/stats` | GET | Admin | Statistiques d'utilisation |
+| `/gerer_utilisateurs` | GET | Admin | Liste des utilisateurs avec modification et suppression |
+| `/ajouterU` | GET / POST | Admin | Ajouter un utilisateur |
+| `/modifierU` | GET / POST | Admin | Modifier un utilisateur |
+| `/supprimerU` | POST | Admin | Supprimer un utilisateur |
+| `/stats` | GET | Admin | Statistiques d'utilisation filtrables par plage de dates |
+| `/reset_stats` | POST | Admin | Remettre les statistiques à zéro |
 | `/export_serigraphie` | GET | Admin | Télécharger le catalogue en `.xlsx` |
 | `/import_serigraphie` | POST | Admin | Importer un fichier CSV/XLSX |
 | `/import_serigraphie/confirm` | POST | Admin | Confirmer la résolution des conflits d'import |
 | `/export_logs` | GET | Admin | Télécharger tous les journaux CSV en `.zip` |
 | `/purge_logs` | POST | Admin | Exporter puis supprimer tous les journaux CSV |
+| `/update` | POST | Admin | Mettre à jour l'application (git pull + redémarrage) |
 | `/shutdown` | POST | Public | Arrêter le système (Linux) ou le serveur (Windows) |
 | `/Functions/<fichier>` | GET | Public | Fichiers JavaScript statiques |
 | `/Images/<fichier>` | GET | Public | Images statiques |
