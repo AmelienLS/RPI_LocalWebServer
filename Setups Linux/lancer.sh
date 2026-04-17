@@ -37,7 +37,12 @@ printf '    Réseau  : \033[36mhttp://%s:%s\033[0m\n' "$local_ip" "$APP_PORT"
 printf '    Arrêt   : Ctrl+C\n\n'
 
 exec "$VENV_DIR/bin/gunicorn" \
-    --workers 2 \
+    --workers 1 \
+    --threads 2 \
+    --timeout 30 \
+    --keep-alive 2 \
+    --max-requests 500 \
+    --max-requests-jitter 100 \
     --bind "$APP_HOST:$APP_PORT" \
     --chdir "$PROJECT_DIR" \
     --access-logfile - \

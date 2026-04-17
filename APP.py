@@ -126,6 +126,11 @@ def get_db_connection():
        - Configure la connexion pour retourner des objets Row (accès par nom de colonne).
     """
     conn = sqlite3.connect(DATABASE_PATH)
+    # Optimisations pragmatiques pour Raspberry/SQLite: moins de blocages et meilleur débit I/O.
+    conn.execute("PRAGMA journal_mode=WAL")
+    conn.execute("PRAGMA synchronous=NORMAL")
+    conn.execute("PRAGMA busy_timeout=5000")
+    conn.execute("PRAGMA temp_store=MEMORY")
     conn.row_factory = sqlite3.Row
     return conn
 
@@ -157,6 +162,12 @@ def _ensure_log_tables(connection: sqlite3.Connection) -> None:
     connection.execute(
         "CREATE INDEX IF NOT EXISTS idx_sortie_logs_date ON sortie_logs (sortie_ts)"
     )
+    connection.execute(
+        "CREATE INDEX IF NOT EXISTS idx_sortie_logs_personne ON sortie_logs (personne)"
+    )
+    connection.execute(
+        "CREATE INDEX IF NOT EXISTS idx_sortie_logs_ref_sortie ON sortie_logs (ref_ecran, sortie_ts)"
+    )
 
 
 def _current_timestamp() -> datetime:
@@ -177,15 +188,16 @@ def _log_file_path(log_date: date) -> Path:
 
 def _sync_daily_log(connection: sqlite3.Connection, log_date: date) -> None:
     """Regénère le fichier CSV du jour donné à partir de la table de logs."""
-    log_date_iso = log_date.isoformat()
+    log_start_iso = datetime.combine(log_date, datetime.min.time()).isoformat()
+    log_end_iso = datetime.combine(log_date, datetime.max.time()).isoformat()
     cursor = connection.execute(
         """
         SELECT ref_ecran, libelle, personne, personne_rangement, sortie_ts, rangement_ts, lavee
         FROM sortie_logs
-        WHERE date(sortie_ts) = ?
-        ORDER BY datetime(sortie_ts) ASC, id ASC
+        WHERE sortie_ts >= ? AND sortie_ts <= ?
+        ORDER BY sortie_ts ASC, id ASC
         """,
-        (log_date_iso,),
+        (log_start_iso, log_end_iso),
     )
     rows = cursor.fetchall()
     log_path = _log_file_path(log_date)
@@ -936,17 +948,21 @@ def stats():
     params_ecrans: list = []
     params_personnes: list = []
     if date_debut and date_fin:
-        date_filter = 'WHERE DATE(sl.sortie_ts) BETWEEN ? AND ?'
-        params_ecrans = [date_debut, date_fin]
-        params_personnes = [date_debut, date_fin]
+        start_bound = f"{date_debut}T00:00:00"
+        end_bound = f"{date_fin}T23:59:59.999999"
+        date_filter = 'WHERE sl.sortie_ts >= ? AND sl.sortie_ts <= ?'
+        params_ecrans = [start_bound, end_bound]
+        params_personnes = [start_bound, end_bound]
     elif date_debut:
-        date_filter = 'WHERE DATE(sl.sortie_ts) >= ?'
-        params_ecrans = [date_debut]
-        params_personnes = [date_debut]
+        start_bound = f"{date_debut}T00:00:00"
+        date_filter = 'WHERE sl.sortie_ts >= ?'
+        params_ecrans = [start_bound]
+        params_personnes = [start_bound]
     elif date_fin:
-        date_filter = 'WHERE DATE(sl.sortie_ts) <= ?'
-        params_ecrans = [date_fin]
-        params_personnes = [date_fin]
+        end_bound = f"{date_fin}T23:59:59.999999"
+        date_filter = 'WHERE sl.sortie_ts <= ?'
+        params_ecrans = [end_bound]
+        params_personnes = [end_bound]
 
     with get_db_connection() as conn:
         cursor = conn.cursor()

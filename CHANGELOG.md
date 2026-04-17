@@ -1,4 +1,17 @@
 # Journal des modifications
+## [3.22.3] - 2026-04-17
+> Commit : `perf(rpi): reduce sqlite contention and tune gunicorn runtime`
+### Modifié
+- `APP.py` : `get_db_connection()` applique désormais des PRAGMA SQLite orientés performance sur Raspberry (`journal_mode=WAL`, `synchronous=NORMAL`, `busy_timeout=5000`, `temp_store=MEMORY`) afin de réduire la contention disque et les blocages ponctuels.
+- `APP.py` : optimisation des filtres temporels dans `_sync_daily_log()` et `/stats` en comparant directement `sortie_ts` (bornes ISO) au lieu d'utiliser `DATE()`/`datetime()` sur la colonne, ce qui améliore l'utilisation des index.
+- `APP.py` : ajout des index `idx_sortie_logs_personne` et `idx_sortie_logs_ref_sortie` pour accélérer les statistiques par personne et les accès historiques par écran.
+- `Setups Linux/lancer.sh` : profil Gunicorn ajusté pour Raspberry (`--workers 1`, `--threads 2`, `--timeout 30`, `--keep-alive 2`, `--max-requests 500`, `--max-requests-jitter 100`) afin de limiter la contention SQLite et stabiliser la latence.
+
+## [3.22.2] - 2026-04-16
+> Commit : `Readme Update`
+### Modifié
+- `README.md` : Mis a jours avec les informations récentes.
+
 ## [3.22.1] - 2026-04-15
 > Commit : 'refactor(ecran) change the modifier button to send the user to gerer_ecrans'
 ### Modifié
