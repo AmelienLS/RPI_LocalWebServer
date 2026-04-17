@@ -4,26 +4,42 @@ Application web développée avec Flask pour gérer des **écrans de sérigraphi
 
 **Version actuelle : 3.22.2**
 
+## Démarrage express (5 minutes)
+
+```bash
+git clone https://github.com/AmelienLS/RPI_LocalWebServer.git
+cd RPI_LocalWebServer
+python -m venv .venv
+source .venv/bin/activate        # Windows : .venv\Scripts\activate
+pip install -r requirements.txt
+cp .env.development .env
+python scripts/init_db.py --force --admin-identifiant admin
+python APP.py
+```
+
+Puis ouvrir [http://127.0.0.1:5000](http://127.0.0.1:5000) et se connecter avec l'identifiant `admin` (aucun mot de passe n'est utilisé).
+
 ---
 
 ## Sommaire
 
-1. [Fonctionnalités](#fonctionnalités)
-2. [Architecture du projet](#architecture-du-projet)
-3. [Stack technique](#stack-technique)
-4. [Base de données](#base-de-données)
-5. [Variables d'environnement](#variables-denvironnement)
-6. [Installation et lancement](#installation-et-lancement)
+1. [Démarrage express (5 minutes)](#démarrage-express-5-minutes)
+2. [Fonctionnalités](#fonctionnalités)
+3. [Architecture du projet](#architecture-du-projet)
+4. [Stack technique](#stack-technique)
+5. [Base de données](#base-de-données)
+6. [Variables d'environnement](#variables-denvironnement)
+7. [Installation et lancement](#installation-et-lancement)
    - [Développement local](#développement-local)
    - [Déploiement Linux / Raspberry Pi](#déploiement-linux--raspberry-pi)
    - [Déploiement Windows](#déploiement-windows)
-7. [Référence des routes](#référence-des-routes)
-8. [Tests](#tests)
-9. [Conseils de maintenance](#conseils-de-maintenance)
-10. [Continuité du projet (fork)](#continuité-du-projet-fork)
-11. [Contribuer](#contribuer)
-12. [Licence](#licence)
-13. [Historique des versions](#historique-des-versions)
+8. [Référence des routes](#référence-des-routes)
+9. [Tests](#tests)
+10. [Conseils de maintenance](#conseils-de-maintenance)
+11. [Continuité du projet (fork)](#continuité-du-projet-fork)
+12. [Contribuer](#contribuer)
+13. [Licence](#licence)
+14. [Historique des versions](#historique-des-versions)
 
 ---
 
@@ -52,7 +68,6 @@ RPI_LocalWebServer/
 ├── APP.py                      # Application Flask principale (routes, logique, BDD)
 ├── wsgi.py                     # Point d'entrée WSGI pour Gunicorn
 ├── requirements.txt            # Dépendances Python
-├── run.bat                     # Raccourci de lancement rapide (Windows, à la racine)
 │
 ├── .env.example                # Template documenté des variables d'environnement (versionné)
 │
@@ -229,7 +244,7 @@ Le projet fournit trois fichiers pour faciliter la configuration :
 |---|---|---|
 | [.env.example](.env.example) | Oui | Template documenté — ne pas modifier directement |
 | `.env.development` | Non | Configuration développement local (debug ON, navigateur auto) |
-| `.env.production` | Non | Configuration production Raspberry Pi (réseau LAN, debug OFF) |
+| `.env.production` | Non (optionnel) | Variante de production personnalisée si vous la créez |
 
 **Démarrage rapide :**
 ```bash
@@ -237,12 +252,12 @@ Le projet fournit trois fichiers pour faciliter la configuration :
 cp .env.development .env
 
 # Production / Raspberry Pi
-cp .env.production .env
+cp .env.example .env
 # Puis éditer FLASK_SECRET_KEY dans .env :
 python3 -c "import secrets; print(secrets.token_hex(32))"
 ```
 
-> Les scripts de déploiement (`demarrage_release.sh`, `Démarrage.bat`…) créent automatiquement le fichier `.env` depuis `.env.production` lors de la première installation.
+> Les scripts de déploiement conservent un fichier `.env` existant s'il est déjà présent. Sinon, l'application démarre avec les valeurs par défaut (voir `.env.example` pour les personnaliser).
 
 ---
 
@@ -357,12 +372,7 @@ Ce script :
 
 #### Lancement rapide (après installation)
 
-Depuis la racine du projet :
-```cmd
-run.bat
-```
-
-Ou depuis le dossier `Setups Windows` :
+Depuis le dossier `Setups Windows` :
 ```cmd
 "Setups Windows\Lancer.bat"
 ```
