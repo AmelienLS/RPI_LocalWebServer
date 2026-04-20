@@ -52,7 +52,7 @@
         <!-- Colonne droite : résultat -->
         <div class="col-right">
             {% if ecran %}
-            <div class="card" style="flex:1;">
+            <div class="card screen-detail-card">
                 <div class="card-header">
                     <span style="font-size:16px; font-weight:700;">Écran {{ ecran['ref_ecran'] }}</span>
                     {% if ecran['sorti'] == 1 %}
@@ -61,7 +61,7 @@
                     <span class="tag tag-success">En armoire</span>
                     {% endif %}
                 </div>
-                <div style="padding:8px 20px;">
+                <div class="screen-detail-body">
                     <div class="field-row">
                         <span class="field-label">Réf. Écran</span>
                         <span class="field-value mono">{{ ecran['ref_ecran'] }}</span>

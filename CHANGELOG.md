@@ -1,4 +1,9 @@
 # Journal des modifications
+## [4.0.1] - 2026-04-20
+> Commit : `fix(gerer-ecrans): allow scrolling in screen detail panel`
+### Corrigé
+- `Templates/gererE.html` + `Styles/gererE.css` : la fiche écran à droite est maintenant scrollable quand son contenu dépasse la hauteur disponible, ce qui rend toujours accessibles les boutons `Modifier` et `Supprimer`.
+
 ## [4.0.0] - 2026-04-20
 > Commit : `feat(ui): complete dark design system redesign across all templates`
 ### Ajouté

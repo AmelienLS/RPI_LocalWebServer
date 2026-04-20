@@ -1,1 +1,19 @@
 /* gererE.css — base styles in common.css */
+
+.screen-detail-card {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.screen-detail-body {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 8px 20px;
+}
+
+.screen-detail-card .card-footer {
+    flex-shrink: 0;
+}
