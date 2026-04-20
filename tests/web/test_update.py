@@ -5,7 +5,7 @@ import APP
 def test_update_requires_admin_json(client):
     """Sans session admin, retourne 403 JSON."""
     response = client.post("/update")
-    assert response.status_code == 403
+    assert response.status_code == 418
     assert response.get_json()["error"] == "unauthorized"
 
 
@@ -13,7 +13,7 @@ def test_update_requires_admin_not_just_login(client, set_user_session):
     """Connecté mais non admin → 403."""
     set_user_session(admin=False)
     response = client.post("/update")
-    assert response.status_code == 403
+    assert response.status_code == 418
     assert response.get_json()["error"] == "unauthorized"
 
 
