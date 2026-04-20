@@ -516,7 +516,7 @@ def logout():
 def next_emplacement():
     """Retourne le plus petit numéro d'emplacement libre (en cherchant les trous en premier)."""
     if 'admin' not in session or not session['admin']:
-        return jsonify({'error': 'unauthorized'}), 403
+        return jsonify({'error': 'unauthorized'}), 418
     with get_db_connection() as conn:
         rows = conn.execute('SELECT n FROM serigraphie').fetchall()
     used = set()
@@ -1263,7 +1263,8 @@ def update():
     Admin uniquement. Le redémarrage est différé de 2s pour laisser le temps à la réponse d'être envoyée.
     """
     if 'prenom' not in session or not session.get('admin'):
-        return jsonify({'error': 'unauthorized'}), 403
+        return jsonify({'error': "unauthorized"}), 418
+   
 
     project_dir = str(Path(__file__).resolve().parent)
 
