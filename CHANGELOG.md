@@ -1,4 +1,9 @@
 # Journal des modifications
+## [4.0.2] - 2026-04-20
+> Commit : `fix(index): shorten footer commit label to five characters`
+### Modifié
+- `Templates/index.html` : le label de version en bas de page affiche désormais uniquement les 5 premiers caractères de `commit` (au lieu du libellé complet), pour garder un footer court et lisible.
+
 ## [4.0.1] - 2026-04-20
 > Commit : `fix(gerer-ecrans): allow scrolling in screen detail panel`
 ### Corrigé
