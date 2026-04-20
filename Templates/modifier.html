@@ -5,82 +5,112 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Modifier un écran</title>
     <link rel="stylesheet" href="/Styles/common.css">
-    <link rel="stylesheet" href="/Styles/modifier.css">
+    <link rel="stylesheet" href="/Styles/ajouter.css">
     <link rel="stylesheet" href="/Styles/vkeyboard.css">
     <link rel="icon" href="/Images/Logo.png" type="image/png">
 </head>
 <body>
-    <!--Page de modification d'un écran avec recherche préalable par référence -->
-    <div class="form-container">
-        <h1>Modifier un écran</h1>
+<div class="page-screen">
 
-        <!-- Formulaire de modification -->
-        <form action="/modifier" method="post">
-            {% if not ref_ecran %}
-            <!-- Saisie de la référence écran pour rechercher -->
-            <label for="ref_ecran">Référence Écran :</label>
-            <input type="text" id="ref_ecran" name="ref_ecran" required>
-            <button type="submit">Chercher</button>
-            {% else %}
-            <!-- Modification de l'écran -->
-            <input type="hidden" name="old_ref_ecran" value="{{ ref_ecran }}">
-            
-            <label for="new_ref_ecran">Nouvelle Référence Écran :</label>
-            <input type="text" id="new_ref_ecran" name="new_ref_ecran" value="{{ ref_ecran }}" required maxlength="9" minlength="9">
-
-            <label for="libelle">Libellé :</label>
-            <input type="text" id="libelle" name="libelle" value="{{ libelle or '' }}" required>
-
-            <label for="pcb">PCB :</label>
-            <input type="text" id="pcb" name="pcb" value="{{ pcb or '' }}" maxlength="9" minlength="9">
-
-            <label for="fab">Fabriquant :</label>
-            <input type="text" id="fab" name="fab" value="{{ fab or '' }}" required maxlength="2" minlength="2">
-
-            <label for="n_fab">Numéro de Fabrication :</label>
-            <input type="text" id="n_fab" name="n_fab" value="{{ n_fab or '' }}" maxlength="7" minlength="7">
-
-            <label for="type">Type :</label>
-            <input type="text" id="type" name="type" value="{{ type_ or '' }}" required>
-
-            <label for="n">N° :</label>
-            <input type="text" id="n" name="n" value="{{ n or '' }}" required maxlength="3" minlength="3">
-
-            <label for="sorti">Sortie :</label>
-            <select id="sorti" name="sorti">
-                <option value="0" {% if sorti == '0' %} selected {% endif %}>Non</option>
-                <option value="1" {% if sorti == '1' %} selected {% endif %}>Oui</option>
-            </select>
-
-            <label for="lave">Lavé :</label>
-            <select id="lave" name="lave">
-                <option value="0" {% if lave == '0' %} selected {% endif %}>Non</option>
-                <option value="1" {% if lave == '1' %} selected {% endif %}>Oui</option>
-            </select>
-
-            <button type="submit">Mettre à jour</button>
-            {% endif %}
-        </form>
-
-        <!-- Affichage du message de réussite -->
-        {% if message %}
-            <div class="success">
-                <p>{{ message }}</p>
-            </div>
-        {% endif %}
-
-        <!-- Affichage d'un message d'erreur si l'écran n'existe pas -->
-        {% if error %}
-            <div class="error">
-                <p>Écran non trouvé. Veuillez vérifier la référence et réessayer.</p>
-                <a href="{{ url_for('modifier') }}" style="color: white; text-decoration: underline;">Réessayer</a>
-            </div>
-        {% endif %}
-
-        <!-- Bouton de retour -->
-        <a href="{{ url_for('index') }}" class="admin-link">Retour au menu</a>
+    <div class="topbar">
+        <a href="{{ url_for('gerer_ecrans') }}" class="topbar-back">← Gérer écrans</a>
+        <span class="topbar-title">Modifier un écran</span>
     </div>
-    <script src="/Functions/vkeyboard.js"></script>
-    <script src="/Functions/rotation.js"></script>
+
+    <div class="two-col">
+
+        <!-- Colonne gauche -->
+        <div class="col-left">
+            {% if message %}
+            <div class="flash-success">{{ message }}</div>
+            {% endif %}
+            {% if error %}
+            <div class="flash-error">Écran non trouvé. Veuillez vérifier la référence.
+                <a href="{{ url_for('modifier') }}" style="color:var(--error); text-decoration:underline;">Réessayer</a>
+            </div>
+            {% endif %}
+
+            <form action="/modifier" method="post" id="modifier-form">
+                {% if not ref_ecran %}
+                <div class="form-group">
+                    <label for="ref_ecran">Référence Écran</label>
+                    <input type="text" id="ref_ecran" name="ref_ecran" required>
+                </div>
+                <button type="submit" style="padding:18px; font-size:16px;">Chercher</button>
+                {% else %}
+                <input type="hidden" name="old_ref_ecran" value="{{ ref_ecran }}">
+                <div class="form-group">
+                    <label for="new_ref_ecran">Nouvelle Référence Écran</label>
+                    <input type="text" id="new_ref_ecran" name="new_ref_ecran" value="{{ ref_ecran }}" required maxlength="9" minlength="9">
+                </div>
+                <div class="form-group">
+                    <label for="libelle">Libellé</label>
+                    <input type="text" id="libelle" name="libelle" value="{{ libelle or '' }}" required>
+                </div>
+                <div class="form-group">
+                    <label for="pcb">PCB</label>
+                    <input type="text" id="pcb" name="pcb" value="{{ pcb or '' }}" maxlength="9" minlength="9">
+                </div>
+                <div class="form-group">
+                    <label for="type">Type</label>
+                    <input type="text" id="type" name="type" value="{{ type_ or '' }}" required>
+                </div>
+                {% endif %}
+            </form>
+        </div>
+
+        <!-- Colonne droite -->
+        {% if ref_ecran %}
+        <div class="col-right">
+            <div class="ajouter-grid-2">
+                <div class="form-group">
+                    <label for="fab">Fabriquant (2 car.)</label>
+                    <input form="modifier-form" type="text" id="fab" name="fab" value="{{ fab or '' }}" required maxlength="2" minlength="2">
+                </div>
+                <div class="form-group">
+                    <label for="n_fab">N° Fabrication</label>
+                    <input form="modifier-form" type="text" id="n_fab" name="n_fab" value="{{ n_fab or '' }}" maxlength="7" minlength="7">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="n">Emplacement (3 car.)</label>
+                <input form="modifier-form" type="text" id="n" name="n" value="{{ n or '' }}" required maxlength="3" minlength="3">
+            </div>
+            <div class="ajouter-grid-2">
+                <div class="form-group">
+                    <label for="sorti">Sortie</label>
+                    <select form="modifier-form" id="sorti" name="sorti">
+                        <option value="0" {% if sorti == '0' %}selected{% endif %}>Non</option>
+                        <option value="1" {% if sorti == '1' %}selected{% endif %}>Oui</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="lave">Lavé</label>
+                    <select form="modifier-form" id="lave" name="lave">
+                        <option value="0" {% if lave == '0' %}selected{% endif %}>Non</option>
+                        <option value="1" {% if lave == '1' %}selected{% endif %}>Oui</option>
+                    </select>
+                </div>
+            </div>
+            <div style="margin-top:auto;">
+                <button type="submit" form="modifier-form" style="padding:20px; font-size:17px;">Mettre à jour</button>
+            </div>
+        </div>
+        {% else %}
+        <div class="col-right">
+            <div class="empty-state">
+                <div class="empty-state-icon">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                </div>
+                <p class="empty-state-text">Les champs de modification s'afficheront ici</p>
+            </div>
+        </div>
+        {% endif %}
+
+    </div>
+</div>
+
+<script src="/Functions/vkeyboard.js"></script>
+<script src="/Functions/rotation.js"></script>
 </body>
 </html>

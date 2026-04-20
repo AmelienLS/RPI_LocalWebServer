@@ -10,53 +10,122 @@
     <link rel="icon" href="/Images/Logo.png" type="image/png">
 </head>
 <body>
-    <a href="{{ url_for('index') }}" class="admin-link">Retour au menu</a>
+<div class="page-screen">
 
-    <div class="form-container">
-        <h1>Gérer les écrans</h1>
-
-        <a href="{{ url_for('ajouter') }}" class="ajouter-link">Ajouter un écran</a>
-
-        <form method="POST">
-            <input type="hidden" name="action" value="search">
-            <label for="ref_ecran">Référence écran :</label>
-            <input type="text" id="ref_ecran" name="ref_ecran" placeholder="Ref écran" required>
-            <button type="submit">Rechercher</button>
-        </form>
-
-        {% if message %}
-        <p class="{% if error %}error-message{% else %}success-message{% endif %}">{{ message }}</p>
-        {% endif %}
-
-        {% if ecran %}
-        <div class="ecran-info">
-            <table class="info-table">
-                <tr><th>Réf. Écran</th><td>{{ ecran['ref_ecran'] }}</td></tr>
-                <tr><th>Libellé</th><td>{{ ecran['libelle'] }}</td></tr>
-                <tr><th>PCB</th><td>{{ ecran['pcb'] or '—' }}</td></tr>
-                <tr><th>FAB</th><td>{{ ecran['fab'] }}</td></tr>
-                <tr><th>N° FAB</th><td>{{ ecran['n_fab'] or '—' }}</td></tr>
-                <tr><th>Type</th><td>{{ ecran['type'] }}</td></tr>
-                <tr><th>Emplacement</th><td class="n-value-inline">{{ ecran['n'] }}</td></tr>
-                <tr><th>Sorti</th><td>{{ 'Oui' if ecran['sorti'] == 1 else 'Non' }}</td></tr>
-                <tr><th>Lavé</th><td>{{ 'Oui' if ecran['lave'] == 1 else 'Non' }}</td></tr>
-            </table>
-
-            <form method="POST" action="{{ url_for('modifier') }}">
-                <input type="hidden" name="ref_ecran" value="{{ ecran['ref_ecran'] }}">
-                <button type="submit" class="modifier-btn">Modifier cet écran</button>
-            </form>
-
-            <form method="POST" action="{{ url_for('gerer_ecrans') }}"
-                  onsubmit="return confirm('Supprimer définitivement l\'écran {{ ecran.ref_ecran }} — {{ ecran.libelle | e }} ?');">
-                <input type="hidden" name="action" value="delete">
-                <input type="hidden" name="ref_ecran" value="{{ ecran.ref_ecran }}">
-                <button type="submit" class="supprimer-btn">Supprimer cet écran</button>
-            </form>
+    <div class="topbar">
+        <a href="{{ url_for('index') }}" class="topbar-back">← Menu</a>
+        <span class="topbar-title">Gérer les écrans</span>
+        <div class="topbar-right">
+            <a href="{{ url_for('ajouter') }}" class="btn btn-auto">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Ajouter
+            </a>
         </div>
-        {% endif %}
     </div>
-    <script src="/Functions/vkeyboard.js"></script>
-    <script src="/Functions/rotation.js"></script>
+
+    <div class="two-col">
+
+        <!-- Colonne gauche : recherche -->
+        <div class="col-left">
+            <div class="card">
+                <div class="card-body">
+                    <form method="POST">
+                        <input type="hidden" name="action" value="search">
+                        <div class="form-group">
+                            <label for="ref_ecran">Référence écran</label>
+                            <input type="text" id="ref_ecran" name="ref_ecran"
+                                   placeholder=""
+                                   style="font-size:22px; text-align:center; font-family:var(--mono);"
+                                   value="{{ request.form.get('ref_ecran', '') }}"
+                                   autocomplete="off">
+                        </div>
+                        <button type="submit" style="padding:18px; font-size:16px;">Rechercher</button>
+                    </form>
+                </div>
+            </div>
+
+            {% if message %}
+            <div class="{% if error %}flash-error{% else %}flash-success{% endif %}">{{ message }}</div>
+            {% endif %}
+        </div>
+
+        <!-- Colonne droite : résultat -->
+        <div class="col-right">
+            {% if ecran %}
+            <div class="card" style="flex:1;">
+                <div class="card-header">
+                    <span style="font-size:16px; font-weight:700;">Écran {{ ecran['ref_ecran'] }}</span>
+                    {% if ecran['sorti'] == 1 %}
+                    <span class="tag tag-warning">Sorti</span>
+                    {% else %}
+                    <span class="tag tag-success">En armoire</span>
+                    {% endif %}
+                </div>
+                <div style="padding:8px 20px;">
+                    <div class="field-row">
+                        <span class="field-label">Réf. Écran</span>
+                        <span class="field-value mono">{{ ecran['ref_ecran'] }}</span>
+                    </div>
+                    <div class="field-row">
+                        <span class="field-label">Libellé</span>
+                        <span class="field-value">{{ ecran['libelle'] }}</span>
+                    </div>
+                    <div class="field-row">
+                        <span class="field-label">PCB</span>
+                        <span class="field-value mono">{{ ecran['pcb'] or '—' }}</span>
+                    </div>
+                    <div class="field-row">
+                        <span class="field-label">FAB</span>
+                        <span class="field-value mono">{{ ecran['fab'] }}</span>
+                    </div>
+                    <div class="field-row">
+                        <span class="field-label">N° FAB</span>
+                        <span class="field-value mono">{{ ecran['n_fab'] or '—' }}</span>
+                    </div>
+                    <div class="field-row">
+                        <span class="field-label">Type</span>
+                        <span class="field-value">{{ ecran['type'] }}</span>
+                    </div>
+                    <div class="field-row">
+                        <span class="field-label">Emplacement</span>
+                        <span class="field-value mono" style="color:var(--success);">{{ ecran['n'] }}</span>
+                    </div>
+                    <div class="field-row">
+                        <span class="field-label">Sorti</span>
+                        <span class="field-value" style="color:var(--text-sec);">{{ 'Oui' if ecran['sorti'] == 1 else 'Non' }}</span>
+                    </div>
+                    <div class="field-row">
+                        <span class="field-label">Lavé</span>
+                        <span class="field-value" style="color:{% if ecran['lave'] == 1 %}var(--success){% else %}var(--error){% endif %};">{{ 'Oui' if ecran['lave'] == 1 else 'Non' }}</span>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <form method="POST" action="{{ url_for('modifier') }}" style="flex:1;">
+                        <input type="hidden" name="ref_ecran" value="{{ ecran['ref_ecran'] }}">
+                        <button type="submit" class="btn-secondary">Modifier</button>
+                    </form>
+                    <form method="POST" action="{{ url_for('gerer_ecrans') }}" style="flex:1;"
+                          onsubmit="return confirm('Supprimer définitivement l\'écran {{ ecran.ref_ecran }} — {{ ecran.libelle | e }} ?');">
+                        <input type="hidden" name="action" value="delete">
+                        <input type="hidden" name="ref_ecran" value="{{ ecran.ref_ecran }}">
+                        <button type="submit" class="btn-danger">Supprimer</button>
+                    </form>
+                </div>
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <div class="empty-state-icon">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                </div>
+                <p class="empty-state-text">Cherchez un écran par référence</p>
+            </div>
+            {% endif %}
+        </div>
+
+    </div>
+</div>
+
+<script src="/Functions/vkeyboard.js"></script>
+<script src="/Functions/rotation.js"></script>
 </body>
 </html>

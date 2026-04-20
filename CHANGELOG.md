@@ -1,4 +1,44 @@
 # Journal des modifications
+## [4.0.0] - 2026-04-20
+> Commit : `feat(ui): complete dark design system redesign across all templates`
+### Ajouté
+- Nouveau système de design tokens CSS complet (`--bg`, `--surface`, `--elevated`, `--border`, `--accent`, `--success`, `--error`, `--warning`, `--blue`, etc.).
+- Polices IBM Plex Sans + IBM Plex Mono intégrées via Google Fonts.
+- Composants partagés dans `common.css` : `topbar`, `two-col`, `card`, `field-row`, `tag`, `alert-banner`, `action-card`, `action-row`, `empty-state`, variantes de boutons ghost (jaune, rouge, bleu, secondaire, sm).
+- Layout non-admin centré sur `index.html` (`.one-col` + `.col-center`).
+- Panneau détail utilisateur JS-driven dans `gererU.html` (sélection sans rechargement de page).
+- Boutons de rôle visuels (Utilisateur / Administrateur) dans `ajouterU.html` et `modifierU.html`.
+- Boutons Lavé / Non lavé visuellement sélectionnables dans `ranger.html`.
+- Bouton "← Menu" en style ghost jaune sur toutes les pages avec TopBar.
+### Modifié
+- Tous les templates (`login`, `setup`, `index`, `prendre`, `ranger`, `ecran`, `gererE`, `gererU`, `stats`, `ajouter`, `modifier`, `ajouterU`, `modifierU`, `supprimer`) refondus avec le nouveau système de design.
+- `APP.py` : correction de la détection du rôle admin (`request.form.get('admin') == 'on'` au lieu de `'admin' in request.form`) pour les routes d'ajout et de modification d'utilisateur.
+- Boutons "← Menu" et "Déconnexion" alignés en taille avec les boutons principaux (`padding: 18px 20px`, `font-size: 16px`).
+- Tous les placeholders de type "ex : ..." supprimés des champs de saisie, placeholders descriptifs conservés.
+### Corrigé
+- `index.html` : `{% endif %}` manquant sur le bloc `{% if a_laver or sortis_longtemps %}` causant une `TemplateSyntaxError`.
+- Espacement entre les éléments de formulaire uniformisé via la règle `card-body > form { display:flex; flex-direction:column; gap:14px }`.
+- Colonne admin non-admin retirée du DOM pour les utilisateurs standard (n'était plus cachée via CSS mais toujours présente).
+
+## [3.23.0] - 2026-04-20
+> Commit : `feat(ui): apply new dark design system to all templates and styles`
+### Modifié
+- `Styles/common.css` : refonte complète — nouvelles design tokens CSS (`--bg`, `--surface`, `--elevated`, `--border`, `--accent`, etc.), polices IBM Plex Sans + IBM Plex Mono via Google Fonts, nouveau système de layout (`page-screen`, `topbar`, `two-col`, `col-left`, `col-right`), composants partagés (`card`, `field-row`, `tag`, `alert-banner`, `action-card`, `empty-state`, boutons variantes).
+- `templates/login.html` + `Styles/login.css` : layout centré avec icône, card, bouton Éteindre rouge.
+- `templates/setup.html` : même pattern centré, boutons Nouvelle DB et Éteindre côte à côte.
+- `templates/index.html` + `Styles/index.css` : header avec nom utilisateur et bouton déconnexion, layout 2 colonnes — alertes + action cards (Prendre/Ranger) + rangée Voir tous les écrans à gauche, grille admin 2×2 à droite.
+- `templates/prendre.html` + `Styles/prendre.css` : TopBar, layout 2 colonnes — saisie ref à gauche, résultat avec emplacement en grand vert à droite.
+- `templates/ranger.html` + `Styles/ranger.css` : TopBar, layout 2 colonnes — filtre + select + boutons Oui/Non + action à gauche, confirmation à droite. Boutons Lavé/Non lavé visuellement sélectionnables.
+- `templates/ecran.html` + `Styles/ecran.css` : TopBar avec actions admin (Exporter/Vider), barre de filtre global, table sticky-header avec tags colorés (Lavé, Sorti, type), barre de statut en bas.
+- `templates/gererE.html` + `Styles/gererE.css` : TopBar + bouton Ajouter, layout 2 colonnes — recherche à gauche, fiche détail avec field-rows + actions Modifier/Supprimer à droite.
+- `templates/gererU.html` + `Styles/gererU.css` : TopBar + bouton Ajouter, layout 2 colonnes — liste cliquable à gauche, panneau détail JS-driven à droite (sélection sans rechargement).
+- `templates/stats.html` + `Styles/stats.css` : TopBar, layout 2 colonnes — filtres période + total + classement personnes à gauche, classement écrans à droite.
+- `templates/ajouter.html` + `Styles/ajouter.css` : TopBar avec Exporter/Importer, layout 2 colonnes avec grille de champs.
+- `templates/modifier.html` : layout 2 colonnes, réutilise `ajouter.css`.
+- `templates/ajouterU.html` + `Styles/ajouterU.css` : TopBar, layout centré avec grille prénom/nom, sélection de rôle par boutons visuels.
+- `templates/modifierU.html` : même structure qu'ajouterU avec les valeurs pré-remplies.
+- `templates/supprimer.html` : TopBar, layout 2 colonnes — recherche à gauche, confirmation à droite.
+
 ## [3.22.3] - 2026-04-17
 > Commit : `perf(rpi): reduce sqlite contention and tune gunicorn runtime`
 ### Modifié

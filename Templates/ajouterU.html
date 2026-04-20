@@ -3,46 +3,70 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ajouter un Utilisateur</title>
+    <title>Ajouter un utilisateur</title>
     <link rel="stylesheet" href="/Styles/common.css">
     <link rel="stylesheet" href="/Styles/ajouterU.css">
     <link rel="stylesheet" href="/Styles/vkeyboard.css">
     <link rel="icon" href="/Images/Logo.png" type="image/png">
 </head>
 <body>
-    <!--Page pour ajouter un nouvel utilisateur avec option admin -->
-    <!-- Bouton pour revenir à /index -->
-    <a href="{{ url_for('index') }}" class="admin-link">Retour au menu</a>
+<div class="page-screen">
 
-    <div class="form-container">
-        <h2>Ajouter un Utilisateur</h2>
-
-        {% if error %}
-        <div style="color: red; font-weight: bold;">
-            {{ error }}
-        </div>
-        {% endif %}
-
-        <form method="POST">
-            <label for="identifiant">Identifiant :</label>
-            <input type="text" id="identifiant" name="identifiant" required>
-
-            <label for="prenom">Prénom :</label>
-            <input type="text" id="prenom" name="prenom" required>
-
-            <label for="nom">Nom :</label>
-            <input type="text" id="nom" name="nom" required>
-
-            <label for="admin">Admin :</label>
-            <input type="checkbox" id="admin" name="admin">
-
-            <button type="submit">Ajouter</button>
-        </form>
-        {% if success %}
-            <div class="confirmation-message" style="color: green; margin-top: 1rem;">{{ success }}</div>
-        {% endif %}
+    <div class="topbar">
+        <a href="{{ url_for('gerer_utilisateurs') }}" class="topbar-back">← Utilisateurs</a>
+        <span class="topbar-title">Ajouter un utilisateur</span>
     </div>
-    <script src="/Functions/vkeyboard.js"></script>
-    <script src="/Functions/rotation.js"></script>
+
+    <div class="ajouterU-wrap">
+        <div class="card">
+            <div class="card-body">
+                {% if error %}
+                <div class="flash-error">{{ error }}</div>
+                {% endif %}
+                {% if success %}
+                <div class="flash-success">{{ success }}</div>
+                {% endif %}
+
+                <form method="POST">
+                    <div class="ajouterU-name-grid">
+                        <div class="form-group">
+                            <label for="prenom">Prénom</label>
+                            <input type="text" id="prenom" name="prenom" placeholder="" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="nom">Nom</label>
+                            <input type="text" id="nom" name="nom" placeholder="" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="identifiant">Identifiant</label>
+                        <input type="text" id="identifiant" name="identifiant" placeholder="" required>
+                    </div>
+
+                    <div class="divider-label">Rôle</div>
+                    <div class="ajouterU-role-btns">
+                        <button type="button" id="btn-role-user" class="role-btn role-btn-active-user" onclick="setRole('user')">Utilisateur</button>
+                        <button type="button" id="btn-role-admin" class="role-btn" onclick="setRole('admin')">Administrateur</button>
+                    </div>
+                    <input type="hidden" name="admin" id="admin-hidden" value="">
+
+                    <button type="submit" style="padding:20px; font-size:17px;">Ajouter l'utilisateur</button>
+                </form>
+            </div>
+        </div>
+        <div style="height:20px;"></div>
+    </div>
+</div>
+
+<script src="/Functions/vkeyboard.js"></script>
+<script src="/Functions/rotation.js"></script>
+<script>
+function setRole(role) {
+    var isAdmin = role === 'admin';
+    document.getElementById('admin-hidden').value = isAdmin ? 'on' : '';
+    document.getElementById('btn-role-user').className  = 'role-btn' + (!isAdmin ? ' role-btn-active-user' : '');
+    document.getElementById('btn-role-admin').className = 'role-btn' + (isAdmin  ? ' role-btn-active-admin' : '');
+}
+</script>
 </body>
 </html>

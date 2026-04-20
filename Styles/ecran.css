@@ -1,105 +1,100 @@
-/* --- Styles spécifiques à la page du tableau des écrans --- */
+/* Ecran table page */
 
-.container {
-    max-width: 100%;
-    overflow-x: auto; /* Défilement horizontal si nécessaire */
+.ecran-filter-bar {
+    padding: 10px 16px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
 }
 
-.admin-actions {
+.ecran-filter-wrap {
+    position: relative;
+}
+
+.ecran-filter-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-sec);
     display: flex;
-    justify-content: center;
-    gap: 1rem;
-    margin: 1rem 0;
-    flex-wrap: wrap;
+    align-items: center;
 }
 
-.admin-link {
-    position: fixed;
-    z-index: 1000;
+.ecran-filter-bar input {
+    padding-left: 44px;
+    padding-top: 12px;
+    padding-bottom: 12px;
+    font-size: 14px;
 }
 
-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-bottom: 1rem;
-    text-align: left;
-    -webkit-user-select: none;
-    user-select: none;
+.ecran-table-wrap {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: auto;
 }
 
-thead th {
-    background-color: #2A2D46;
-    padding: 0.75rem;
-    font-size: 1rem;
-    text-align: center;
+.ecran-status-bar {
+    padding: 10px 16px;
+    border-top: 1px solid var(--border);
+    background: var(--surface);
+    display: flex;
+    justify-content: space-between;
+    flex-shrink: 0;
+    font-size: 12px;
+    color: var(--text-sec);
 }
 
-thead th.sortable {
-    cursor: pointer;
+.ecran-status-right {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-dim);
 }
 
-thead th.sortable:hover {
-    background-color: #363A58;
+/* Table cell overrides */
+td, th {
+    min-width: 80px;
+    word-wrap: break-word;
 }
 
-thead th[data-sort="asc"]::after  { content: ' ▲'; font-size: 0.7rem; }
-thead th[data-sort="desc"]::after { content: ' ▼'; font-size: 0.7rem; }
+.td-mono {
+    font-family: var(--mono);
+    font-weight: 600;
+    font-size: 13px;
+}
 
-thead input {
+.td-accent { color: var(--accent); }
+
+.td-pris {
+    font-size: 12px;
+    color: var(--text-dim);
+    font-family: var(--mono);
+}
+
+/* Per-column filter inputs in header */
+.col-filter {
     width: 90%;
-    margin-top: 0.5rem;
-    padding: 0.3rem;
-    border: 1px solid #ccc;
+    margin-top: 6px;
+    padding: 6px 8px;
+    font-size: 11px;
     border-radius: 4px;
-}
-
-tbody td {
-    padding: 0.75rem;
-    font-size: 0.9rem;
-    border: 1px solid #2A2D46;
-    text-align: center;
-}
-
-.filter-input {
     -webkit-user-select: text;
     user-select: text;
 }
 
-tbody tr:nth-child(odd) td {
-    background-color: #1F2233;
-}
+/* Row striping */
+tbody tr:nth-child(even) td { background: var(--surface); }
+tbody tr:nth-child(odd)  td { background: var(--bg); }
 
-td, th {
-    min-width: 120px;
-    word-wrap: break-word;
-}
-
-button {
+/* Table buttons */
+tbody button {
     width: auto;
-    padding: 0.6rem 1rem;
-    min-height: 44px;
+    padding: 8px 12px;
+    font-size: 12px;
+    font-weight: 700;
 }
 
-button.prendre {
-    font-size: 0.9rem;
-    padding: 0.6rem 1rem;
-    border: 1px solid #FFC800;
-}
-
-button.prendre:hover {
-    background-color: #FFD700;
-}
-
-.export-btn, .purge-btn {
-    padding: 0.75rem 1.5rem;
-    min-height: calc(44px + 1.5rem); /* Confort tactile 10" : égale la hauteur des boutons d'action principaux */
-}
-
-.purge-btn {
-    background-color: #FF4C4C;
-    color: #FFFFFF;
-}
-
-.purge-btn:hover {
-    background-color: #E04343;
-}
+thead th.sortable { cursor: pointer; }
+thead th.sortable:hover { background: var(--border); }
+thead th[data-sort="asc"]::after  { content: ' ▲'; font-size: 0.7rem; }
+thead th[data-sort="desc"]::after { content: ' ▼'; font-size: 0.7rem; }

@@ -3,40 +3,97 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Prendre écran</title>
+    <title>Prendre un écran</title>
     <link rel="stylesheet" href="/Styles/common.css">
     <link rel="stylesheet" href="/Styles/prendre.css">
     <link rel="stylesheet" href="/Styles/vkeyboard.css">
     <link rel="icon" href="/Images/Logo.png" type="image/png">
 </head>
 <body>
-    <!--Page pour prendre un écran -->
-    <div class="container">
-        <a href="{{ url_for('index') }}" class="admin-link">Retour au menu</a>
-        
-        <h1>Prendre un écran</h1>
+<div class="page-screen">
 
-        <form method="POST">
-            <div class="form-container">
-                <input type="text" name="ref_ecran" placeholder="Ref écran" required>
-                <button type="submit">Prendre</button>
-            </div>
-        </form>
-
-        {% if message %}
-            <p class="message">{{ message }}</p>
-        {% endif %}
-
-        {% if apercu %}
-        <div class="apercu-container">
-            <p class="n-value"><strong>Emplacement</strong> {{ apercu['n'] }}</p>
-            <p><strong>Réf.</strong> {{ apercu['ref_ecran'] }}</p>
-            <p><strong>Libellé</strong> {{ apercu['libelle'] }}</p>
-            <p><strong>État</strong> {{ 'Déjà sorti' if apercu['sorti'] == 1 else 'En armoire' }}</p>
-        </div>
-        {% endif %}
+    <div class="topbar">
+        <a href="{{ url_for('index') }}" class="topbar-back">← Menu</a>
+        <span class="topbar-title">Prendre un écran</span>
     </div>
-    <script src="/Functions/vkeyboard.js"></script>
-    <script src="/Functions/rotation.js"></script>
+
+    <div class="two-col">
+
+        <!-- Colonne gauche : saisie -->
+        <div class="col-left">
+            <div class="card">
+                <div class="card-body">
+                    <form method="POST">
+                        <div class="form-group">
+                            <label for="ref_ecran">Référence de l'écran</label>
+                            <input type="text" id="ref_ecran" name="ref_ecran"
+                                   placeholder=""
+                                   style="font-size:32px; font-family:var(--mono); text-align:center; letter-spacing:4px; padding:20px;"
+                                   value="{{ request.form.get('ref_ecran', '') }}"
+                                   required autocomplete="off">
+                        </div>
+                        {% if message %}
+                        <div class="{% if apercu %}flash-success{% else %}flash-error{% endif %}">{{ message }}</div>
+                        {% endif %}
+                        <button type="submit" style="padding:20px; font-size:17px;">Prendre</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Colonne droite : résultat -->
+        <div class="col-right">
+            {% if apercu %}
+            <div class="card" style="border-color:var(--success); flex:1;">
+                <div class="card-header" style="background:rgba(34,197,94,0.1); border-color:rgba(34,197,94,0.2);">
+                    <span style="color:var(--success); font-weight:600;">Écran trouvé</span>
+                    {% if apercu['sorti'] == 1 %}
+                    <span class="tag tag-warning">Déjà sorti</span>
+                    {% else %}
+                    <span class="tag tag-success">En armoire</span>
+                    {% endif %}
+                </div>
+                <div class="card-body">
+                    <div style="text-align:center; margin-bottom:20px;">
+                        <p style="font-size:12px; color:var(--text-sec); margin-bottom:8px; text-transform:uppercase; letter-spacing:1px;">Emplacement</p>
+                        <p style="font-size:72px; font-weight:700; color:var(--success); font-family:var(--mono); letter-spacing:4px; line-height:1;">{{ apercu['n'] }}</p>
+                    </div>
+                    <div style="border-top:1px solid var(--border); padding-top:16px; display:flex; flex-direction:column; gap:2px;">
+                        <div class="field-row">
+                            <span class="field-label">Réf.</span>
+                            <span class="field-value mono">{{ apercu['ref_ecran'] }}</span>
+                        </div>
+                        <div class="field-row">
+                            <span class="field-label">Libellé</span>
+                            <span class="field-value">{{ apercu['libelle'] }}</span>
+                        </div>
+                        <div class="field-row">
+                            <span class="field-label">Type</span>
+                            <span class="field-value">{{ apercu['type'] }}</span>
+                        </div>
+                        <div class="field-row">
+                            <span class="field-label">Lavé</span>
+                            <span class="field-value" style="color:{% if apercu['lave'] == 1 %}var(--success){% else %}var(--error){% endif %};">
+                                {{ 'Oui' if apercu['lave'] == 1 else 'Non' }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <div class="empty-state-icon">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+                </div>
+                <p class="empty-state-text">L'emplacement s'affichera ici</p>
+            </div>
+            {% endif %}
+        </div>
+
+    </div>
+</div>
+
+<script src="/Functions/vkeyboard.js"></script>
+<script src="/Functions/rotation.js"></script>
 </body>
 </html>

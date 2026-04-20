@@ -9,30 +9,51 @@
     <link rel="icon" href="/Images/Logo.png" type="image/png">
     <title>Configuration de la base de données</title>
 </head>
-<body>
-    <form method="POST" action="/setup/init_db" class="corner-form corner-form-left">
-        <button type="submit" class="corner-btn corner-btn-left"
-                onclick="return confirm('Créer une nouvelle base de données à l\'emplacement configuré ?\nLes données existantes seront effacées.')">
-            Nouvelle DB
-        </button>
-    </form>
-    <form method="POST" action="/shutdown" class="corner-form corner-form-right">
-        <button type="submit" class="corner-btn corner-btn-right"
-                onclick="return confirm('Éteindre le système ?')">
-            Éteindre
-        </button>
-    </form>
-    <div class="login-container">
-        <h1>Configuration</h1>
-        <p>La base de données est introuvable. Indiquez son chemin complet sur cette machine.</p>
-        <form method="POST" action="/setup">
-            <input type="text" name="path" value="{{ current_path }}" placeholder="Ex : C:\Users\...\armoire.db" required>
-            <button type="submit">Enregistrer</button>
-        </form>
-        {% if error %}
-        <p class="error">{{ error }}</p>
-        {% endif %}
+<body class="login-body">
+    <div class="login-wrap">
+        <div style="text-align:center; margin-bottom:8px;">
+            <div class="setup-icon">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <ellipse cx="12" cy="5" rx="9" ry="3"/>
+                    <path d="M3 5v14a9 3 0 0 0 18 0V5"/>
+                    <path d="M3 12a9 3 0 0 0 18 0"/>
+                </svg>
+            </div>
+            <h1 style="font-size:24px; font-weight:700; margin-bottom:6px; color:var(--text);">Configuration</h1>
+            <p class="setup-desc">La base de données est introuvable. Indiquez son chemin complet sur cette machine.</p>
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+                <form method="POST" action="/setup">
+                    <div class="form-group">
+                        <label for="path">Chemin de la base de données</label>
+                        <input type="text" id="path" name="path" value="{{ current_path }}" placeholder="" required>
+                    </div>
+                    {% if error %}
+                    <div class="flash-error">{{ error }}</div>
+                    {% endif %}
+                    <button type="submit">Enregistrer</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="setup-actions">
+            <form method="POST" action="/setup/init_db" style="flex:1;">
+                <button type="submit" class="btn-secondary"
+                        onclick="return confirm('Créer une nouvelle base de données à l\'emplacement configuré ?\nLes données existantes seront effacées.')">
+                    Nouvelle DB
+                </button>
+            </form>
+            <form method="POST" action="/shutdown" style="flex:1;">
+                <button type="submit" class="btn-danger"
+                        onclick="return confirm('Éteindre le système ?')">
+                    Éteindre
+                </button>
+            </form>
+        </div>
     </div>
+
     <script src="/Functions/vkeyboard.js"></script>
     <script src="/Functions/rotation.js"></script>
 </body>

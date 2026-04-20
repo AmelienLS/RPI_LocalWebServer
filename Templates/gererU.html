@@ -9,46 +9,142 @@
     <link rel="icon" href="/Images/Logo.png" type="image/png">
 </head>
 <body>
-    <a href="{{ url_for('index') }}" class="admin-link">Retour au menu</a>
+<div class="page-screen">
 
-    <div class="container">
-        <h1>Gérer les utilisateurs</h1>
-        <a href="{{ url_for('ajouterU') }}" class="ajouter-link">Ajouter un utilisateur</a>
-
-        <table>
-            <thead>
-                <tr>
-                    <th>Prénom</th>
-                    <th>Nom</th>
-                    <th>Identifiant</th>
-                    <th>Admin</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for user in users %}
-                <tr>
-                    <td>{{ user['prenom'] }}</td>
-                    <td>{{ user['nom'] }}</td>
-                    <td>{{ user['identifiant'] }}</td>
-                    <td>{{ 'Oui' if user['admin'] == 1 else 'Non' }}</td>
-                    <td class="actions-cell">
-                        <form method="GET" action="{{ url_for('modifierU') }}">
-                            <input type="hidden" name="id" value="{{ user['id'] }}">
-                            <button type="submit" class="modifier-btn">Modifier</button>
-                        </form>
-                        <form method="POST" action="{{ url_for('supprimerU') }}" onsubmit="return confirm('Supprimer {{ user.prenom | e }} {{ user.nom | e }} ?');">
-                            <input type="hidden" name="id" value="{{ user['id'] }}">
-                            <button type="submit" class="button supprimer-btn">Supprimer</button>
-                        </form>
-                    </td>
-                </tr>
-                {% else %}
-                <tr><td colspan="5">Aucun utilisateur en base.</td></tr>
-                {% endfor %}
-            </tbody>
-        </table>
+    <div class="topbar">
+        <a href="{{ url_for('index') }}" class="topbar-back">← Menu</a>
+        <span class="topbar-title">Gérer les utilisateurs</span>
+        <div class="topbar-right">
+            <a href="{{ url_for('ajouterU') }}" class="btn btn-auto">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Ajouter
+            </a>
+        </div>
     </div>
-    <script src="/Functions/rotation.js"></script>
+
+    <div class="two-col">
+
+        <!-- Colonne gauche : liste des utilisateurs -->
+        <div class="col-left" style="gap:10px; padding:20px;">
+            {% for user in users %}
+            <div class="user-list-item" data-index="{{ loop.index0 }}"
+                 data-id="{{ user['id'] }}"
+                 data-prenom="{{ user['prenom'] | e }}"
+                 data-nom="{{ user['nom'] | e }}"
+                 data-identifiant="{{ user['identifiant'] | e }}"
+                 data-admin="{{ user['admin'] }}"
+                 onclick="selectUser(this)">
+                <div class="user-list-avatar">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                </div>
+                <div class="user-list-info">
+                    <div class="user-list-name">{{ user['prenom'] }} {{ user['nom'] }}</div>
+                    <div class="user-list-id">{{ user['identifiant'] }}</div>
+                </div>
+                {% if user['admin'] == 1 %}
+                <span class="tag tag-accent">Admin</span>
+                {% endif %}
+            </div>
+            {% else %}
+            <p style="color:var(--text-dim); font-size:14px;">Aucun utilisateur en base.</p>
+            {% endfor %}
+        </div>
+
+        <!-- Colonne droite : détail utilisateur -->
+        <div class="col-right" id="user-detail-col">
+            <div class="empty-state" id="user-empty-state">
+                <div class="empty-state-icon">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                </div>
+                <p class="empty-state-text">Sélectionnez un utilisateur</p>
+            </div>
+
+            <div id="user-detail-panel" style="display:none; flex-direction:column; gap:14px; flex:1;">
+                <div class="card">
+                    <div class="card-header" id="user-detail-header">
+                        <div style="display:flex; align-items:center; gap:14px;">
+                            <div style="width:48px; height:48px; border-radius:14px; background:rgba(59,130,246,0.13); display:flex; align-items:center; justify-content:center; color:var(--blue);">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                            </div>
+                            <div>
+                                <div id="user-detail-name" style="font-size:18px; font-weight:700;"></div>
+                                <div id="user-detail-id" style="font-size:13px; color:var(--text-sec); font-family:var(--mono);"></div>
+                            </div>
+                        </div>
+                        <span id="user-detail-badge" class="tag tag-accent" style="display:none;">Admin</span>
+                    </div>
+                    <div style="padding:8px 20px;">
+                        <div class="field-row">
+                            <span class="field-label">Prénom</span>
+                            <span class="field-value" id="user-detail-prenom"></span>
+                        </div>
+                        <div class="field-row">
+                            <span class="field-label">Nom</span>
+                            <span class="field-value" id="user-detail-nom"></span>
+                        </div>
+                        <div class="field-row">
+                            <span class="field-label">Identifiant</span>
+                            <span class="field-value mono" id="user-detail-identifiant"></span>
+                        </div>
+                        <div class="field-row">
+                            <span class="field-label">Rôle</span>
+                            <span class="field-value" id="user-detail-role"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modifier button (GET form) -->
+                <form id="modifier-form" method="GET" action="{{ url_for('modifierU') }}">
+                    <input type="hidden" name="id" id="modifier-id-input">
+                    <button type="submit" class="btn-secondary">Modifier</button>
+                </form>
+
+                <!-- Supprimer button (POST form) -->
+                <form id="supprimer-form" method="POST" action="{{ url_for('supprimerU') }}"
+                      onsubmit="return confirm('Supprimer cet utilisateur ?');">
+                    <input type="hidden" name="id" id="supprimer-id-input">
+                    <button type="submit" class="btn-danger">Supprimer</button>
+                </form>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script src="/Functions/rotation.js"></script>
+<script>
+function selectUser(el) {
+    document.querySelectorAll('.user-list-item').forEach(function (item) {
+        item.classList.remove('user-list-item-active');
+    });
+    el.classList.add('user-list-item-active');
+
+    var id         = el.dataset.id;
+    var prenom     = el.dataset.prenom;
+    var nom        = el.dataset.nom;
+    var identifiant= el.dataset.identifiant;
+    var isAdmin    = el.dataset.admin === '1';
+
+    document.getElementById('user-empty-state').style.display  = 'none';
+    var panel = document.getElementById('user-detail-panel');
+    panel.style.display = 'flex';
+
+    document.getElementById('user-detail-name').textContent       = prenom + ' ' + nom;
+    document.getElementById('user-detail-id').textContent         = identifiant;
+    document.getElementById('user-detail-prenom').textContent     = prenom;
+    document.getElementById('user-detail-nom').textContent        = nom;
+    document.getElementById('user-detail-identifiant').textContent= identifiant;
+
+    var roleEl = document.getElementById('user-detail-role');
+    roleEl.textContent = isAdmin ? 'Administrateur' : 'Utilisateur';
+    roleEl.style.color = isAdmin ? 'var(--accent)' : 'var(--text-sec)';
+
+    var badge = document.getElementById('user-detail-badge');
+    badge.style.display = isAdmin ? '' : 'none';
+
+    document.getElementById('modifier-id-input').value  = id;
+    document.getElementById('supprimer-id-input').value = id;
+}
+</script>
 </body>
 </html>

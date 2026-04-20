@@ -601,7 +601,7 @@ def ajouterU():
         identifiant = request.form['identifiant']
         prenom = request.form['prenom']
         nom = request.form['nom']
-        admin = 1 if 'admin' in request.form else 0
+        admin = 1 if request.form.get('admin') == 'on' else 0
 
         try:
             with get_db_connection() as conn:
@@ -695,7 +695,7 @@ def modifierU():
         identifiant = request.form['identifiant']
         prenom = request.form['prenom']
         nom = request.form['nom']
-        admin = 1 if 'admin' in request.form else 0
+        admin = 1 if request.form.get('admin') == 'on' else 0
 
         try:
             with get_db_connection() as conn:

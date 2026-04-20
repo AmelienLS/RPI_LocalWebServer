@@ -466,14 +466,6 @@ npm test
 
 ## Conseils de maintenance
 
-### Ajouter un champ à la table `serigraphie`
-
-1. Modifier [database/schema.sql](database/schema.sql)
-2. Mettre à jour toutes les routes concernées dans [APP.py](APP.py) (INSERT, UPDATE, SELECT)
-3. Mettre à jour les templates HTML correspondants ([Templates/ajouter.html](Templates/ajouter.html), [Templates/modifier.html](Templates/modifier.html), [Templates/ecran.html](Templates/ecran.html))
-4. Réinitialiser la base avec `python scripts/init_db.py --force`
-5. Mettre à jour les tests dans `tests/db/` et `tests/web/`
-
 ### Ajouter un utilisateur sans interface
 
 ```bash

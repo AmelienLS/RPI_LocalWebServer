@@ -3,70 +3,99 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tableau écran</title>
+    <title>Tableau écrans</title>
     <link rel="stylesheet" href="/Styles/common.css">
     <link rel="stylesheet" href="/Styles/ecran.css">
     <link rel="stylesheet" href="/Styles/vkeyboard.css">
     <link rel="icon" href="/Images/Logo.png" type="image/png">
 </head>
 <body>
-    <!--Affichage du tableau des écrans avec options de filtrage -->
-    <div class="container">
-        <h1>Table écran</h1>
-        <a href="{{ url_for('index') }}" class="admin-link">Retour au menu</a>
+<div class="page-screen">
+
+    <div class="topbar">
+        <a href="{{ url_for('index') }}" class="topbar-back">← Menu</a>
+        <span class="topbar-title">Tableau des écrans</span>
         {% if admin %}
-        <div class="admin-actions">
+        <div class="topbar-right">
             <form action="{{ url_for('export_logs') }}" method="get">
-                <button type="submit" class="button export-btn">Exporter les journaux</button>
+                <button type="submit" class="btn-secondary btn-sm btn-auto">Exporter</button>
             </form>
-            <form action="{{ url_for('purge_logs') }}" method="post" onsubmit="return confirm('Exporter et supprimer tous les journaux ?');">
-                <button type="submit" class="button purge-btn">Vider les journaux</button>
+            <form action="{{ url_for('purge_logs') }}" method="post"
+                  onsubmit="return confirm('Exporter et supprimer tous les journaux ?');">
+                <button type="submit" class="btn-danger btn-sm btn-auto">Vider journaux</button>
             </form>
         </div>
         {% endif %}
+    </div>
+
+    <!-- Global filter bar -->
+    <div class="ecran-filter-bar">
+        <div class="ecran-filter-wrap">
+            <span class="ecran-filter-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            </span>
+            <input id="global-filter" type="text" placeholder="Filtrer tous les écrans…" autocomplete="off" style="padding-left:44px;">
+        </div>
+    </div>
+
+    <!-- Scrollable table -->
+    <div class="ecran-table-wrap">
         <table id="serigraphie-table">
             <thead>
                 <tr>
-                    <th>Réf. Écran<br><input type="text" class="filter-input" data-column="0" placeholder="Filtrer"></th>
-                    <th>Libellé<br><input type="text" class="filter-input" data-column="1" placeholder="Filtrer"></th>
-                    <th>PCB<br><input type="text" class="filter-input" data-column="2" placeholder="Filtrer"></th>
-                    <th>FAB<br><input type="text" class="filter-input" data-column="3" placeholder="Filtrer"></th>
-                    <th>N° FAB<br><input type="text" class="filter-input" data-column="4" placeholder="Filtrer"></th>
-                    <th>Type<br><input type="text" class="filter-input" data-column="5" placeholder="Filtrer"></th>
-                    <th>Emplacement<br><input type="text" class="filter-input" data-column="6" placeholder="Filtrer"></th>
-                    <th>Lavé<br><input type="text" class="filter-input" data-column="7" placeholder="Oui / Non"></th>
-                    <th>Sorti<br><input type="text" class="filter-input" data-column="8" placeholder="Oui / Non"></th>
-                    <th>Pris par<br><input type="text" class="filter-input" data-column="9" placeholder="Filtrer"></th>
+                    <th>Réf. Écran<br><input type="text" class="filter-input col-filter" data-column="0" placeholder="Filtrer"></th>
+                    <th>Libellé<br><input type="text" class="filter-input col-filter" data-column="1" placeholder="Filtrer"></th>
+                    <th>PCB<br><input type="text" class="filter-input col-filter" data-column="2" placeholder="Filtrer"></th>
+                    <th>FAB<br><input type="text" class="filter-input col-filter" data-column="3" placeholder="Filtrer"></th>
+                    <th>N° FAB<br><input type="text" class="filter-input col-filter" data-column="4" placeholder="Filtrer"></th>
+                    <th>Type<br><input type="text" class="filter-input col-filter" data-column="5" placeholder="Filtrer"></th>
+                    <th>Emplacement<br><input type="text" class="filter-input col-filter" data-column="6" placeholder="Filtrer"></th>
+                    <th>Lavé<br><input type="text" class="filter-input col-filter" data-column="7" placeholder="Oui / Non"></th>
+                    <th>Sorti<br><input type="text" class="filter-input col-filter" data-column="8" placeholder="Oui / Non"></th>
+                    <th>Pris par<br><input type="text" class="filter-input col-filter" data-column="9" placeholder="Filtrer"></th>
                     <th>Sortir</th>
-                    {% if admin %}
-                        <th>Modifier</th>
-                    {% endif %}
+                    {% if admin %}<th>Modifier</th>{% endif %}
                 </tr>
             </thead>
             <tbody>
                 {% for ecran in ecrans %}
                 <tr>
-                    <td>{{ ecran.ref_ecran }}</td>
+                    <td class="td-mono td-accent">{{ ecran.ref_ecran }}</td>
                     <td>{{ ecran.libelle }}</td>
-                    <td>{{ ecran.pcb }}</td>
-                    <td>{{ ecran.fab }}</td>
-                    <td>{{ ecran.n_fab }}</td>
-                    <td>{{ ecran.type }}</td>
-                    <td>{{ ecran.n }}</td>
-                    <td>{{ 'Oui' if ecran.lave == 1 else 'Non' }}</td>
-                    <td>{{ 'Oui' if ecran.sorti == 1 else 'Non' }}</td>
-                    <td>{{ ecran.pris_par + ' à ' + ecran.sortie_ts[11:16] if ecran.pris_par else 'En armoire' }}</td>
+                    <td class="td-mono">{{ ecran.pcb }}</td>
+                    <td class="td-mono">{{ ecran.fab }}</td>
+                    <td class="td-mono">{{ ecran.n_fab }}</td>
+                    <td><span class="tag tag-dim">{{ ecran.type }}</span></td>
+                    <td class="td-mono td-accent">{{ ecran.n }}</td>
                     <td>
-                        <form action="{{ url_for('prendre') }}" method="POST" onsubmit="return confirm('Prendre l\'écran {{ ecran.ref_ecran }} — {{ ecran.libelle }} ?');">
+                        {% if ecran.lave == 1 %}
+                        <span class="tag tag-success">Oui</span>
+                        {% else %}
+                        <span class="tag tag-error">Non</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if ecran.sorti == 1 %}
+                        <span class="tag tag-warning">Sorti</span>
+                        {% else %}
+                        <span class="tag tag-dim">Rangé</span>
+                        {% endif %}
+                    </td>
+                    <td class="td-pris">{{ ecran.pris_par + ' à ' + ecran.sortie_ts[11:16] if ecran.pris_par else '—' }}</td>
+                    <td>
+                        <form action="{{ url_for('prendre') }}" method="POST"
+                              onsubmit="return confirm('Prendre l\'écran {{ ecran.ref_ecran }} — {{ ecran.libelle }} ?');">
                             <input type="hidden" name="ref_ecran" value="{{ ecran.ref_ecran }}">
-                            <button type="submit" class="button sortir-btn">Prendre</button>
+                            <button type="submit" class="btn-sm btn-auto">Prendre</button>
                         </form>
                     </td>
                     {% if admin %}
                     <td>
                         <form action="{{ url_for('gerer_ecrans') }}" method="POST">
                             <input type="hidden" name="ref_ecran" value="{{ ecran.ref_ecran }}">
-                            <button type="submit" class="button modifier-btn">Modifier</button>
+                            <button type="submit" class="btn-secondary btn-sm btn-auto">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                            </button>
                         </form>
                     </td>
                     {% endif %}
@@ -76,9 +105,31 @@
         </table>
     </div>
 
-    <script src="/Functions/Ecran.js"></script>
-    <script src="/Functions/ecranDrag.js"></script>
-    <script src="/Functions/vkeyboard.js"></script>
-    <script src="/Functions/rotation.js"></script>
+    <!-- Status bar -->
+    <div class="ecran-status-bar">
+        <span id="ecran-count-label">{{ ecrans | length }} écrans</span>
+        <span class="ecran-status-right" id="ecran-sorti-label">{{ ecrans | selectattr('sorti', 'equalto', 1) | list | length }} sortis</span>
+    </div>
+
+</div>
+
+<script src="/Functions/Ecran.js"></script>
+<script src="/Functions/ecranDrag.js"></script>
+<script src="/Functions/vkeyboard.js"></script>
+<script src="/Functions/rotation.js"></script>
+<script>
+(function () {
+    var globalInput = document.getElementById('global-filter');
+    if (!globalInput) return;
+    globalInput.addEventListener('input', function () {
+        var val = globalInput.value.toLowerCase().trim();
+        var rows = document.querySelectorAll('#serigraphie-table tbody tr');
+        rows.forEach(function (row) {
+            var text = row.textContent.toLowerCase();
+            row.style.display = (!val || text.includes(val)) ? '' : 'none';
+        });
+    });
+})();
+</script>
 </body>
 </html>

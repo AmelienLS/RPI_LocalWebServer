@@ -3,62 +3,102 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ranger écrans</title>
+    <title>Ranger un écran</title>
     <link rel="stylesheet" href="/Styles/common.css">
     <link rel="stylesheet" href="/Styles/ranger.css">
     <link rel="icon" href="/Images/Logo.png" type="image/png">
 </head>
 <body>
-    <!--Page utilisée pour ranger un écran et gérer le statut de lavage -->
-    <div class="container">
-        <h1>Ranger écrans</h1>
-        <a href="{{ url_for('index') }}" class="admin-link">Retour au menu</a>
-        
-        <form method="POST">
-            <label for="ref_ecran">Choisissez un écran à ranger :</label>
-            <input type="text" id="ranger-filtre" placeholder="Filtrer…" autocomplete="off">
-            <select name="ref_ecran" id="ref_ecran" required>
-                {% for ecran in serigraphies %}
-                <option value="{{ ecran['ref_ecran'] }}">
-                    [{{ ecran['n'] }}] {{ ecran['libelle'] }} — {{ ecran['ref_ecran'] }}
-                </option>
-                {% endfor %}
-            </select>
+<div class="page-screen">
 
-            <label for="lavee">L'écran a-t-il été lavé ?</label>
-            <select name="lavee" id="lavee" required>
-                <option value="oui">Oui</option>
-                <option value="non">Non</option>
-            </select>
-
-            <button type="submit">Ranger</button>
-        </form>
-
-        <!-- Affiche l'emplacement si disponible -->
-        {% if error %}
-        <p class="error-message" style="color: red;">{{ error }}</p>
-        {% endif %}
-
-        {% if emplacement %}
-        <p class="n-value">L'emplacement pour ranger est : {{ emplacement }}</p>
-        {% endif %}
+    <div class="topbar">
+        <a href="{{ url_for('index') }}" class="topbar-back">← Menu</a>
+        <span class="topbar-title">Ranger un écran</span>
     </div>
-    <script src="/Functions/rotation.js"></script>
-    <script>
-    (function () {
-        var filtre = document.getElementById('ranger-filtre');
-        var select = document.getElementById('ref_ecran');
-        var options = Array.from(select.options);
 
-        filtre.addEventListener('input', function () {
-            var val = filtre.value.toLowerCase().trim();
-            options.forEach(function (opt) {
-                opt.hidden = val !== '' && !opt.textContent.toLowerCase().includes(val);
-            });
-            var first = options.find(function (o) { return !o.hidden; });
-            if (first) select.value = first.value;
+    <div class="two-col">
+
+        <!-- Colonne gauche : saisie -->
+        <div class="col-left">
+            <div class="card">
+                <div class="card-body">
+                    <form method="POST" id="ranger-form">
+                        <div class="form-group">
+                            <label for="ranger-filtre">Filtrer</label>
+                            <input type="text" id="ranger-filtre" placeholder="Rechercher par référence ou libellé…" autocomplete="off">
+                        </div>
+                        <div class="form-group">
+                            <label for="ref_ecran">Sélectionner l'écran</label>
+                            <select name="ref_ecran" id="ref_ecran" required>
+                                {% for ecran in serigraphies %}
+                                <option value="{{ ecran['ref_ecran'] }}">
+                                    [{{ ecran['n'] }}] {{ ecran['libelle'] }} — {{ ecran['ref_ecran'] }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="divider-label">L'écran a-t-il été lavé ?</div>
+                        <div class="lave-buttons">
+                            <button type="button" class="lave-btn" id="btn-lave-oui" onclick="selectLave('oui')">Oui</button>
+                            <button type="button" class="lave-btn" id="btn-lave-non" onclick="selectLave('non')">Non</button>
+                        </div>
+                        <input type="hidden" name="lavee" id="lavee-hidden" value="">
+
+                        <button type="submit" style="padding:20px; font-size:17px;">Ranger l'écran</button>
+                    </form>
+
+                    {% if error %}
+                    <div class="flash-error">{{ error }}</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Colonne droite : confirmation -->
+        <div class="col-right" style="justify-content:center;">
+            {% if emplacement %}
+            <div class="card" style="border-color:var(--success); text-align:center; padding:40px 32px;">
+                <p style="font-size:12px; color:var(--text-sec); margin-bottom:8px; text-transform:uppercase; letter-spacing:1px;">Rangé à l'emplacement</p>
+                <p style="font-size:72px; font-weight:700; color:var(--success); font-family:var(--mono); letter-spacing:4px; line-height:1; margin-bottom:16px;">{{ emplacement }}</p>
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <div class="empty-state-icon">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M19 12l-7 7-7-7"/></svg>
+                </div>
+                <p class="empty-state-text">La confirmation s'affichera ici</p>
+            </div>
+            {% endif %}
+        </div>
+
+    </div>
+</div>
+
+<script src="/Functions/rotation.js"></script>
+<script>
+(function () {
+    var filtre = document.getElementById('ranger-filtre');
+    var select = document.getElementById('ref_ecran');
+    var options = Array.from(select.options);
+
+    filtre.addEventListener('input', function () {
+        var val = filtre.value.toLowerCase().trim();
+        options.forEach(function (opt) {
+            opt.hidden = val !== '' && !opt.textContent.toLowerCase().includes(val);
         });
-    })();
-    </script>
+        var first = options.find(function (o) { return !o.hidden; });
+        if (first) select.value = first.value;
+    });
+
+    window.selectLave = function (val) {
+        document.getElementById('lavee-hidden').value = val;
+        document.getElementById('btn-lave-oui').classList.toggle('lave-btn-active-oui', val === 'oui');
+        document.getElementById('btn-lave-oui').classList.toggle('lave-btn-inactive', val !== 'oui');
+        document.getElementById('btn-lave-non').classList.toggle('lave-btn-active-non', val === 'non');
+        document.getElementById('btn-lave-non').classList.toggle('lave-btn-inactive', val !== 'non');
+    };
+})();
+</script>
 </body>
 </html>

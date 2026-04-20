@@ -5,42 +5,76 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Supprimer une référence</title>
     <link rel="stylesheet" href="/Styles/common.css">
-    <link rel="stylesheet" href="/Styles/supprimer.css">
     <link rel="stylesheet" href="/Styles/vkeyboard.css">
     <link rel="icon" href="/Images/Logo.png" type="image/png">
 </head>
 <body>
-    <!--Page pour rechercher et supprimer une référence écran -->
-    <div class="container">
-        <h1>Supprimer une référence</h1>
-        <a href="{{ url_for('index') }}" class="admin-link">Retour au menu</a>
+<div class="page-screen">
 
-        <!-- Formulaire pour saisir la référence -->
-        <form method="POST" action="{{ url_for('supprimer') }}">
-            <label for="ref_ecran">Référence Écran :</label>
-            <input type="text" id="ref_ecran" name="ref_ecran" placeholder="Entrez la référence écran" required>
-            <button type="submit" name="action" value="check">Rechercher</button>
-        </form>
+    <div class="topbar">
+        <a href="{{ url_for('index') }}" class="topbar-back">← Menu</a>
+        <span class="topbar-title">Supprimer une référence</span>
+    </div>
 
-        <!-- Section de confirmation -->
-        {% if ref_ecran %}
-        <div id="confirmation-container" style="margin-top: 1rem;">
-            {% if exists %}
-            <p style="color: red;">Êtes-vous sûr de vouloir supprimer la référence écran : <strong>{{ libelle }}</strong> ?</p>
-            <form method="POST" action="{{ url_for('supprimer') }}">
-                <input type="hidden" name="ref_ecran" value="{{ ref_ecran }}">
-                <div class="button-group">
-                    <button type="submit" name="action" value="delete" class="confirmer">Confirmer la suppression</button>
-                    <a href="{{ url_for('supprimer') }}" class="cancel-btn">Annuler</a>
+    <div class="two-col">
+
+        <!-- Colonne gauche : recherche -->
+        <div class="col-left">
+            <div class="card">
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('supprimer') }}">
+                        <div class="form-group">
+                            <label for="ref_ecran">Référence Écran</label>
+                            <input type="text" id="ref_ecran" name="ref_ecran"
+                                   placeholder="Entrez la référence écran"
+                                   style="font-family:var(--mono);" required>
+                        </div>
+                        <button type="submit" name="action" value="check" style="margin-top:4px;">Rechercher</button>
+                    </form>
                 </div>
-            </form>
+            </div>
+        </div>
+
+        <!-- Colonne droite : confirmation -->
+        <div class="col-right" style="justify-content:center;">
+            {% if ref_ecran %}
+            {% if exists %}
+            <div class="card" style="border-color:var(--error);">
+                <div class="card-header" style="background:rgba(239,68,68,0.08); border-color:rgba(239,68,68,0.2);">
+                    <span style="color:var(--error);">Confirmer la suppression</span>
+                </div>
+                <div class="card-body">
+                    <p style="color:var(--text-sec); font-size:14px;">
+                        Vous êtes sur le point de supprimer l'écran :
+                    </p>
+                    <p style="font-size:18px; font-weight:700; color:var(--text);">{{ libelle }}</p>
+                    <p style="font-size:13px; color:var(--text-dim); font-family:var(--mono);">{{ ref_ecran }}</p>
+                    <div style="display:flex; gap:10px; margin-top:8px;">
+                        <form method="POST" action="{{ url_for('supprimer') }}" style="flex:1;">
+                            <input type="hidden" name="ref_ecran" value="{{ ref_ecran }}">
+                            <button type="submit" name="action" value="delete" class="btn-danger">Confirmer</button>
+                        </form>
+                        <a href="{{ url_for('supprimer') }}" class="btn btn-secondary" style="flex:1;">Annuler</a>
+                    </div>
+                </div>
+            </div>
             {% else %}
-            <p style="color: red;">La référence écran "<strong>{{ ref_ecran }}</strong>" n'existe pas.</p>
+            <div class="flash-error" style="margin:0;">La référence « <strong>{{ ref_ecran }}</strong> » n'existe pas.</div>
+            {% endif %}
+            {% else %}
+            <div class="empty-state">
+                <div class="empty-state-icon">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+                </div>
+                <p class="empty-state-text">La confirmation s'affichera ici</p>
+            </div>
             {% endif %}
         </div>
-        {% endif %}
+
     </div>
-    <script src="/Functions/vkeyboard.js"></script>
-    <script src="/Functions/rotation.js"></script>
+</div>
+
+<script src="/Functions/vkeyboard.js"></script>
+<script src="/Functions/rotation.js"></script>
 </body>
 </html>

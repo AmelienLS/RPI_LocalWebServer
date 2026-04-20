@@ -1,9 +1,1 @@
-/* --- Styles spécifiques à la page de modification --- */
-
-/* Responsivité pour les petits écrans */
-@media (max-width: 768px) {
-    .form-container {
-        padding: 1.5rem;
-        width: 100%;
-    }
-}
+/* modifier.css — base styles in common.css, uses ajouter.css for grid */

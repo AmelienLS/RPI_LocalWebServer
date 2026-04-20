@@ -9,79 +9,100 @@
     <title>Statistiques</title>
 </head>
 <body>
-    <a href="{{ url_for('index') }}" class="retour-menu">Retour au menu</a>
-    <div class="container">
-        <h1>Statistiques</h1>
+<div class="page-screen">
 
-        <form method="GET" action="{{ url_for('stats') }}" class="stats-filter">
-            <label for="date_debut">Du</label>
-            <input type="date" id="date_debut" name="date_debut" value="{{ date_debut }}">
-            <label for="date_fin">au</label>
-            <input type="date" id="date_fin" name="date_fin" value="{{ date_fin }}">
-            <button type="submit">Filtrer</button>
-            {% if date_debut or date_fin %}
-            <a href="{{ url_for('stats') }}" class="stats-filter-reset">Réinitialiser</a>
-            {% endif %}
-        </form>
+    <div class="topbar">
+        <a href="{{ url_for('index') }}" class="topbar-back">← Menu</a>
+        <span class="topbar-title">Statistiques</span>
+    </div>
 
-        <div class="stat-total">
-            Total des passages : <span class="stat-count">{{ total_passages }}</span>
-            {% if date_debut or date_fin %}
-            <span class="stats-filter-label">
-                ({{ date_debut if date_debut else '…' }} → {{ date_fin if date_fin else '…' }})
-            </span>
-            {% endif %}
+    <div class="two-col">
+
+        <!-- Colonne gauche : filtres + total + personnes -->
+        <div class="col-left">
+
+            <!-- Filtre période -->
+            <div class="card">
+                <div class="card-body">
+                    <div class="divider-label">Période</div>
+                    <form method="GET" action="{{ url_for('stats') }}">
+                        <div class="stats-date-grid">
+                            <div class="form-group">
+                                <label for="date_debut">Du</label>
+                                <input type="date" id="date_debut" name="date_debut" value="{{ date_debut }}">
+                            </div>
+                            <div class="form-group">
+                                <label for="date_fin">Au</label>
+                                <input type="date" id="date_fin" name="date_fin" value="{{ date_fin }}">
+                            </div>
+                        </div>
+                        <div style="display:flex; gap:10px;">
+                            <button type="submit" class="btn-secondary btn-sm" style="flex:1;">Filtrer</button>
+                            {% if date_debut or date_fin %}
+                            <a href="{{ url_for('stats') }}" class="btn btn-secondary btn-sm" style="flex:1;">Réinitialiser</a>
+                            {% endif %}
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Total -->
+            <div class="card" style="border-color:rgba(254,208,0,0.2);">
+                <div class="card-body" style="flex-direction:row; justify-content:space-between; align-items:center; padding:24px;">
+                    <span style="font-size:15px; color:var(--text-sec);">
+                        Total des passages
+                        {% if date_debut or date_fin %}
+                        <br><small style="font-size:12px; color:var(--text-dim);">{{ date_debut if date_debut else '…' }} → {{ date_fin if date_fin else '…' }}</small>
+                        {% endif %}
+                    </span>
+                    <span style="font-size:40px; font-weight:700; color:var(--accent); font-family:var(--mono);">{{ total_passages }}</span>
+                </div>
+            </div>
+
+            <!-- Personnes actives -->
+            <div class="card">
+                <div class="card-header">Personnes les plus actives</div>
+                {% for row in personnes_stats %}
+                <div class="stats-row{% if not loop.last %} stats-row-border{% endif %}">
+                    <span class="stats-rank">{{ loop.index }}</span>
+                    <span class="stats-name">{{ row.personne }}</span>
+                    <span class="stats-count{% if loop.first and row.total_passages > 0 %} stats-count-top{% endif %}">{{ row.total_passages }}</span>
+                </div>
+                {% else %}
+                <div style="padding:20px; color:var(--text-dim); font-size:14px;">Aucune opération enregistrée.</div>
+                {% endfor %}
+            </div>
+
+            <!-- Reset -->
+            <form method="POST" action="/reset_stats"
+                  onsubmit="return confirm('Remettre à zéro toutes les statistiques ? Cette action est irréversible.');">
+                <button type="submit" class="btn-danger btn-sm">Remettre les stats à zéro</button>
+            </form>
+
         </div>
 
-        <h2>Écrans les plus utilisés</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>Réf. Écran</th>
-                    <th>Libellé</th>
-                    <th>FAB</th>
-                    <th>Type</th>
-                    <th>Passages</th>
-                </tr>
-            </thead>
-            <tbody>
+        <!-- Colonne droite : top écrans -->
+        <div class="col-right">
+            <div class="card">
+                <div class="card-header">Écrans les plus utilisés</div>
                 {% for row in ecrans_stats %}
-                <tr>
-                    <td>{{ row.ref_ecran }}</td>
-                    <td>{{ row.libelle }}</td>
-                    <td>{{ row.fab }}</td>
-                    <td>{{ row.type }}</td>
-                    <td class="stat-count{% if loop.first and row.total_passages > 0 %} top{% endif %}">{{ row.total_passages }}</td>
-                </tr>
+                <div class="stats-row{% if not loop.last %} stats-row-border{% endif %}">
+                    <span class="stats-rank">{{ loop.index }}</span>
+                    <div style="flex:1; min-width:0;">
+                        <div style="font-size:14px; font-weight:600;">{{ row.libelle }}</div>
+                        <div style="font-size:12px; color:var(--text-sec); font-family:var(--mono);">{{ row.ref_ecran }} · {{ row.fab }} · {{ row.type }}</div>
+                    </div>
+                    <span class="stats-count{% if loop.first and row.total_passages > 0 %} stats-count-top{% endif %}">{{ row.total_passages }}</span>
+                </div>
                 {% else %}
-                <tr><td colspan="5">Aucun écran en base.</td></tr>
+                <div style="padding:20px; color:var(--text-dim); font-size:14px;">Aucun écran en base.</div>
                 {% endfor %}
-            </tbody>
-        </table>
+            </div>
+        </div>
 
-        <h2>Personnes les plus actives</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>Personne</th>
-                    <th>Passages</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for row in personnes_stats %}
-                <tr>
-                    <td>{{ row.personne }}</td>
-                    <td class="stat-count">{{ row.total_passages }}</td>
-                </tr>
-                {% else %}
-                <tr><td colspan="2">Aucune opération enregistrée.</td></tr>
-                {% endfor %}
-            </tbody>
-        </table>
-        <form method="POST" action="/reset_stats" onsubmit="return confirm('Remettre à zéro toutes les statistiques ? Cette action est irréversible.');">
-            <button type="submit" class="btn-reset-stats">Remettre les stats à zéro</button>
-        </form>
     </div>
-    <script src="/Functions/rotation.js"></script>
+</div>
+
+<script src="/Functions/rotation.js"></script>
 </body>
 </html>

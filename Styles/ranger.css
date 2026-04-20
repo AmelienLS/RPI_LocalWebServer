@@ -1,28 +1,41 @@
-body {
-    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
-    background-color: #2A2D46;
+/* Ranger page */
+
+.lave-buttons {
     display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    margin: 0;
-    padding: 1rem;
-    -webkit-user-select: none; /* Safari */
-    -ms-user-select: none; /* IE 10+ et Edge */
-    user-select: none; /* Standard */
+    gap: 10px;
 }
 
-/* --- Styles spécifiques à la page "ranger" --- */
-
-.container {
-    width: 90%;
-    max-width: 400px;
+.lave-btn {
+    flex: 1;
+    padding: 20px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: var(--font);
+    border: none;
+    background: var(--elevated);
+    color: var(--text-sec);
+    box-shadow: none;
 }
 
-.radio-group {
-    margin-bottom: 1rem;
+.lave-btn-active-oui {
+    background: rgba(34, 197, 94, 0.18) !important;
+    color: var(--success) !important;
+    border: 1px solid rgba(34, 197, 94, 0.45) !important;
+    box-shadow: none !important;
 }
 
-input[type="radio"] {
-    width: auto; /* Annule la largeur de 100% des inputs communs */
-    margin-right: 0.5rem;
+.lave-btn-active-non {
+    background: rgba(239, 68, 68, 0.18) !important;
+    color: var(--error) !important;
+    border: 1px solid rgba(239, 68, 68, 0.45) !important;
+    box-shadow: none !important;
 }
+
+.lave-btn-inactive {
+    background: var(--elevated) !important;
+    color: var(--text-sec) !important;
+    box-shadow: none !important;
+}
+

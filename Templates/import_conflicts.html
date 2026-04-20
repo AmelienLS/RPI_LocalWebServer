@@ -9,30 +9,37 @@
     <title>Conflits d'import</title>
 </head>
 <body>
-    <a href="{{ url_for('ajouter') }}" class="retour">Retour à l'ajout</a>
-    <div class="container">
-        <h1>Résolution des conflits</h1>
+<div class="page-screen">
 
+    <div class="topbar">
+        <a href="{{ url_for('ajouter') }}" class="topbar-back">← Retour à l'ajout</a>
+        <span class="topbar-title">Résolution des conflits</span>
+    </div>
+
+    <div class="conflicts-wrap">
+
+        <!-- Messages d'info -->
         {% if inserted %}
-        <p class="info-inserted">{{ inserted }} écran(s) ajouté(s) sans conflit.</p>
+        <div class="flash-success">{{ inserted }} écran(s) ajouté(s) sans conflit.</div>
         {% endif %}
-
-        <p class="info-conflicts">{{ conflicts | length }} écran(s) existent déjà en base. Choisissez l'action pour chacun :</p>
+        <p class="conflicts-subtitle">{{ conflicts | length }} écran(s) existent déjà en base. Choisissez l'action pour chacun :</p>
 
         <form action="/import_serigraphie/confirm" method="POST">
             <input type="hidden" name="conflicts_json" value="{{ conflicts_json | e }}">
 
-            <div class="conflict-actions-top">
-                <button type="button" class="button btn-overwrite-all" onclick="selectAll()">Écraser tout</button>
-                <button type="submit" class="button btn-confirm">Confirmer</button>
+            <!-- Barre d'actions supérieure -->
+            <div class="conflict-actions-bar">
+                <button type="button" class="btn-danger btn-auto" onclick="selectAll()">Écraser tout</button>
+                <button type="submit" class="btn-auto">Confirmer</button>
             </div>
 
+            <!-- Liste des conflits -->
             <div class="conflicts-list">
                 {% for c in conflicts %}
-                <div class="conflict-card">
-                    <div class="conflict-header">
-                        <span class="conflict-ref">Réf {{ c.incoming.ref_ecran }}</span>
-                        <label class="conflict-toggle">
+                <div class="conflict-card card">
+                    <div class="conflict-card-header">
+                        <span class="conflict-ref">Réf. {{ c.incoming.ref_ecran }}</span>
+                        <label class="conflict-toggle-label">
                             <input type="checkbox" name="overwrite" value="{{ c.incoming.ref_ecran }}" class="overwrite-cb">
                             Écraser
                         </label>
@@ -48,8 +55,8 @@
                         <tbody>
                             {% set fields = [('libelle','Libellé'),('pcb','PCB'),('fab','Fabricant'),('n_fab','N° Fab'),('type','Type'),('n','N°')] %}
                             {% for field, label in fields %}
-                            <tr class="{{ 'diff' if c.existing.get(field,'') != c.incoming.get(field,'') else '' }}">
-                                <td class="field-name">{{ label }}</td>
+                            <tr class="{{ 'conflict-diff' if c.existing.get(field,'') != c.incoming.get(field,'') else '' }}">
+                                <td class="conflict-field-name">{{ label }}</td>
                                 <td>{{ c.existing.get(field, '—') }}</td>
                                 <td>{{ c.incoming.get(field, '—') }}</td>
                             </tr>
@@ -60,18 +67,21 @@
                 {% endfor %}
             </div>
 
-            <div class="conflict-actions-bottom">
-                <button type="button" class="button btn-overwrite-all" onclick="selectAll()">Écraser tout</button>
-                <button type="submit" class="button btn-confirm">Confirmer</button>
+            <!-- Barre d'actions inférieure -->
+            <div class="conflict-actions-bar" style="margin-top:20px; margin-bottom:0;">
+                <button type="button" class="btn-danger btn-auto" onclick="selectAll()">Écraser tout</button>
+                <button type="submit" class="btn-auto">Confirmer</button>
             </div>
         </form>
-    </div>
 
-    <script>
-        function selectAll() {
-            document.querySelectorAll('.overwrite-cb').forEach(cb => cb.checked = true);
-        }
-    </script>
-    <script src="/Functions/rotation.js"></script>
+    </div>
+</div>
+
+<script>
+    function selectAll() {
+        document.querySelectorAll('.overwrite-cb').forEach(cb => cb.checked = true);
+    }
+</script>
+<script src="/Functions/rotation.js"></script>
 </body>
 </html>

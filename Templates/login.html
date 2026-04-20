@@ -3,27 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Charger les styles communs en premier -->
     <link rel="stylesheet" href="/Styles/common.css">
-    <!-- Charger les styles spécifiques à la page ensuite -->
     <link rel="stylesheet" href="/Styles/login.css">
     <link rel="stylesheet" href="/Styles/vkeyboard.css">
     <link rel="icon" href="/Images/Logo.png" type="image/png">
     <title>Connexion</title>
 </head>
-<body>
-    <!--Page de connexion pour authentifier un utilisateur -->
-    <div class="login-container">
-        <h1>Connexion</h1>
-        <form method="POST">
-            <input type="text" name="identifiant" placeholder="Identifiant" required>
-            <button type="submit">Se connecter</button>
-            <button type="submit" class="shutdown-button" formaction="{{ url_for('shutdown') }}" formnovalidate>Éteindre</button>
+<body class="login-body">
+    <div class="login-wrap">
+        <div class="login-brand">
+            <div class="login-icon">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="3" width="18" height="18" rx="2"/>
+                    <path d="M3 9h18"/>
+                    <path d="M9 21V9"/>
+                </svg>
+            </div>
+            <h1>Armoire</h1>
+            <p class="login-sub">Gestion des écrans de sérigraphie</p>
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+                <form method="POST">
+                    <div class="form-group">
+                        <label for="identifiant">Identifiant</label>
+                        <input type="text" id="identifiant" name="identifiant" placeholder="Votre identifiant" required>
+                    </div>
+                    {% if error %}
+                    <div class="flash-error">{{ error }}</div>
+                    {% endif %}
+                    <button type="submit">Se connecter</button>
+                </form>
+            </div>
+        </div>
+
+        <form method="POST" action="{{ url_for('shutdown') }}">
+            <button type="submit" class="btn-danger">Éteindre</button>
         </form>
-        {% if error %}
-        <p class="error">{{ error }}</p>
-        {% endif %}
     </div>
+
     <script src="/Functions/vkeyboard.js"></script>
     <script src="/Functions/rotation.js"></script>
 </body>

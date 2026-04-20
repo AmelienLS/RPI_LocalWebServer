@@ -1,36 +1,51 @@
-/* --- Styles spécifiques à la page d'ajout d'utilisateur --- */
+/* AjouterU / ModifierU pages */
 
-body {
-    align-items: center;
-}
-
-.form-container {
-    width: 90%;
-    max-width: 400px;
-}
-
-form {
+.ajouterU-wrap {
+    flex: 1;
+    padding: 24px 20px;
     display: flex;
     flex-direction: column;
+    overflow-y: auto;
+    max-width: 520px;
+    width: 100%;
+    margin: 0 auto;
 }
 
-label {
-    color: #feed00;
+.ajouterU-name-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
 }
 
-h2 {
-    color: white;
-    margin-bottom: 1rem;
+.ajouterU-role-btns {
+    display: flex;
+    gap: 10px;
+    margin-top: 8px;
 }
 
-.confirmation-message {
-    margin-top: 2rem;
-}
-
-input[type="checkbox"] {
-    width: 1.5rem;
-    height: 1.5rem;
-    accent-color: #feed00;
+.role-btn {
+    flex: 1;
+    padding: 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 700;
     cursor: pointer;
-    vertical-align: middle;
+    font-family: var(--font);
+    border: none;
+    background: var(--elevated);
+    color: var(--text-sec);
+    box-shadow: none;
+}
+
+.role-btn-active-user {
+    background: var(--elevated) !important;
+    color: var(--text) !important;
+    box-shadow: 0 0 0 2px var(--border) !important;
+}
+
+.role-btn-active-admin {
+    background: rgba(254, 208, 0, 0.18) !important;
+    color: var(--accent) !important;
+    border: 1px solid rgba(254, 208, 0, 0.45) !important;
+    box-shadow: none !important;
 }

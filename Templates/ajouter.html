@@ -7,71 +7,102 @@
     <link rel="stylesheet" href="/Styles/ajouter.css">
     <link rel="stylesheet" href="/Styles/vkeyboard.css">
     <link rel="icon" href="/Images/Logo.png" type="image/png">
-    <title>Ajouter écran</title>
+    <title>Ajouter un écran</title>
 </head>
 <body>
-    <!--Page pour ajouter un nouvel écran dans la base de données -->
-    <a href="{{ url_for('close_db') }}" class="retour">Fermer connexion DB et retour au menu</a>
-    <div class="ie-bar">
-        <a href="{{ url_for('export_serigraphie') }}" class="ie-btn">Exporter</a>
-        <button type="button" class="ie-btn" onclick="document.getElementById('import-input').click()">Importer</button>
-        <form id="import-form" action="/import_serigraphie" method="POST" enctype="multipart/form-data" style="display:none">
-            <input id="import-input" type="file" name="import_file" accept=".csv,.xlsx"
-                   onchange="document.getElementById('import-form').submit()">
-        </form>
+<div class="page-screen">
+
+    <div class="topbar">
+        <a href="{{ url_for('gerer_ecrans') }}" class="topbar-back">← Gérer écrans</a>
+        <span class="topbar-title">Ajouter un écran</span>
+        <div class="topbar-right">
+            <a href="{{ url_for('export_serigraphie') }}" class="btn btn-secondary btn-auto">Exporter</a>
+            <button type="button" class="btn-secondary btn-auto" onclick="document.getElementById('import-input').click()">Importer</button>
+            <form id="import-form" action="/import_serigraphie" method="POST" enctype="multipart/form-data" style="display:none">
+                <input id="import-input" type="file" name="import_file" accept=".csv,.xlsx"
+                       onchange="document.getElementById('import-form').submit()">
+            </form>
+        </div>
     </div>
-    <div class="form-container">
-        <h1>Ajouter un écran</h1>
-        {% if error %}
-        <p class="error">{{ error }}</p>
-        {% endif %}
-        {% if success %}
-        <p class="success">{{ success }}</p>
-        {% endif %}
-        <form method="POST">
-            <label for="ref_ecran">Réf Écran (9 caractères):</label>
-            <input type="text" id="ref_ecran" name="ref_ecran" value="{{ ref_ecran or '' }}" required>
 
-            <label for="libelle">Libellé:</label>
-            <input type="text" id="libelle" name="libelle" value="{{ libelle or '' }}" required>
+    <div class="two-col">
 
-            <label for="pcb">PCB (9 caractères):</label>
-            <input type="text" id="pcb" name="pcb" value="{{ pcb or '' }}">
+        <!-- Colonne gauche -->
+        <div class="col-left">
+            {% if error %}
+            <div class="flash-error">{{ error }}</div>
+            {% endif %}
+            {% if success %}
+            <div class="flash-success">{{ success }}</div>
+            {% endif %}
 
-            <label for="fab">Fabricant (2 caractères):</label>
-            <input type="text" id="fab" name="fab" value="{{ fab or '' }}" required>
+            <form method="POST" id="ajouter-form">
+                <div class="form-group">
+                    <label for="ref_ecran">Réf Écran (9 car.)</label>
+                    <input type="text" id="ref_ecran" name="ref_ecran" value="{{ ref_ecran or '' }}" placeholder="" required>
+                </div>
+                <div class="form-group">
+                    <label for="libelle">Libellé</label>
+                    <input type="text" id="libelle" name="libelle" value="{{ libelle or '' }}" placeholder="" required>
+                </div>
+                <div class="form-group">
+                    <label for="pcb">PCB (9 car.)</label>
+                    <input type="text" id="pcb" name="pcb" value="{{ pcb or '' }}" placeholder="">
+                </div>
+                <div class="form-group">
+                    <label for="type">Type</label>
+                    <input type="text" id="type" name="type" value="{{ type or '' }}" placeholder="" required>
+                </div>
+            </form>
+        </div>
 
-            <label for="n_fab">N° Fab (F + 6 caractères):</label>
-            <input type="text" id="n_fab" name="n_fab" value="{{ n_fab or '' }}">
-
-            <label for="type">Type:</label>
-            <input type="text" id="type" name="type" value="{{ type or '' }}" required>
-
-            <label for="n">N° (3 caractères):</label>
-            <div class="n-row">
-                <input type="text" id="n" name="n" value="{{ n or '' }}" required>
-                <button type="button" id="btn-auto-n">Emplacement libre</button>
+        <!-- Colonne droite -->
+        <div class="col-right">
+            <div class="ajouter-grid-2">
+                <div class="form-group">
+                    <label for="fab">Fabricant (2 car.)</label>
+                    <input form="ajouter-form" type="text" id="fab" name="fab" value="{{ fab or '' }}" placeholder="" required>
+                </div>
+                <div class="form-group">
+                    <label for="n_fab">N° Fab (F+6 car.)</label>
+                    <input form="ajouter-form" type="text" id="n_fab" name="n_fab" value="{{ n_fab or '' }}" placeholder="">
+                </div>
             </div>
 
-            <button type="submit">Ajouter</button>
-        </form>
+            <div class="ajouter-n-row">
+                <div class="form-group" style="flex:1;">
+                    <label for="n">Emplacement (3 car.)</label>
+                    <input form="ajouter-form" type="text" id="n" name="n" value="{{ n or '' }}" placeholder="" required>
+                </div>
+                <button type="button" id="btn-auto-n" class="btn-secondary" style="align-self:flex-end; width:auto; padding:16px 14px; font-size:13px; flex-shrink:0;">
+                    Libre ?
+                </button>
+            </div>
+
+            <div style="margin-top:auto;">
+                <button type="submit" form="ajouter-form" style="padding:20px; font-size:17px;">Enregistrer</button>
+            </div>
+        </div>
+
     </div>
-    <script src="/Functions/vkeyboard.js"></script>
-    <script src="/Functions/rotation.js"></script>
-    <script>
-        document.getElementById('btn-auto-n').addEventListener('click', function () {
-            fetch('/next_emplacement')
-                .then(function (r) {
-                    if (!r.ok) throw new Error('Erreur ' + r.status);
-                    return r.json();
-                })
-                .then(function (data) {
-                    var input = document.getElementById('n');
-                    input.value = data.n;
-                    input.dispatchEvent(new Event('input', { bubbles: true }));
-                })
-                .catch(function (err) { console.error('next_emplacement:', err); });
-        });
-    </script>
+</div>
+
+<script src="/Functions/vkeyboard.js"></script>
+<script src="/Functions/rotation.js"></script>
+<script>
+document.getElementById('btn-auto-n').addEventListener('click', function () {
+    fetch('/next_emplacement')
+        .then(function (r) {
+            if (!r.ok) throw new Error('Erreur ' + r.status);
+            return r.json();
+        })
+        .then(function (data) {
+            var input = document.getElementById('n');
+            input.value = data.n;
+            input.dispatchEvent(new Event('input', { bubbles: true }));
+        })
+        .catch(function (err) { console.error('next_emplacement:', err); });
+});
+</script>
 </body>
 </html>
