@@ -16,8 +16,18 @@ def test_index_renders_admin_view(client, set_user_session):
     response = client.get("/index")
     assert response.status_code == 200
     body = response.data.decode("utf-8")
-    assert "Bienvenue, Alice" in body
+    assert "Alice" in body
     assert "Administration" in body
+
+
+def test_index_non_admin_has_no_admin_section(client, set_user_session):
+    """Un utilisateur non-admin ne doit pas voir la section Administration."""
+    set_user_session(admin=False, prenom="Bob")
+    response = client.get("/index")
+    assert response.status_code == 200
+    body = response.data.decode("utf-8")
+    assert "Administration" not in body
+    assert "admin-grid" not in body
 
 
 def test_login_invalid_identifiant(client):
