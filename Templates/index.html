@@ -102,7 +102,7 @@
 
             {% if not admin %}
             <div class="version-label">
-                {% if branch %}{{ branch }}{% endif %}{% if branch and commit %} · {% endif %}{% if commit %}{{ commit[:5] }}{% endif %}
+                v{{ app_version }}
             </div>
             {% endif %}
         </div>
@@ -146,7 +146,7 @@
             </div>
 
             <div class="version-label">
-                {% if branch %}{{ branch }}{% endif %}{% if branch and commit %} · {% endif %}{% if commit %}{{ commit[:5] }}{% endif %}
+                v{{ app_version }}
             </div>
         </div>
         {% endif %}

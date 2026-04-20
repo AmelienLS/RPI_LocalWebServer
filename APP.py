@@ -4,6 +4,7 @@ import io
 import json
 import os
 import platform
+import re
 import secrets
 import shlex
 import sqlite3
@@ -264,6 +265,20 @@ def _build_logs_archive(delete_files: bool = False) -> BytesIO:
     return archive_stream
 
 
+def _get_latest_app_version() -> str:
+    """Retourne la dernière version trouvée dans CHANGELOG.md."""
+    changelog_path = BASE_DIR / "CHANGELOG.md"
+    try:
+        with changelog_path.open("r", encoding="utf-8") as f:
+            for line in f:
+                match = re.match(r"^## \[([0-9]+\.[0-9]+\.[0-9]+)\]", line.strip())
+                if match:
+                    return match.group(1)
+    except Exception:
+        pass
+    return "0.0.0"
+
+
 def login_required(f):
     """Redirige vers la page de connexion si l'utilisateur n'est pas connecté."""
     @wraps(f)
@@ -442,22 +457,10 @@ def index():
         )
         sortis_longtemps = cursor.fetchall()
     alerte_sortis = nb_sortis > 4
-    try:
-        project_dir = str(Path(__file__).resolve().parent)
-        branch = subprocess.run(
-            ['git', '-C', project_dir, 'rev-parse', '--abbrev-ref', 'HEAD'],
-            capture_output=True, text=True
-        ).stdout.strip()
-        commit = subprocess.run(
-            ['git', '-C', project_dir, 'log', '-1', '--pretty=format:%s'],
-            capture_output=True, text=True
-        ).stdout.strip()
-    except Exception:
-        branch = ''
-        commit = ''
+    app_version = _get_latest_app_version()
     return render_template('index.html', prenom=prenom, admin=admin, a_laver=a_laver,
                            alerte_sortis=alerte_sortis, sortis_longtemps=sortis_longtemps,
-                           branch=branch, commit=commit)
+                           app_version=app_version)
 
 
 # Route pour marquer un écran comme lavé depuis l'accueil

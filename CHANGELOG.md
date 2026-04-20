@@ -1,4 +1,10 @@
 # Journal des modifications
+## [4.0.3] - 2026-04-20
+> Commit : `fix(index): show app version instead of commit text in footer`
+### Modifié
+- `APP.py` : ajout de `_get_latest_app_version()` pour lire dynamiquement la dernière version dans `CHANGELOG.md` et la passer au template d'accueil.
+- `Templates/index.html` : remplacement de l'affichage `branche · commit` par `v{{ app_version }}` dans les deux labels de pied de page.
+
 ## [4.0.2] - 2026-04-20
 > Commit : `fix(index): shorten footer commit label to five characters`
 ### Modifié
