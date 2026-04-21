@@ -4,8 +4,7 @@ __pycache__/
 *.db
 #instance/
 !instance/.gitkeep
-instance/config.ini
-instance/logs
+instance/*
 CLAUDE.md
 
 # Environments
