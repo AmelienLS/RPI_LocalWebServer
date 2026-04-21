@@ -94,6 +94,7 @@ tbody button {
     font-weight: 700;
 }
 
+thead th { font-family: var(--font-title); }
 thead th.sortable { cursor: pointer; }
 thead th.sortable:hover { background: var(--border); }
 thead th[data-sort="asc"]::after  { content: ' ▲'; font-size: 0.7rem; }

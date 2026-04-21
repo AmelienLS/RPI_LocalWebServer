@@ -13,6 +13,7 @@
 
 .index-header-sub {
     font-size: 13px;
+    font-family: var(--font-title);
     color: var(--text-sec);
     margin-bottom: 2px;
 }
@@ -20,6 +21,7 @@
 .index-header-name {
     font-size: 26px;
     font-weight: 700;
+    font-family: var(--font-title);
     color: var(--text);
     text-align: left;
 }

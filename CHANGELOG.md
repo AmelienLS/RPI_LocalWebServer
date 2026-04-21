@@ -1,4 +1,16 @@
 # Journal des modifications
+## [4.1.0] - 2026-04-21
+> Commit : `feat(ui): replace Google Fonts with local Glacial Indifference and Montserrat`
+### Ajouté
+- Polices locales `Glacial Indifference` (Regular, Bold) et `Montserrat` (Regular, Medium, SemiBold, Bold) ajoutées dans `Styles/fonts/` — aucune requête réseau au chargement.
+- Variable CSS `--font-title: 'Montserrat'` pour distinguer la typographie des titres.
+### Modifié
+- `Styles/common.css` : suppression de l'`@import` Google Fonts, remplacement par des `@font-face` locaux. Montserrat appliqué aux titres de topbar, section labels, noms de cartes d'action, labels admin, divider labels. Glacial Indifference pour tout le reste.
+- `Styles/index.css` : Montserrat appliqué à "Connecté en tant que" et au nom de l'utilisateur.
+- `Styles/ecran.css` : Montserrat appliqué aux en-têtes de colonnes du tableau.
+### Corrigé
+- `Templates/index.html` : double listener sur la carte "Mettre à jour" remplacé par un unique listener avec guard `busy`, évitant les appels dupliqués à `/update`. Script `update.js` superflu retiré.
+
 ## [4.0.3] - 2026-04-20
 > Commit : `fix(index): show app version instead of commit text in footer`
 ### Modifié

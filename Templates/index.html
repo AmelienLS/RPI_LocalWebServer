@@ -155,28 +155,36 @@
 </div>
 
 <script src="/Functions/rotation.js"></script>
-<script src="/Functions/update.js"></script>
 <script>
 (function () {
     var card = document.getElementById('admin-card-update');
-    if (card) {
-        card.addEventListener('click', function () {
-            document.getElementById('btn-update') && document.getElementById('btn-update').click();
-        });
-        var btn = document.getElementById('btn-update');
-        if (!btn) {
-            card.addEventListener('click', function () {
-                fetch('/update', { method: 'POST' })
-                    .then(r => r.json())
-                    .then(data => {
-                        var res = document.getElementById('update-result');
-                        res.style.display = 'block';
-                        document.getElementById('update-branch').textContent = data.branch || '';
-                        document.getElementById('update-output').textContent = data.output || '';
-                    });
-            });
-        }
-    }
+    if (!card) return;
+    var busy = false;
+    card.addEventListener('click', function () {
+        if (busy) return;
+        busy = true;
+        fetch('/update', { method: 'POST' })
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+                var res = document.getElementById('update-result');
+                res.style.display = 'block';
+                document.getElementById('update-branch').textContent = 'Branche : ' + (data.branch || '');
+                document.getElementById('update-output').textContent = data.output || '(aucun changement)';
+                if (data.will_restart) {
+                    var sec = 8;
+                    var cd = document.getElementById('update-countdown');
+                    cd.textContent = 'Redémarrage du service dans ' + sec + 's…';
+                    var iv = setInterval(function () {
+                        sec--;
+                        if (sec <= 0) { clearInterval(iv); cd.textContent = 'Rechargement…'; location.reload(); }
+                        else { cd.textContent = 'Redémarrage du service dans ' + sec + 's…'; }
+                    }, 1000);
+                } else {
+                    busy = false;
+                }
+            })
+            .catch(function () { busy = false; });
+    });
 })();
 </script>
 </body>

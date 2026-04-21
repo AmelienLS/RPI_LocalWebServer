@@ -1,21 +1,64 @@
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+/* ── Local fonts ──────────────────────────────────────────── */
+@font-face {
+    font-family: 'Glacial Indifference';
+    src: url('/Styles/fonts/GlacialIndifference-Regular.otf') format('opentype');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    font-family: 'Glacial Indifference';
+    src: url('/Styles/fonts/GlacialIndifference-Bold.otf') format('opentype');
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    font-family: 'Montserrat';
+    src: url('/Styles/fonts/Montserrat-Regular.otf') format('opentype');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    font-family: 'Montserrat';
+    src: url('/Styles/fonts/Montserrat-Medium.ttf') format('truetype');
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    font-family: 'Montserrat';
+    src: url('/Styles/fonts/Montserrat-SemiBold.otf') format('opentype');
+    font-weight: 600;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    font-family: 'Montserrat';
+    src: url('/Styles/fonts/Montserrat-Bold.otf') format('opentype');
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
 
 /* ── Design tokens ────────────────────────────────────────── */
 :root {
-    --bg:        #191B2A;
-    --surface:   #1E2235;
-    --elevated:  #252A45;
-    --border:    #2E3358;
-    --accent:    #feed00;
-    --text:      #FFFFFF;
-    --text-sec:  #8B91B5;
-    --text-dim:  #4B5278;
-    --success:   #22C55E;
-    --error:     #EF4444;
-    --warning:   #F97316;
-    --blue:      #3B82F6;
-    --mono:      'IBM Plex Mono', monospace;
-    --font:      'IBM Plex Sans', sans-serif;
+    --bg:         #191B2A;
+    --surface:    #1E2235;
+    --elevated:   #252A45;
+    --border:     #2E3358;
+    --accent:     #feed00;
+    --text:       #FFFFFF;
+    --text-sec:   #8B91B5;
+    --text-dim:   #4B5278;
+    --success:    #22C55E;
+    --error:      #EF4444;
+    --warning:    #F97316;
+    --blue:       #3B82F6;
+    --mono:       'Glacial Indifference', monospace;
+    --font:       'Glacial Indifference', sans-serif;
+    --font-title: 'Montserrat', sans-serif;
 }
 
 /* ── Reset ────────────────────────────────────────────────── */
@@ -72,6 +115,7 @@ html, body {
 .topbar-title {
     font-size: 17px;
     font-weight: 700;
+    font-family: var(--font-title);
     flex: 1;
 }
 
@@ -235,7 +279,7 @@ html, body {
     justify-content: center;
 }
 
-.action-card-label { font-size: 16px; font-weight: 700; text-align: center; }
+.action-card-label { font-size: 16px; font-weight: 700; font-family: var(--font-title); text-align: center; }
 .action-card-sub   { font-size: 12px; color: var(--text-sec); text-align: center; }
 
 /* Wide action row (Voir tous les écrans) */
@@ -299,6 +343,7 @@ html, body {
 .admin-card-label {
     font-size: 13px;
     font-weight: 600;
+    font-family: var(--font-title);
     text-align: center;
 }
 
@@ -306,6 +351,7 @@ html, body {
 .divider-label {
     font-size: 11px;
     font-weight: 600;
+    font-family: var(--font-title);
     color: var(--text-sec);
     text-transform: uppercase;
     letter-spacing: 1px;
@@ -315,6 +361,7 @@ html, body {
 .section-label {
     font-size: 11px;
     font-weight: 600;
+    font-family: var(--font-title);
     color: var(--text-sec);
     text-transform: uppercase;
     letter-spacing: 1px;
